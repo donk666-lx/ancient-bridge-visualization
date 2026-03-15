@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onUnmounted } from 'vue'
 
 const props = defineProps({
   message: {
@@ -41,6 +41,7 @@ const inputMessage = ref('')
 const isVisible = ref(false)
 const displayMessage = ref('')
 const inputRef = ref(null)
+const hideTimer = ref(null)
 
 // 监听消息变化
 watch(() => props.message, (newVal) => {
@@ -48,9 +49,16 @@ watch(() => props.message, (newVal) => {
     displayMessage.value = newVal
     isVisible.value = true
 
+    // 清除之前的定时器（如果存在）
+    if (hideTimer.value) {
+      clearTimeout(hideTimer.value)
+      hideTimer.value = null
+    }
+
     // 8秒后自动隐藏消息
-    setTimeout(() => {
+    hideTimer.value = setTimeout(() => {
       isVisible.value = false
+      hideTimer.value = null
     }, 8000)
   }
 })
@@ -88,6 +96,14 @@ function handleBubbleClick() {
     emit('send', '')
   }
 }
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (hideTimer.value) {
+    clearTimeout(hideTimer.value)
+    hideTimer.value = null
+  }
+})
 </script>
 
 <style scoped>

@@ -16,7 +16,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['vue', 'vue-router', 'pinia'],
+          'vendor': ['vue', 'vue-router'],
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
@@ -45,6 +45,6 @@ export default defineConfig({
     cors: true,
   },
   optimizeDeps: {
-    include: ['vue', 'vue-router', 'pinia'],
+    include: ['vue', 'vue-router'],
   },
 })
