@@ -463,7 +463,7 @@ app.post('/api/v1/tts/edge', async (req, res) => {
     }
     
     const outputFile = `temp_${uuidv4()}.mp3`;
-    const pythonScript = 'edge_tts_service.py';
+    const pythonScript = './edge_tts_service.py';
     
     try {
         // 调用 Python 脚本生成语音
