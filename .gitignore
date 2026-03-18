@@ -7,10 +7,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# Dependencies
+node_modules/
+
+# Build outputs
 dist
 dist-ssr
 *.local
+
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +30,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test files
+test.mp3
+test_local.mp3
+test_pip.mp3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Edge TTS
+edge-tts-master/
