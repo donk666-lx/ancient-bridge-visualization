@@ -29,6 +29,53 @@ const XUNFEI_API_KEY = 'f5330e8b08d8b80908d0f5773e24b40';
 const XUNFEI_API_SECRET = 'ZQ2M3D7ciaf0a661a719ub22b67';
 const XUNFEI_TTS_URL = 'wss://tts-api.xfyun.cn/v2/tts';
 
+// 缓存Word文档内容
+let bridgeKnowledgeCache = '';
+let bridgeKnowledgePlain = '';
+
+// 读取Word文档内容（Markdown格式）
+async function loadBridgeKnowledge() {
+    try {
+        const docPath = join(__dirname, '..', 'knowledge', 'bridge_knowledge.md');
+        bridgeKnowledgeCache = await fs.readFile(docPath, 'utf-8');
+        // 转换为纯文本（去除Markdown标记）
+        bridgeKnowledgePlain = markdownToPlainText(bridgeKnowledgeCache);
+        console.log('✅ 桥梁知识库已加载，Markdown长度:', bridgeKnowledgeCache.length, '字符，纯文本长度:', bridgeKnowledgePlain.length, '字符');
+    } catch (error) {
+        console.error('❌ 加载桥梁知识库失败:', error.message);
+        bridgeKnowledgeCache = '';
+        bridgeKnowledgePlain = '';
+    }
+}
+
+// Markdown转纯文本函数
+function markdownToPlainText(markdown) {
+    return markdown
+        // 移除标题标记
+        .replace(/^#{1,6}\s+/gm, '')
+        // 移除加粗标记
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        // 移除斜体标记
+        .replace(/\*(.*?)\*/g, '$1')
+        // 移除代码标记
+        .replace(/`(.*?)`/g, '$1')
+        // 移除链接标记，保留文本
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        // 移除图片标记
+        .replace(/!\[([^\]]*)\]\([^)]+\)/g, '')
+        // 移除水平线
+        .replace(/^---$/gm, '')
+        // 移除列表标记
+        .replace(/^[-*+]\s+/gm, '')
+        .replace(/^\d+\.\s+/gm, '')
+        // 移除引用标记
+        .replace(/^>\s*/gm, '')
+        // 移除多余的空行
+        .replace(/\n{3,}/g, '\n\n')
+        // 移除行首行尾空格
+        .trim();
+}
+
 // 聊天API端点
 app.post('/api/v1/chat', async (req, res) => {
     const { message } = req.body;
@@ -39,12 +86,18 @@ app.post('/api/v1/chat', async (req, res) => {
     console.log('请求时间:', new Date().toISOString());
     
     try {
+        // 构建系统提示词，包含桥梁知识库（使用纯文本格式）
+        let systemPrompt = '你是一个友好的私人小导游，善于回答各种问题，语气亲切自然。';
+        if (bridgeKnowledgePlain) {
+            systemPrompt += '\n\n以下是你需要掌握的桥梁知识库，请基于这些内容回答用户关于古代桥梁的问题。回复时请使用自然语言，不要包含Markdown标记：\n\n' + bridgeKnowledgePlain;
+        }
+        
         const requestBody = {
             model: 'glm-4.5-air',
             messages: [
                 {
                     role: 'system',
-                    content: '你是一个友好的私人小导游，善于回答各种问题，语气亲切自然。'
+                    content: systemPrompt
                 },
                 {
                     role: 'user',
@@ -111,12 +164,18 @@ app.post('/api/v1/chat/stream', async (req, res) => {
     console.log('请求时间:', new Date().toISOString());
     
     try {
+        // 构建系统提示词，包含桥梁知识库（使用纯文本格式）
+        let systemPrompt = '你是一个友好的私人小导游，善于回答各种问题，语气亲切自然。回复要简洁，适合语音朗读。';
+        if (bridgeKnowledgePlain) {
+            systemPrompt += '\n\n以下是你需要掌握的桥梁知识库，请基于这些内容回答用户关于古代桥梁的问题。回复时请使用自然语言，不要包含Markdown标记：\n\n' + bridgeKnowledgePlain;
+        }
+        
         const requestBody = {
             model: 'glm-4.5-air',
             messages: [
                 {
                     role: 'system',
-                    content: '你是一个友好的私人小导游，善于回答各种问题，语气亲切自然。回复要简洁，适合语音朗读。'
+                    content: systemPrompt
                 },
                 {
                     role: 'user',
@@ -529,10 +588,18 @@ app.post('/api/v1/tts/edge', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`服务器运行在 http://localhost:${port}`);
-    console.log('API Key:', ZHIPU_API_KEY ? '已配置 (' + ZHIPU_API_KEY.substring(0, 10) + '...)' : '未配置');
-    console.log('使用模型: glm-4.5-air');
-    console.log('讯飞TTS API:', XUNFEI_APPID ? '已配置' : '未配置');
-    console.log('Edge TTS: 已配置 (Python)');
-});
+// 启动服务器
+async function startServer() {
+    // 先加载桥梁知识库
+    await loadBridgeKnowledge();
+    
+    app.listen(port, () => {
+        console.log(`服务器运行在 http://localhost:${port}`);
+        console.log('API Key:', ZHIPU_API_KEY ? '已配置 (' + ZHIPU_API_KEY.substring(0, 10) + '...)' : '未配置');
+        console.log('使用模型: glm-4.5-air');
+        console.log('讯飞TTS API:', XUNFEI_APPID ? '已配置' : '未配置');
+        console.log('Edge TTS: 已配置 (Python)');
+    });
+}
+
+startServer();

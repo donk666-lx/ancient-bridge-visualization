@@ -349,6 +349,20 @@
 </div>
 
 <script>
+// API 配置
+const API_CONFIG = {
+  baseURL: 'http://localhost:3002',
+  endpoints: {
+    tts: '/api/v1/tts/edge',
+    chat: '/api/v1/chat'
+  }
+};
+
+// 获取完整 API URL
+function getApiUrl(endpoint) {
+  return `${API_CONFIG.baseURL}${API_CONFIG.endpoints[endpoint]}`;
+}
+
 const pet = document.getElementById('pet');
 const eyeL = document.getElementById('eyeL');
 const eyeR = document.getElementById('eyeR');
@@ -677,10 +691,10 @@ async function speakMessage(text) {
   console.log('🔄 正在调用 Edge TTS 生成语音...');
   
   try {
-    const response = await fetch('http://localhost:3002/api/v1/tts/edge', {
+    const response = await fetch(getApiUrl('tts'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         text: cleanText,  // 使用清理后的文本
         voice: 'xiaoxiao'  // 微软晓晓 - 活泼女声
       })
@@ -757,7 +771,7 @@ function speakWithWebSpeech(text) {
   
   window.speechSynthesis.speak(utterance);
 }
-const API_URL = 'http://localhost:3002/api/v1/chat';
+const API_URL = getApiUrl('chat');
 
 async function send() {
     const message = inputEl.value.trim();

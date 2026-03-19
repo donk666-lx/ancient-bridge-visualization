@@ -23,6 +23,7 @@ import { ref, onMounted, watch } from 'vue'
 import PetCharacter from './components/PetCharacter.vue'
 import ChatInterface from './components/ChatInterface.vue'
 import Toolbar from './components/Toolbar.vue'
+import { getApiUrl } from './config/api.js'
 
 const currentMood = ref('happy')
 const responseMessage = ref('')
@@ -64,12 +65,12 @@ async function speakMessage(text) {
     console.log('🎙️ 调用 Edge TTS:', text.substring(0, 50) + '...')
     
     // 调用后端 Edge TTS API
-    const response = await fetch('http://localhost:3002/api/v1/tts/edge', {
+    const response = await fetch(getApiUrl('tts'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         text: text,
         voice: 'xiaoxiao'  // 微软晓晓 - 活泼女声
       })
@@ -154,7 +155,7 @@ async function handleSendMessage(message) {
 
   try {
     // 调用后端聊天API
-    const chatResponse = await fetch('http://localhost:3002/api/v1/chat', {
+    const chatResponse = await fetch(getApiUrl('chat'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
