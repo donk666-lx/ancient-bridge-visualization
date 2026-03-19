@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const projectImagesContainer = document.querySelector(".project-images");
         const projectNames = document.querySelectorAll(".project-names p");
         const projectNamesContainer = document.querySelector(".project-names");
-        const totalProjectCount = 3;
+        const totalProjectCount = 10;
 
         // Recalculate dimensions on resize
         const updateDimensions = () => {
@@ -107,21 +107,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
 
                     if (projectProgress > 0 && projectProgress < 1) {
-                        if (index !== 0) {
-                            gsap.set(p, {
-                                color: "#fff",
-                                fontFamily: "'Google Sans', sans-serif",
-                                fontWeight: 500,
-                            });
-                        }
+                        gsap.set(p, {
+                            color: "#000000",
+                            fontFamily: "'ZCOOL XiaoWei', 'Noto Serif SC', serif",
+                            fontWeight: 500,
+                            textShadow: "1px 1px 2px rgba(255, 255, 255, 0.5)",
+                        });
                     } else {
-                        if (index !== 0) {
-                            gsap.set(p, {
-                                color: "#4a4a4a",
-                                fontFamily: "'Google Sans', sans-serif",
-                                fontWeight: 500,
-                            });
-                        }
+                        gsap.set(p, {
+                            color: "#000000",
+                            fontFamily: "'ZCOOL XiaoWei', 'Noto Serif SC', serif",
+                            fontWeight: 500,
+                            textShadow: "1px 1px 2px rgba(255, 255, 255, 0.5)",
+                        });
                     }
                 });
             },

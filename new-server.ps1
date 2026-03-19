@@ -1,4 +1,4 @@
-# Simple HTTP Server
+# New HTTP Server
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add('http://localhost:8000/')
 $listener.Start()
