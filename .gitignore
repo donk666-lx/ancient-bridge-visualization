@@ -45,3 +45,6 @@ __pycache__/
 
 # Edge TTS
 edge-tts-master/
+
+# Claude AI
+.claude/
