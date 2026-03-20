@@ -1,0 +1,483 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap");
+
+:root {
+  --base-100: #ebf5df;
+  --base-200: #fec81d;
+  --base-300: #0f0f0f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+h1,
+h2 {
+  text-transform: uppercase;
+  font-family: "Instrument Serif", sans-serif;
+  font-weight: 500;
+  line-height: 0.9;
+}
+
+h1 {
+  font-size: clamp(4rem, 7.5vw, 10rem);
+}
+
+h2 {
+  font-size: clamp(2.5rem, 4.5vw, 5rem);
+}
+
+p {
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 1.125rem;
+  font-weight: 400;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 175svh;
+  color: var(--base-200);
+  overflow: hidden;
+}
+
+.hero-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.hero-header {
+    position: absolute;
+    width: 100%;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.hero-header p {
+    width: 75%;
+}
+
+.hero-canvas {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.hero-content {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 125svh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 8rem;
+}
+
+.hero-subtitle {
+    color: white;
+    font-family: "Ma Shan Zheng", cursive;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: clamp(5rem, 12vw, 10rem);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.hero-subtitle p {
+    margin: 0;
+}
+
+.hero-content h2 {
+    color: white;
+    font-family: "Ma Shan Zheng", cursive;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: clamp(3rem, 8vw, 8rem);
+    margin: 0;
+}
+
+.about {
+    position: relative;
+    width: 100%;
+    height: 100svh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--base-300);
+    color: var(--base-100);
+}
+
+.about p {
+    width: 40%;
+    text-align: center;
+}
+
+.bridge-section {
+    position: relative;
+    width: 100%;
+    height: 100svh;
+    overflow: hidden;
+}
+
+.bridge-img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 1000px) {
+    .hero-content h2,
+    .about p {
+        width: calc(100% - 4rem);
+    }
+}
+
+/* 第二个项目样式 */
+:root {
+    --light: #e3e3db;
+    --dark: #0f0f0f;
+}
+
+.jeskojets-hero {
+    perspective: 1000px;
+    color: var(--light);
+}
+
+.outro {
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.sky-container,
+.hero-copy,
+.window-container,
+.jeskojets-hero .hero-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    will-change: transform;
+}
+
+.sky-container {
+    height: 350svh;
+    position: relative;
+}
+
+.sky-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* 居中文字块，定位在图片下半部偏中 */
+.sky-center-block {
+    position: absolute;
+    bottom: 28%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    white-space: nowrap;
+}
+
+/* 年份徽章 */
+.sky-year-badge {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3em;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 248, 200, 0.35);
+    padding: 0.3em 1.2em;
+    border-radius: 2px;
+    backdrop-filter: blur(4px);
+}
+
+.sky-year-num {
+    font-family: "Instrument Serif", serif;
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    color: rgba(255, 240, 180, 0.95);
+    letter-spacing: 0.12em;
+    font-style: italic;
+}
+
+.sky-year-label {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    color: rgba(255, 240, 180, 0.75);
+    letter-spacing: 0.1em;
+}
+
+/* 大标题 */
+.sky-main-title {
+    font-family: "KaiTi", "STKaiti", "SimSun", "Songti SC", serif;
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
+    font-weight: 700;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 248, 220, 0.88);
+    letter-spacing: 0.5em;
+    text-shadow:
+        0 0 40px rgba(255, 220, 130, 0.45),
+        0 0 80px rgba(255, 180, 60, 0.18);
+    filter: drop-shadow(0 4px 16px rgba(60, 30, 0, 0.4));
+}
+
+/* 装饰分割线 */
+.sky-divider-line {
+    width: 260px;
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 230, 150, 0.65) 20%,
+        rgba(255, 230, 150, 0.65) 80%,
+        transparent
+    );
+    position: relative;
+}
+
+.sky-divider-line::before,
+.sky-divider-line::after {
+    content: "◆";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.45rem;
+    color: rgba(255, 230, 150, 0.65);
+}
+
+.sky-divider-line::before { left: 0; }
+.sky-divider-line::after  { right: 0; }
+
+/* 副标语 */
+.sky-sub-slogan {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    font-size: clamp(0.8rem, 1.2vw, 1rem);
+    color: rgba(255, 240, 190, 0.8);
+    letter-spacing: 0.35em;
+}
+
+.vertical-title {
+    position: absolute;
+    bottom: 20%;
+    right: 8%;
+    left: auto;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: "KaiTi", "STKaiti", "SimSun", "Songti SC", serif;
+    font-size: clamp(5rem, 8vw, 7.5rem);
+    color: #3C2A21;
+    letter-spacing: 0.4em;
+    font-weight: 700;
+    text-shadow: 2px 2px 6px rgba(255, 255, 255, 0.35);
+}
+
+.poem {
+    position: absolute;
+    bottom: 22%;
+    right: 2.5rem;
+    font-family: "KaiTi", "STKaiti", "SimSun", "Songti SC", serif;
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    color: #FFFAF0;
+    line-height: 2.2;
+    text-align: right;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(255, 255, 255, 0.6),
+        1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.intro-bar {
+    position: absolute;
+    bottom: 18%;
+    left: 22%;
+    width: auto;
+    background: none;
+    padding: 0;
+    display: flex;
+}
+
+.intro-content {
+    display: flex;
+    flex-direction: row;
+    gap: 1.4rem;
+    align-items: flex-start;
+}
+
+.intro-title {
+    font-family: "KaiTi", "STKaiti", "SimSun", "Songti SC", serif;
+    font-size: clamp(1.6rem, 2.2vw, 2rem);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
+}
+
+.intro-subtitle,
+.intro-desc,
+.intro-honor {
+    font-family: "KaiTi", "STKaiti", "Microsoft YaHei", sans-serif;
+    font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.2em;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.35);
+}
+
+.hero-copy {
+    height: 100svh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-copy h1 {
+    width: 85%;
+}
+
+.window-container {
+    height: 100svh;
+}
+
+.jeskojets-hero .hero-header {
+    height: 100svh;
+    padding: 3.5rem 4rem;
+    display: flex;
+    transform-style: preserve-3d;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    text-align: left !important;
+}
+
+.jeskojets-hero .hero-header .col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.jeskojets-hero .hero-header .col:nth-child(2) {
+    align-items: flex-end;
+    text-align: right;
+}
+
+/* 大标题 */
+.jeskojets-hero .hero-header h1 {
+    font-family: "KaiTi", "STKaiti", "SimSun", "Songti SC", serif;
+    font-size: clamp(4.5rem, 7vw, 7rem);
+    font-weight: 700;
+    color: var(--light);
+    letter-spacing: 0.15em;
+    line-height: 1;
+    text-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.45),
+        0 0 40px rgba(200, 170, 120, 0.2);
+    position: relative;
+    text-transform: none !important;
+}
+
+.jeskojets-hero .hero-header h1::after {
+    content: "";
+    display: block;
+    margin-top: 0.6rem;
+    width: 2.5em;
+    height: 2px;
+    background: linear-gradient(to right, rgba(220, 200, 150, 0.8), transparent);
+}
+
+.jeskojets-hero .hero-header .col:nth-child(2) h1::after {
+    margin-left: auto;
+    background: linear-gradient(to left, rgba(220, 200, 150, 0.8), transparent);
+}
+
+/* 正文段落 */
+.jeskojets-hero .hero-header .col p {
+    width: 55%;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    font-size: clamp(0.85rem, 1.15vw, 1.05rem);
+    line-height: 2;
+    color: rgba(227, 227, 219, 0.82);
+    letter-spacing: 0.06em;
+    border-left: 2px solid rgba(220, 200, 150, 0.5);
+    padding-left: 0.9rem;
+}
+
+.jeskojets-hero .hero-header .col:nth-child(2) p {
+    border-left: none;
+    border-right: 2px solid rgba(220, 200, 150, 0.5);
+    padding-left: 0;
+    padding-right: 0.9rem;
+    font-family: "KaiTi", "STKaiti", "SimSun", serif;
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    letter-spacing: 0.2em;
+    color: rgba(227, 227, 219, 0.9);
+    line-height: 1.6;
+}
+
+@media (max-width: 1000px) {
+    .jeskojets-hero h1 {
+        font-size: 3rem;
+    }
+
+    .jeskojets-hero p {
+        font-size: 1.125rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .vertical-title {
+        left: auto;
+        right: 4%;
+        font-size: 3.5rem;
+        letter-spacing: 0.3em;
+    }
+
+    .poem {
+        right: 1.2rem;
+        font-size: 1.1rem;
+        letter-spacing: 0.1em;
+    }
+
+    .intro-bar {
+        left: 10%;
+        bottom: 15%;
+    }
+}
