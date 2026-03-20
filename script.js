@@ -242,6 +242,55 @@ function initSecondProject() {
   }
 }
 
+// 初始化遮罩层
+function initOverlay() {
+  // 创建遮罩层元素
+  const overlay = document.createElement('div');
+  overlay.className = 'transition-overlay';
+  document.body.appendChild(overlay);
+
+  // 监听滚动事件，实现遮罩效果
+  lenis.on('scroll', ({ scroll }) => {
+    // 获取第二个项目的位置
+    const jeskojetsHero = document.querySelector('.jeskojets-hero');
+    if (!jeskojetsHero) return;
+    
+    const jeskojetsHeroTop = jeskojetsHero.offsetTop;
+    const windowHeight = window.innerHeight;
+    
+    // 计算第二个项目动画完全结束的位置
+    // 第二个项目的 ScrollTrigger end 是 +=${window.innerHeight * 3}px
+    // 所以动画完全结束的位置是 jeskojetsHeroTop + windowHeight * 3
+    const jeskojetsAnimationEnd = jeskojetsHeroTop + windowHeight * 3;
+    
+    // 计算遮罩开始的位置（动画完全结束后，再往后更多）
+    const transitionStart = jeskojetsAnimationEnd + windowHeight * 1.5;
+    // 计算全黑开始的位置（快速变黑）
+    const blackStart = transitionStart + windowHeight * 0.25;
+    // 计算全黑结束的位置（延长全黑时间）
+    const blackEnd = blackStart + windowHeight * 3;
+    // 计算遮罩结束的位置
+    const transitionEnd = blackEnd + windowHeight * 3;
+    
+    // 计算当前滚动位置相对于过渡区域的进度
+    let overlayOpacity = 0;
+    
+    if (scroll >= transitionStart && scroll <= blackStart) {
+      // 从0到1的不透明度，快速变暗到全黑
+      overlayOpacity = (scroll - transitionStart) / (windowHeight * 0.5) * 1;
+    } else if (scroll > blackStart && scroll <= blackEnd) {
+      // 保持全黑状态
+      overlayOpacity = 1;
+    } else if (scroll > blackEnd && scroll <= transitionEnd) {
+      // 从1到0的不透明度，慢慢恢复
+      overlayOpacity = 1 - (scroll - blackEnd) / (windowHeight * 3) * 1;
+    }
+    
+    // 更新遮罩层的不透明度
+    overlay.style.backgroundColor = `rgba(0, 0, 0, ${overlayOpacity})`;
+  });
+}
+
 // 初始化所有项目
 document.addEventListener("DOMContentLoaded", () => {
   // 初始化 Lenis
@@ -252,4 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // 初始化第二个项目
   initSecondProject();
+  
+  // 初始化遮罩层
+  initOverlay();
 });
