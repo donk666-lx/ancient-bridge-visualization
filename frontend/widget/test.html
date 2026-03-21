@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget 组件测试</title>
+  <style>
+    /* 故意设置一些可能冲突的样式 */
+    * { margin: 0; padding: 0; }
+    body { 
+      font-family: Arial; 
+      padding: 50px;
+      background: #f0f0f0;
+    }
+    h1 { color: red; font-size: 48px; }
+    .btn { 
+      padding: 20px; 
+      background: red; 
+      color: yellow;
+      font-size: 24px;
+    }
+    #chatWindow { 
+      position: fixed; 
+      bottom: 0; 
+      right: 0; 
+      width: 200px; 
+      height: 200px; 
+      background: pink;
+      z-index: 99999;
+    }
+  </style>
+</head>
+<body>
+  <h1>宿主页面标题（红色大字）</h1>
+  <p>这是一个测试页面，故意设置了一些可能冲突的样式：</p>
+  <ul>
+    <li>全局 * 选择器重置</li>
+    <li>h1 红色大字</li>
+    <li>.btn 红色背景黄色文字</li>
+    <li>#chatWindow 粉色固定层</li>
+  </ul>
+  <p>如果小助手组件样式正常，说明 Shadow DOM 隔离有效！</p>
+  
+  <button class="btn" onclick="BridgeAssistant.init({apiUrl: 'http://localhost:3002', autoOpen: true})">
+    初始化小助手
+  </button>
+  
+  <!-- 冲突元素 -->
+  <div id="chatWindow">宿主页面的 chatWindow</div>
+
+  <!-- 引入小助手 -->
+  <script src="BridgeAssistant.js"></script>
+  <script>
+    // 自动初始化
+    window.onload = function() {
+      BridgeAssistant.init({
+        apiUrl: 'http://localhost:3002',
+        position: 'bottom-right',
+        welcomeMessage: '你好！我是古桥小助手。测试一下 Shadow DOM 隔离效果~',
+        autoOpen: true
+      });
+    };
+  </script>
+</body>
+</html>

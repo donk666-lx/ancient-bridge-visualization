@@ -588,6 +588,150 @@ app.post('/api/v1/tts/edge', async (req, res) => {
     }
 });
 
+// 流式 Edge TTS API端点 - 分段返回，支持边生成边播放
+app.post('/api/v1/tts/edge/stream', async (req, res) => {
+    const { text, voice = 'xiaoxiao' } = req.body;
+    
+    console.log('========================================');
+    console.log('收到流式 Edge TTS 请求:', { text: text?.substring(0, 50) + '...', voice });
+    console.log('请求时间:', new Date().toISOString());
+    
+    if (!text || text.trim().length === 0) {
+        return res.json({ error: '文本不能为空' });
+    }
+    
+    // 导入Python脚本中的分段函数逻辑
+    function splitTextIntoChunks(text, maxLength = 50) {
+        const sentences = text.split(/([。！？.!?\n])/);
+        const chunks = [];
+        let currentChunk = "";
+        
+        for (let i = 0; i < sentences.length; i += 2) {
+            let sentence = sentences[i];
+            if (i + 1 < sentences.length) {
+                sentence += sentences[i + 1];
+            }
+            
+            sentence = sentence.trim();
+            if (!sentence) continue;
+            
+            if (sentence.length > maxLength) {
+                if (currentChunk) {
+                    chunks.push(currentChunk);
+                    currentChunk = "";
+                }
+                
+                const parts = sentence.split(/([，；,;])/);
+                let tempChunk = "";
+                for (let j = 0; j < parts.length; j += 2) {
+                    let part = parts[j];
+                    if (j + 1 < parts.length) {
+                        part += parts[j + 1];
+                    }
+                    
+                    if (tempChunk.length + part.length < maxLength) {
+                        tempChunk += part;
+                    } else {
+                        if (tempChunk) chunks.push(tempChunk);
+                        tempChunk = part;
+                    }
+                }
+                
+                if (tempChunk) currentChunk = tempChunk;
+            } else {
+                if (currentChunk.length + sentence.length < maxLength) {
+                    currentChunk += sentence;
+                } else {
+                    if (currentChunk) chunks.push(currentChunk);
+                    currentChunk = sentence;
+                }
+            }
+        }
+        
+        if (currentChunk) chunks.push(currentChunk);
+        return chunks;
+    }
+    
+    try {
+        const chunks = splitTextIntoChunks(text);
+        console.log('文本分段:', chunks.length, '段');
+        
+        // 设置响应头，支持流式传输
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Transfer-Encoding', 'chunked');
+        
+        // 发送总段数信息
+        res.write(JSON.stringify({ type: 'info', totalChunks: chunks.length }) + '\n');
+        
+        // 串行生成每段音频（避免并发过多）
+        for (let i = 0; i < chunks.length; i++) {
+            const chunk = chunks[i];
+            const outputFile = `temp_stream_${uuidv4()}.mp3`;
+            
+            try {
+                // 调用Python生成单段TTS
+                await new Promise((resolve, reject) => {
+                    const pythonProcess = spawn('python', [
+                        './edge_tts_service.py',
+                        chunk,
+                        voice,
+                        outputFile
+                    ], {
+                        encoding: 'utf8',
+                        env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+                    });
+                    
+                    pythonProcess.on('close', (code) => {
+                        if (code !== 0) {
+                            reject(new Error(`Python 脚本执行失败，退出码: ${code}`));
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+                
+                // 读取音频文件
+                const audioBuffer = await fs.readFile(outputFile);
+                const audioBase64 = audioBuffer.toString('base64');
+                
+                // 删除临时文件
+                await fs.unlink(outputFile).catch(() => {});
+                
+                // 发送音频段
+                res.write(JSON.stringify({
+                    type: 'chunk',
+                    index: i,
+                    total: chunks.length,
+                    audio: audioBase64,
+                    text: chunk
+                }) + '\n');
+                
+                console.log(`第 ${i + 1}/${chunks.length} 段 TTS 完成`);
+                
+            } catch (error) {
+                console.error(`第 ${i + 1} 段 TTS 失败:`, error);
+                res.write(JSON.stringify({
+                    type: 'error',
+                    index: i,
+                    message: error.message
+                }) + '\n');
+            }
+        }
+        
+        // 发送完成信号
+        res.write(JSON.stringify({ type: 'done' }) + '\n');
+        res.end();
+        
+        console.log('流式 TTS 完成');
+        console.log('========================================');
+        
+    } catch (error) {
+        console.error('流式 TTS 失败:', error);
+        res.write(JSON.stringify({ type: 'error', message: error.message }) + '\n');
+        res.end();
+    }
+});
+
 // 启动服务器
 async function startServer() {
     // 先加载桥梁知识库
@@ -599,6 +743,7 @@ async function startServer() {
         console.log('使用模型: glm-4.5-air');
         console.log('讯飞TTS API:', XUNFEI_APPID ? '已配置' : '未配置');
         console.log('Edge TTS: 已配置 (Python)');
+        console.log('流式TTS: 已启用 /api/v1/tts/edge/stream');
     });
 }
 

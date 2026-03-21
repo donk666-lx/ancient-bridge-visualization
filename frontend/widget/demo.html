@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>古桥小助手 - 嵌入示例</title>
+  <style>
+    /* 宿主页面样式 - 与小助手完全隔离 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .code-block .comment { color: #6a9955; }
+    .code-block .keyword { color: #569cd6; }
+    .code-block .string { color: #ce9178; }
+    .code-block .function { color: #dcdcaa; }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: #5a67d8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn.secondary {
+      background: #48bb78;
+    }
+
+    .btn.secondary:hover {
+      background: #38a169;
+    }
+
+    .btn.danger {
+      background: #f56565;
+    }
+
+    .btn.danger:hover {
+      background: #e53e3e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f7fafc;
+      font-weight: 600;
+      color: #4a5568;
+    }
+
+    td code {
+      background: #edf2f7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .highlight {
+      background: #fffaf0;
+      border-left: 4px solid #ed8936;
+      padding: 15px 20px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .footer {
+      text-align: center;
+      color: rgba(255,255,255,0.8);
+      margin-top: 40px;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏛️ 古桥小助手</h1>
+    
+    <div class="card">
+      <h2>快速开始</h2>
+      <p>只需两行代码，即可在任何网页中嵌入古桥小助手：</p>
+      <div class="code-block">
+<span class="comment">&lt;!-- 1. 引入脚本 --&gt;</span>
+<span class="keyword">&lt;script</span> <span class="function">src</span>=<span class="string">"https://your-domain.com/widget/BridgeAssistant.js"</span><span class="keyword">&gt;&lt;/script&gt;</span>
+
+<span class="comment">&lt;!-- 2. 初始化 --&gt;</span>
+<span class="keyword">&lt;script&gt;</span>
+  <span class="function">BridgeAssistant</span>.<span class="function">init</span>({
+    <span class="function">apiUrl</span>: <span class="string">'http://localhost:3002'</span>,
+    <span class="function">position</span>: <span class="string">'bottom-right'</span>
+  });
+<span class="keyword">&lt;/script&gt;</span>
+      </div>
+      <button class="btn" onclick="initAssistant()">🚀 初始化小助手</button>
+      <button class="btn secondary" onclick="initWithWelcome()">👋 带欢迎语初始化</button>
+      <button class="btn danger" onclick="destroyAssistant()">❌ 销毁小助手</button>
+    </div>
+
+    <div class="card">
+      <h2>配置选项</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>参数</th>
+            <th>类型</th>
+            <th>默认值</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>apiUrl</code></td>
+            <td>string</td>
+            <td>http://localhost:3002</td>
+            <td>后端API地址</td>
+          </tr>
+          <tr>
+            <td><code>position</code></td>
+            <td>string</td>
+            <td>bottom-right</td>
+            <td>位置：bottom-right, bottom-left, top-right, top-left</td>
+          </tr>
+          <tr>
+            <td><code>voice</code></td>
+            <td>string</td>
+            <td>xiaoxiao</td>
+            <td>语音类型</td>
+          </tr>
+          <tr>
+            <td><code>voiceEnabled</code></td>
+            <td>boolean</td>
+            <td>true</td>
+            <td>是否启用语音</td>
+          </tr>
+          <tr>
+            <td><code>theme</code></td>
+            <td>string</td>
+            <td>default</td>
+            <td>主题：default, dark</td>
+          </tr>
+          <tr>
+            <td><code>width</code></td>
+            <td>number</td>
+            <td>320</td>
+            <td>窗口宽度(px)</td>
+          </tr>
+          <tr>
+            <td><code>height</code></td>
+            <td>number</td>
+            <td>400</td>
+            <td>窗口高度(px)</td>
+          </tr>
+          <tr>
+            <td><code>autoOpen</code></td>
+            <td>boolean</td>
+            <td>false</td>
+            <td>是否自动打开</td>
+          </tr>
+          <tr>
+            <td><code>welcomeMessage</code></td>
+            <td>string</td>
+            <td>默认欢迎语</td>
+            <td>欢迎消息内容</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>API 方法</h2>
+      <div class="code-block">
+<span class="comment">// 打开聊天窗口</span>
+<span class="function">BridgeAssistant</span>.<span class="function">open</span>();
+
+<span class="comment">// 关闭聊天窗口</span>
+<span class="function">BridgeAssistant</span>.<span class="function">close</span>();
+
+<span class="comment">// 切换聊天窗口</span>
+<span class="function">BridgeAssistant</span>.<span class="function">toggle</span>();
+
+<span class="comment">// 销毁小助手</span>
+<span class="function">BridgeAssistant</span>.<span class="function">destroy</span>();
+
+<span class="comment">// 程序化发送消息</span>
+<span class="function">BridgeAssistant</span>.<span class="function">send</span>(<span class="string">'赵州桥的历史'</span>);
+      </div>
+      <button class="btn" onclick="openAssistant()">📂 打开窗口</button>
+      <button class="btn" onclick="closeAssistant()">📁 关闭窗口</button>
+      <button class="btn" onclick="toggleAssistant()">🔄 切换窗口</button>
+    </div>
+
+    <div class="card">
+      <h2>完整示例</h2>
+      <div class="code-block">
+<span class="comment">&lt;!DOCTYPE html&gt;</span>
+<span class="keyword">&lt;html&gt;</span>
+<span class="keyword">&lt;head&gt;</span>
+  <span class="keyword">&lt;title&gt;</span>我的网站<span class="keyword">&lt;/title&gt;</span>
+<span class="keyword">&lt;/head&gt;</span>
+<span class="keyword">&lt;body&gt;</span>
+  <span class="comment">&lt;!-- 页面内容 --&gt;</span>
+  <span class="keyword">&lt;h1&gt;</span>欢迎来到我的网站<span class="keyword">&lt;/h1&gt;</span>
+  
+  <span class="comment">&lt;!-- 引入古桥小助手 --&gt;</span>
+  <span class="keyword">&lt;script</span> <span class="function">src</span>=<span class="string">"BridgeAssistant.js"</span><span class="keyword">&gt;&lt;/script&gt;</span>
+  <span class="keyword">&lt;script&gt;</span>
+    <span class="function">BridgeAssistant</span>.<span class="function">init</span>({
+      <span class="function">apiUrl</span>: <span class="string">'http://localhost:3002'</span>,
+      <span class="function">position</span>: <span class="string">'bottom-right'</span>,
+      <span class="function">theme</span>: <span class="string">'default'</span>,
+      <span class="function">welcomeMessage</span>: <span class="string">'你好！有什么关于古桥的问题吗？'</span>,
+      <span class="function">autoOpen</span>: <span class="keyword">true</span>
+    });
+  <span class="keyword">&lt;/script&gt;</span>
+<span class="keyword">&lt;/body&gt;</span>
+<span class="keyword">&lt;/html&gt;</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>特性说明</h2>
+      <div class="highlight">
+        <strong>✅ 完全隔离</strong> - 使用 Shadow DOM 技术，CSS 和 DOM 完全隔离，不会与宿主页面冲突
+      </div>
+      <div class="highlight">
+        <strong>✅ 响应式设计</strong> - 自动适配移动端和桌面端
+      </div>
+      <div class="highlight">
+        <strong>✅ 语音合成</strong> - 集成 Edge TTS，支持语音朗读回答
+      </div>
+      <div class="highlight">
+        <strong>✅ 轻量级</strong> - 纯原生 JavaScript，无需任何依赖
+      </div>
+      <div class="highlight">
+        <strong>✅ 易于定制</strong> - 支持主题、位置、尺寸等多种配置
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>古桥小助手 - 让中国古代桥梁文化触手可及</p>
+  </div>
+
+  <!-- 引入小助手脚本 -->
+  <script src="BridgeAssistant.js"></script>
+  
+  <script>
+    // 演示控制函数
+    function initAssistant() {
+      BridgeAssistant.init({
+        apiUrl: 'http://localhost:3002',
+        position: 'bottom-right'
+      });
+      showNotification('✅ 小助手已初始化');
+    }
+
+    function initWithWelcome() {
+      BridgeAssistant.init({
+        apiUrl: 'http://localhost:3002',
+        position: 'bottom-right',
+        welcomeMessage: '👋 你好！我是古桥小助手，专门为你介绍中国古代桥梁的历史文化。赵州桥、卢沟桥、洛阳桥...你想了解哪座桥的故事呢？',
+        autoOpen: true
+      });
+      showNotification('✅ 小助手已初始化（带欢迎语）');
+    }
+
+    function destroyAssistant() {
+      BridgeAssistant.destroy();
+      showNotification('❌ 小助手已销毁');
+    }
+
+    function openAssistant() {
+      BridgeAssistant.open();
+    }
+
+    function closeAssistant() {
+      BridgeAssistant.close();
+    }
+
+    function toggleAssistant() {
+      BridgeAssistant.toggle();
+    }
+
+    function showNotification(message) {
+      // 创建通知元素
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 1000000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        animation: slideDown 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      // 3秒后移除
+      setTimeout(() => {
+        notification.style.animation = 'slideUp 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+      @keyframes slideUp {
+        from { opacity: 1; transform: translateX(-50%) translateY(0); }
+        to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

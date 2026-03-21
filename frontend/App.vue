@@ -5,6 +5,7 @@
       <ChatInterface
         :message="responseMessage"
         :show-input="showChatInput"
+        :duration="messageDuration"
         @send="handleSendMessage"
       />
       <Toolbar
@@ -30,6 +31,7 @@ const responseMessage = ref('')
 const showChatInput = ref(false)
 const voiceEnabled = ref(true)
 const toolbarRef = ref(null)
+const messageDuration = ref(0) // 消息显示时长（毫秒），0表示自动计算
 let currentAudio = null
 let userInteracted = false
 
@@ -91,6 +93,15 @@ async function speakMessage(text) {
       const audioUrl = URL.createObjectURL(audioBlob)
       
       currentAudio = new Audio(audioUrl)
+      
+      // 音频加载完成后，根据音频时长设置消息显示时长
+      currentAudio.onloadedmetadata = () => {
+        const audioDuration = currentAudio.duration * 1000 // 转换为毫秒
+        // 音频时长 + 1秒缓冲时间
+        messageDuration.value = Math.max(3000, audioDuration + 1000)
+        console.log('🎵 音频时长:', audioDuration, 'ms, 消息显示时长:', messageDuration.value, 'ms')
+      }
+      
       currentAudio.onended = () => {
         URL.revokeObjectURL(audioUrl)
       }

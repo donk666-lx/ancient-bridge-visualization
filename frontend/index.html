@@ -818,7 +818,7 @@ async function send() {
 
 let messageTimeout = null;
 
-function showMessage(content, duration = 30000) {
+function showMessage(content, duration = 30000, skipSpeech = false) {
     console.log('📢 showMessage 被调用:', content.substring(0, 30) + '...');
     
     // 清除之前的定时器
@@ -831,14 +831,15 @@ function showMessage(content, duration = 30000) {
     // 🎙️ 语音朗读（去除 emoji）
     console.log('  - voiceOn:', voiceOn);
     console.log('  - userInteracted:', userInteracted);
+    console.log('  - skipSpeech:', skipSpeech);
     
-    if (voiceOn && userInteracted) {
+    if (voiceOn && userInteracted && !skipSpeech) {
         console.log('🎙️ 准备调用语音朗读...');
         // 去除 emoji 后朗读
         const textWithoutEmoji = content.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20EF}]/gu, '');
         speakMessage(textWithoutEmoji);
     } else {
-        console.log('⚠️ 跳过语音朗读: voiceOn=' + voiceOn + ', userInteracted=' + userInteracted);
+        console.log('⚠️ 跳过语音朗读: voiceOn=' + voiceOn + ', userInteracted=' + userInteracted + ', skipSpeech=' + skipSpeech);
     }
 
     messageTimeout = setTimeout(() => {
@@ -1496,7 +1497,7 @@ pet.addEventListener('dblclick', function(e) {
     petOffsetX = 0;
     petOffsetY = 0;
     setMood('happy');
-    showMessage('回到原点~ ✨');
+    showMessage('回到原点~ ✨', 1500, true);
     setTimeout(() => setMood('normal'), 1500);
     e.stopPropagation();
 });
