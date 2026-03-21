@@ -5,12 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IronHill Scroll Animation | TTTISE</title>
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Fredoka+One&display=swap" rel="stylesheet">
+   <script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+    "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js",
+    "gsap": "https://cdn.skypack.dev/gsap",
+    "lenis": "https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.mjs"
+  }
+}
+</script>
 </head>
 
 <body>
+    <!-- 全局黑暗蒙层，由 initSecondProject 驱动 -->
+    <div class="sky-dark-mask"></div>
+
+    <!-- 开头部分 -->
+    <section class="intro-section">
+        <p class="intro-title">桥韵—智汇</p>
+    </section>
+    <section class="spotlight-section">
+        <div class="project-index">
+            <h1>01/10</h1>
+        </div>
+        <div class="project-images">
+            <div class="project-img"><img src="/img1.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img2.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img3.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img4.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img5.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img6.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img7.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img8.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img9.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="/img10.jpg" alt="" loading="lazy"></div>
+        </div>
+        <div class="project-names">
+            <p>通津桥</p>
+            <p>.</p>
+            <p>.</p>
+            <p>双龙桥</p>
+            <p>.</p>
+            <p>.</p>
+            <p>赵州桥</p>
+            <p>.</p>
+            <p>.</p>
+            <p>.</p>
+        </div>
+    </section>
+    <!-- 原有项目内容 -->
     <section class="hero">
         <div class="hero-img">
-            <img src="/porsche-911-gt3-rs-7680x4320-25139.jpg" alt="" />
+            <img src="/porsche-911-gt3-rs-7680x4320-25139.jpg" alt="" loading="lazy" />
         </div>
 
         <div class="hero-header">
@@ -30,7 +80,7 @@
     <!-- 第二个项目内容 -->
     <section class="hero jeskojets-hero">
         <div class="sky-container">
-            <img src="/sky.png" alt="" />
+            <img src="/sky.png" alt="" loading="lazy" />
 
             <div class="sky-overlay">
                 <div class="sky-center-block">
@@ -63,7 +113,7 @@
         </div>
 
         <div class="window-container">
-            <img src="/windows.png" alt="" />
+            <img src="/windows.png" alt="" loading="lazy" />
         </div>
 
         <div class="hero-header">
@@ -84,14 +134,59 @@
         </div>
     </section>
 
-    <section class="outro">
-        <h1>End of view.</h1>
-    </section>
+    <footer>
+        <div class="tttise-footer-container">
+            <div id="tttise-footer-canvas"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
-    <script src="/script.js"></script>
+            <div class="tttise-footer-content">
+                <div class="tttise-zhaozhou-bridge-header" aria-label="桥梁标题与简介">
+                    <h1 class="tttise-bridge-main-title">赵州桥</h1>
+                    <p class="tttise-bridge-subtitle">天下第一桥 · 千年石拱桥典范</p>
+
+                </div>
+                
+                <div class="tttise-zhaozhou-stage" id="tttise-zhaozhou-stage" aria-label="赵州桥信息可视化" data-active="">
+                    <div class="tttise-zhaozhou-left" aria-label="左侧信息展示">
+                        <section class="tttise-zhaozhou-module tttise-zhaozhou-module--author" aria-label="匠师信息">
+                            <div class="tttise-zhaozhou-module__cap">匠师</div>
+                            <div class="tttise-zhaozhou-module__title">李春</div>
+                            <div class="tttise-zhaozhou-module__meta">隋代著名工匠</div>
+                        </section>
+
+                        <section class="tttise-zhaozhou-module tttise-zhaozhou-module--intro" aria-label="桥梁历史简介">
+                            <div class="tttise-zhaozhou-module__cap">千年名桥</div>
+                            <div class="tttise-zhaozhou-module__title">赵州桥 · 安济桥</div>
+                            <div class="tttise-zhaozhou-module__meta">隋开皇年间（约595—605）营建 · 河北赵县</div>
+                            <div class="tttise-zhaozhou-module__grid">
+                                <div class="tttise-zhaozhou-module__kv">
+                                    <span class="tttise-zhaozhou-module__k">结构特征</span>
+                                    <span class="tttise-zhaozhou-module__v">单孔石拱为主拱，敞肩拱为辅拱，减轻自重，利于泄洪与分散应力。</span>
+                                </div>
+                                <div class="tttise-zhaozhou-module__kv">
+                                    <span class="tttise-zhaozhou-module__k">历史意义</span>
+                                    <span class="tttise-zhaozhou-module__v">中国桥梁建筑史的里程碑，结构逻辑与构造美感兼具标杆价值。</span>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tttise-zhaozhou-title-right" aria-label="赵州桥诗句">
+                        <div class="tttise-zhaozhou-title-column">千年古韵</div>
+                        <div class="tttise-zhaozhou-title-column">石拱飞虹</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 跳转按钮 -->
+        <button class="next-page-btn" onclick="window.location.href='next-page.html'">
+            <span>下一页</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </button>
+    </footer>
+
+    <script type="module" src="/script.js"></script>
 </body>
 </html>

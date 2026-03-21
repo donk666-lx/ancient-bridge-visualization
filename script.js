@@ -1,3 +1,13 @@
+import gsap from "gsap";
+import { ScrollTrigger } from "https://cdn.skypack.dev/gsap/ScrollTrigger";
+import Lenis from "lenis"; // 现在它会指向上面定义的 jsdelivr 地址
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { vertexShader, fragmentShader } from "./shaders.js";
+import { initZhaozhou3DScene } from "../shared/zhaozhou-3d-scene.js";
+
+gsap.registerPlugin(ScrollTrigger);
+
 // 全局变量
 let lenis;
 
@@ -54,85 +64,8 @@ function initFirstProject() {
   const rgb = hexToRgb(CONFIG.color);
   const geometry = new THREE.PlaneGeometry(2, 2);
   const material = new THREE.ShaderMaterial({
-    vertexShader: `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform float uProgress;
-      uniform vec2 uResolution;
-      uniform vec3 uColor;
-      uniform float uSpread;
-      varying vec2 vUv;
-
-      float Hash(vec2 p) {
-        vec3 p2 = vec3(p.xy, 1.0);
-        return fract(sin(dot(p2, vec3(37.1, 61.7, 12.4))) * 3758.5453123);
-      }
-
-      float noise(in vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f *= f * (3.0 - 2.0 * f);
-        return mix(
-          mix(Hash(i + vec2(0.0, 0.0)), Hash(i + vec2(1.0, 0.0)), f.x),
-          mix(Hash(i + vec2(0.0, 1.0)), Hash(i + vec2(1.0, 1.0)), f.x),
-          f.y
-        );
-      }
-
-      float fbm(vec2 p) {
-        float v = 0.0;
-        v += noise(p * 1.0) * 0.5;
-        v += noise(p * 2.0) * 0.25;
-        v += noise(p * 4.0) * 0.125;
-        v += noise(p * 8.0) * 0.0625;
-        return v;
-      }
-
-      float inkSplash(vec2 p) {
-        float distance = length(p);
-        float splash = 1.0 - smoothstep(0.0, 1.0, distance);
-        splash *= 1.0 + sin(distance * 10.0) * 0.1;
-        return splash;
-      }
-
-      void main() {
-        vec2 uv = vUv;
-        float aspect = uResolution.x / uResolution.y;
-        vec2 centeredUv = (uv - 0.5) * vec2(aspect, 1.0);
-
-        // 水墨风格的颜色 - 深灰色/黑色
-        vec3 inkColor = vec3(0.1, 0.1, 0.1);
-        
-        // 多层次噪声创建水墨效果
-        float noiseValue = fbm(centeredUv * 10.0);
-        float noiseValue2 = fbm(centeredUv * 20.0) * 0.5;
-        float noiseValue3 = fbm(centeredUv * 30.0) * 0.25;
-        float totalNoise = noiseValue + noiseValue2 + noiseValue3;
-        
-        // 水墨扩散效果
-        float inkSpread = inkSplash(centeredUv * 2.0) * 0.3;
-        
-        // 溶解边缘
-        float dissolveEdge = uv.y - uProgress * 1.2;
-        float d = dissolveEdge + (totalNoise + inkSpread) * uSpread;
-
-        float pixelSize = 1.0 / uResolution.y;
-        float alpha = 1.0 - smoothstep(-pixelSize, pixelSize, d);
-        
-        // 添加随机墨点效果
-        float dotNoise = noise(centeredUv * 50.0);
-        if (dotNoise > 0.8) {
-          alpha *= 0.8 + dotNoise * 0.2;
-        }
-
-        gl_FragColor = vec4(inkColor, alpha);
-      }
-    `,
+    vertexShader,
+    fragmentShader,
     uniforms: {
       uProgress: { value: 0 },
       uResolution: {
@@ -149,19 +82,34 @@ function initFirstProject() {
 
   let scrollProgress = 0;
 
+  // 仅在 hero 可见时才运行渲染循环
+  let firstProjectActive = false;
   function animate() {
+    if (!firstProjectActive) return;
+    requestAnimationFrame(animate);
     material.uniforms.uProgress.value = scrollProgress;
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
   }
 
-  animate();
+  const heroVisObserver = new IntersectionObserver((entries) => {
+    const isVisible = entries[0].isIntersecting;
+    if (isVisible && !firstProjectActive) {
+      firstProjectActive = true;
+      animate();
+    } else if (!isVisible) {
+      firstProjectActive = false;
+    }
+  }, { threshold: 0 });
+  heroVisObserver.observe(hero);
 
   lenis.on("scroll", ({ scroll }) => {
     const heroHeight = hero.offsetHeight;
     const windowHeight = window.innerHeight;
+    // 减去 hero 在页面中的起始位置，确保进度从 hero 进入视口时才从 0 开始
+    const heroOffsetTop = hero.offsetTop;
+    const heroScroll = scroll - heroOffsetTop;
     const maxScroll = heroHeight - windowHeight;
-    scrollProgress = Math.min((scroll / maxScroll) * CONFIG.speed, 1.1);
+    scrollProgress = Math.max(0, Math.min((heroScroll / maxScroll) * CONFIG.speed, 1.1));
   });
 
   window.addEventListener("resize", () => {
@@ -171,7 +119,6 @@ function initFirstProject() {
   // 文字动画
   const heroH2 = document.querySelector(".hero-content h2");
   if (heroH2) {
-    // 简单的文字淡入效果，替代 SplitText
     gsap.set(heroH2, { opacity: 0 });
 
     ScrollTrigger.create({
@@ -242,53 +189,178 @@ function initSecondProject() {
   }
 }
 
-// 初始化遮罩层
-function initOverlay() {
-  // 创建遮罩层元素
-  const overlay = document.createElement('div');
-  overlay.className = 'transition-overlay';
-  document.body.appendChild(overlay);
+// 初始化开头部分
+function initIntroSection() {
+  const spotlightSection = document.querySelector(".spotlight-section");
+  const projectIndex = document.querySelector(".spotlight-section .project-index h1");
+  const projectImgs = document.querySelectorAll(".spotlight-section .project-img");
+  const projectImagesContainer = document.querySelector(".spotlight-section .project-images");
+  const projectNames = document.querySelectorAll(".spotlight-section .project-names p");
+  const projectNamesContainer = document.querySelector(".spotlight-section .project-names");
+  const totalProjectCount = 10;
 
-  // 监听滚动事件，实现遮罩效果
-  lenis.on('scroll', ({ scroll }) => {
-    // 获取第二个项目的位置
-    const jeskojetsHero = document.querySelector('.jeskojets-hero');
-    if (!jeskojetsHero) return;
-    
-    const jeskojetsHeroTop = jeskojetsHero.offsetTop;
-    const windowHeight = window.innerHeight;
-    
-    // 计算第二个项目动画完全结束的位置
-    // 第二个项目的 ScrollTrigger end 是 +=${window.innerHeight * 3}px
-    // 所以动画完全结束的位置是 jeskojetsHeroTop + windowHeight * 3
-    const jeskojetsAnimationEnd = jeskojetsHeroTop + windowHeight * 3;
-    
-    // 计算遮罩开始的位置（动画完全结束后，再往后更多）
-    const transitionStart = jeskojetsAnimationEnd + windowHeight * 1.5;
-    // 计算全黑开始的位置（快速变黑）
-    const blackStart = transitionStart + windowHeight * 0.25;
-    // 计算全黑结束的位置（延长全黑时间）
-    const blackEnd = blackStart + windowHeight * 3;
-    // 计算遮罩结束的位置
-    const transitionEnd = blackEnd + windowHeight * 3;
-    
-    // 计算当前滚动位置相对于过渡区域的进度
-    let overlayOpacity = 0;
-    
-    if (scroll >= transitionStart && scroll <= blackStart) {
-      // 从0到1的不透明度，快速变暗到全黑
-      overlayOpacity = (scroll - transitionStart) / (windowHeight * 0.5) * 1;
-    } else if (scroll > blackStart && scroll <= blackEnd) {
-      // 保持全黑状态
-      overlayOpacity = 1;
-    } else if (scroll > blackEnd && scroll <= transitionEnd) {
-      // 从1到0的不透明度，慢慢恢复
-      overlayOpacity = 1 - (scroll - blackEnd) / (windowHeight * 3) * 1;
-    }
-    
-    // 更新遮罩层的不透明度
-    overlay.style.backgroundColor = `rgba(0, 0, 0, ${overlayOpacity})`;
+  if (!spotlightSection || !projectImagesContainer) return;
+
+  // 预计算每张图片在条带坐标系内的中心 Y 和半高
+  // section 被 pin 到视口顶部，.project-images 以 position:absolute top:0 排布
+  // 所以 img.offsetTop（相对 .project-images）即屏幕 Y（translateY=0 时）
+  let imgCenterOffsets = [];
+  let imgHalfHeights = [];
+
+  const updateDimensions = () => {
+    const spotlightSectionHeight = spotlightSection.offsetHeight;
+    const spotlightSectionPadding = parseFloat(
+      getComputedStyle(spotlightSection).padding
+    ) || 0;
+
+    const projectIndexHeight = projectIndex ? projectIndex.offsetHeight : 0;
+    const containerHeight = projectNamesContainer ? projectNamesContainer.offsetHeight : 0;
+    const imagesHeight = projectImagesContainer.offsetHeight;
+
+    const moveDistanceIndex =
+      spotlightSectionHeight - spotlightSectionPadding * 2 - projectIndexHeight;
+
+    const moveDistanceNames =
+      spotlightSectionHeight - spotlightSectionPadding * 2 - containerHeight;
+
+    const moveDistanceImages = window.innerHeight - imagesHeight;
+
+    const imgActivationThreshold = window.innerHeight / 2;
+
+    // resize 时重新读取一次布局（静态读取，不在滚动帧内）
+    imgCenterOffsets = Array.from(projectImgs).map(
+      (img) => img.offsetTop + img.offsetHeight / 2
+    );
+    imgHalfHeights = Array.from(projectImgs).map(
+      (img) => img.offsetHeight / 2
+    );
+
+    return { moveDistanceIndex, moveDistanceNames, moveDistanceImages, imgActivationThreshold };
+  };
+
+  let dimensions = updateDimensions();
+
+  window.addEventListener('resize', () => {
+    dimensions = updateDimensions();
+  }, { passive: true });
+
+  ScrollTrigger.create({
+    trigger: ".spotlight-section",
+    start: "top top",
+    end: `+=${window.innerHeight * 5}px`,
+    pin: true,
+    pinSpacing: true,
+    scrub: 1,
+    onUpdate: (self) => {
+      const progress = self.progress;
+      const currentIndex = Math.min(
+        Math.floor(progress * totalProjectCount) + 1,
+        totalProjectCount
+      );
+
+      if (projectIndex) {
+        projectIndex.textContent = `${String(currentIndex).padStart(
+          2,
+          "0"
+        )}/${String(totalProjectCount).padStart(2, "0")}`;
+
+        gsap.set(projectIndex, {
+          y: progress * dimensions.moveDistanceIndex,
+        });
+      }
+
+      const translateY = progress * dimensions.moveDistanceImages;
+      gsap.set(projectImagesContainer, { y: translateY });
+
+      // 使用预计算偏移量判断激活图片，完全避免 getBoundingClientRect()
+      projectImgs.forEach((img, i) => {
+        const screenCenterY = imgCenterOffsets[i] + translateY;
+        if (
+          screenCenterY - imgHalfHeights[i] <= dimensions.imgActivationThreshold &&
+          screenCenterY + imgHalfHeights[i] >= dimensions.imgActivationThreshold
+        ) {
+          gsap.set(img, { opacity: 1 });
+        } else {
+          gsap.set(img, { opacity: 0.5 });
+        }
+      });
+
+      projectNames.forEach((p, index) => {
+        const startProgress = index / totalProjectCount;
+        const endProgress = (index + 1) / totalProjectCount;
+        const projectProgress = Math.max(
+          0,
+          Math.min(1, (progress - startProgress) / (endProgress - startProgress))
+        );
+
+        gsap.set(p, {
+          y: -projectProgress * dimensions.moveDistanceNames,
+        });
+
+        if (projectProgress > 0 && projectProgress < 1) {
+          p.classList.add('active-name');
+        } else {
+          p.classList.remove('active-name');
+        }
+      });
+    },
   });
+}
+
+// 全屏黑暗过渡：在 jeskojets 滚动末尾变黑，进入 footer 后慢慢恢复
+function initDarkMaskTransition() {
+  const mask = document.querySelector(".sky-dark-mask");
+  if (!mask) return;
+
+  // 变黑：绑定在 jeskojets-hero 滚动的末段（progress 0.8→0.95 迅速变黑，之后保持全黑）
+  ScrollTrigger.create({
+    trigger: ".jeskojets-hero",
+    start: "top top",
+    end: `+=${window.innerHeight * 3}px`,
+    scrub: 1,
+    onUpdate: (self) => {
+      const p = self.progress;
+      if (p <= 0.6) {
+        gsap.set(mask, { opacity: 0 });
+      } else {
+        // 0.6→0.97 缓慢变黑，0.97→1 保持全黑
+        const t = Math.min((p - 0.6) / 0.37, 1);
+        gsap.set(mask, { opacity: t });
+      }
+    },
+  });
+
+  // 恢复：进入 footer 后缓慢恢复透明，跨越整个 footer 滚动范围
+  ScrollTrigger.create({
+    trigger: "footer",
+    start: "top bottom",
+    end: "top top",
+    scrub: 1,
+    onUpdate: (self) => {
+      const p = self.progress;
+      // 前 5% 保持全黑，之后用平方缓出慢慢恢复
+      if (p <= 0.05) {
+        gsap.set(mask, { opacity: 1 });
+      } else {
+        const t = (p - 0.05) / 0.95;
+        gsap.set(mask, { opacity: 1 - t * t });
+      }
+    },
+  });
+}
+
+// 初始化页脚
+function initFooter() {
+  const sceneControl = initZhaozhou3DScene({
+    containerId: "tttise-footer-canvas",
+    footerSelector: "footer",
+    footerContainerSelector: ".tttise-footer-container",
+    modelPath: "./modelZhaozhou.glb",
+    onReady: () => {}
+  });
+
+  // 保存 sceneControl 引用，以便在需要时可以销毁场景
+  window.zhaozhouSceneControl = sceneControl;
 }
 
 // 初始化所有项目
@@ -296,12 +368,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // 初始化 Lenis
   initLenis();
   
+  // 初始化开头部分
+  initIntroSection();
+  
   // 初始化第一个项目
   initFirstProject();
   
   // 初始化第二个项目
   initSecondProject();
-  
-  // 初始化遮罩层
-  initOverlay();
+
+  // 全屏黑暗过渡（sky section → footer）
+  initDarkMaskTransition();
+
+  // 初始化页脚
+  initFooter();
 });
