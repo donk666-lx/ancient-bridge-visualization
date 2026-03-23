@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>私人小导游 🌉</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    *::-webkit-scrollbar { display: none; }
+    html, body {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+    .container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    /* ===== 流体球 67px ===== */
+    .pet-wrapper {
+        width: 67px;
+        height: 67px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        cursor: grab;
+        will-change: transform, left, top;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        z-index: 1000;
+    }
+    .pet-wrapper:active { cursor: grabbing; }
+    .pet-wrapper.dragging { 
+        cursor: grabbing;
+        z-index: 100;
+    }
+
+    .inner-fluid {
+        position: absolute;
+        top: 3px; left: 3px; right: 3px; bottom: 3px;
+        border-radius: 50%;
+        overflow: hidden;
+        z-index: 1;
+        background: linear-gradient(135deg, #ffb3b3, #fed6e3);
+        transition: filter 0.4s ease;
+    }
+    .fluid-blob {
+        position: absolute;
+        width: 130%; height: 130%; top: -15%; left: -15%;
+        background:
+            radial-gradient(circle at 30% 30%, rgba(235,87,87,0.85), transparent 40%),
+            radial-gradient(circle at 70% 65%, rgba(255,154,108,0.8), transparent 40%);
+        animation: fluid-spin 8s linear infinite;
+    }
+    .fluid-blob-2 {
+        position: absolute;
+        width: 110%; height: 110%; top: -5%; left: -5%;
+        background:
+            radial-gradient(circle at 60% 30%, rgba(255,200,150,0.4), transparent 35%),
+            radial-gradient(circle at 35% 70%, rgba(220,60,60,0.3), transparent 35%);
+        animation: fluid-spin-r 12s linear infinite;
+    }
+
+    .glass-shell {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        border-radius: 50%; z-index: 2;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+        box-shadow:
+            inset -2px -2px 8px rgba(255,255,255,0.08),
+            inset 2px 2px 8px rgba(255,255,255,0.35),
+            0px 2px 6px rgba(220,80,80,0.08);
+        border: 1px solid rgba(255,255,255,0.25);
+        transition: box-shadow 1.0s cubic-bezier(0.4, 0.0, 0.2, 1), border 1.0s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    .glass-shell::before {
+        content: '';
+        position: absolute; top: 12%; left: 18%; width: 28%; height: 14%;
+        border-radius: 50%; 
+        background: rgba(255,255,255,0.55);
+        filter: blur(1px); 
+        transform: rotate(-40deg);
+        transition: opacity 1.0s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    .glass-shell::after {
+        content: '';
+        position: absolute; bottom: 22%; right: 20%; width: 16%; height: 10%;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        filter: blur(1px);
+        transform: rotate(25deg);
+        transition: opacity 1.0s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    /* 胶囊眼睛 — 大占比 */
+    .eyes-container {
+        position: absolute; z-index: 3;
+        top: 16%; left: 10%; width: 80%; height: 50%;
+        display: flex; justify-content: center; align-items: center;
+        gap: 12px;
+        pointer-events: none;
+        overflow: visible;
+    }
+    .eye {
+        width: 11px; height: 19px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.4);
+        transition: width 0.18s, height 0.18s, border-radius 0.18s, transform 0.18s cubic-bezier(0.25, 1, 0.5, 1);
+        transform-origin: center center;
+    }
+
+    /* 腮红 */
+    .blush {
+        position: absolute; z-index: 3;
+        width: 14px; height: 8px; border-radius: 50%;
+        background: rgba(255,130,130,0.25); filter: blur(3px);
+        pointer-events: none; 
+        /* 🎨 2秒平滑过渡 */
+        transition: background 2.0s cubic-bezier(0.33, 0.0, 0.2, 1), opacity 0.6s ease; 
+        opacity: 0.8;
+    }
+    .blush-l { top: 58%; left: 8%; }
+    .blush-r { top: 58%; right: 8%; }
+
+    /* 气泡装饰 */
+    .bub {
+        position: absolute; border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4), rgba(255,255,255,0.06));
+        border:1px solid rgba(255,255,255,0.12);
+        z-index: 0; opacity: 0; pointer-events: none;
+    }
+    .bub-1 { width: 5px; height: 5px; left: -5px; top: 60%; animation: bub 5s ease-in infinite 0s; }
+    .bub-2 { width: 3px; height: 3px; right: -4px; top: 40%; animation: bub 6.5s ease-in infinite 2s; }
+
+    .particles {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none; z-index: 10;
+    }
+
+    /* ===== 图标工具栏 ===== */
+    .toolbar {
+        position: absolute;
+        top: calc(50% + 60px);
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, top 0.1s linear;
+        z-index: 20;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        will-change: top, left;
+    }
+    .container:hover .toolbar:not(.dragging) {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .toolbar.dragging {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .tool-icon {
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.85);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .tool-icon svg {
+        width: 13px; height: 13px;
+        stroke: #666; fill: none;
+        stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .tool-icon:hover {
+        transform: scale(1.2);
+        box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+    }
+    .tool-icon:active { transform: scale(0.9); }
+
+    /* 模型切换按钮 */
+    .model-switch-btn {
+        min-width: 26px;
+        padding: 0 4px;
+        border-radius: 13px;
+    }
+    .model-switch-btn:hover {
+        background: rgba(255,255,255,0.95);
+    }
+    .tool-icon.active {
+        background: rgba(255,255,255,1);
+        box-shadow: 0 0 8px rgba(255,255,255,0.5), 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* 输入条 */
+    .input-bar {
+        position: absolute;
+        top: calc(50% + 92px);
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.1s linear;
+        z-index: 20;
+        will-change: top, left;
+    }
+    .input-bar.show:not(.dragging) {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .input-bar.dragging {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    .input-bar input {
+        width: 160px;
+        padding: 4px 10px;
+        border: none;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.85);
+        font-size: 11px;
+        outline: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .input-bar button {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.85);
+        font-size: 11px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    /* 消息气泡 */
+    .message-bubble {
+        position: absolute;
+        top: calc(50% - 100px);
+        left: calc(50% + 70px);
+        transform: translateX(0);
+        max-width: 200px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.1s linear, left 0.1s linear;
+        z-index: 20;
+        will-change: top, left;
+    }
+    .message-bubble.show {
+        opacity: 1;
+        transform: translateY(-10px) translateX(0);
+    }
+    .message-content {
+        background: rgba(255,255,255,0.95);
+        padding: 10px 12px;
+        border-radius: 16px 16px 16px 4px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #333;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        word-wrap: break-word;
+    }
+
+    @keyframes fluid-spin {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.08); }
+        100% { transform: rotate(360deg) scale(1); }
+    }
+    @keyframes fluid-spin-r {
+        0% { transform: rotate(360deg) scale(1.05); }
+        50% { transform: rotate(180deg) scale(0.95); }
+        100% { transform: rotate(0deg) scale(1.05); }
+    }
+    @keyframes bub {
+        0% { opacity: 0; transform: translateY(0) scale(0.3); }
+        15% { opacity: 0.5; }
+        100% { opacity: 0; transform: translateY(-30px) translateX(5px) scale(1); }
+    }
+    @keyframes squish {
+        0% { transform: translate(-50%, -50%) scale(1, 1); }
+        25% { transform: translate(-50%, -50%) scale(1.15, 0.85); }
+        50% { transform: translate(-50%, -50%) scale(0.9, 1.1); }
+        75% { transform: translate(-50%, -50%) scale(1.05, 0.95); }
+        100% { transform: translate(-50%, -50%) scale(1, 1); }
+    }
+    
+    /* 点击时的缩放动画 */
+    .pet-wrapper.squishing {
+        animation: squish 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="pet-wrapper" id="pet">
+        <div class="inner-fluid" id="fluid">
+            <div class="fluid-blob" id="blob1"></div>
+            <div class="fluid-blob-2" id="blob2"></div>
+        </div>
+        <div class="glass-shell"></div>
+        <div class="eyes-container" id="eyes">
+            <div class="eye" id="eyeL"></div>
+            <div class="eye" id="eyeR"></div>
+        </div>
+        <div class="blush blush-l" id="blushL"></div>
+        <div class="blush blush-r" id="blushR"></div>
+        <div class="bub bub-1"></div>
+        <div class="bub bub-2"></div>
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <!-- 图标工具栏 -->
+    <div class="toolbar" id="toolbar">
+        <div class="tool-icon" id="btnChat" title="发消息">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="tool-icon" id="btnVoice" title="语音">
+            <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </div>
+        <div class="tool-icon" id="btnScreenshot" title="截图">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+    </div>
+
+    <!-- 消息气泡 -->
+    <div class="message-bubble" id="messageBubble">
+        <div class="message-content" id="messageContent"></div>
+    </div>
+
+    <!-- 输入条 -->
+    <div class="input-bar" id="inputBar">
+        <input type="text" id="input" placeholder="说点什么...">
+        <button id="btnSend">↑</button>
+    </div>
+</div>
+
+<script>
+// API 配置
+const API_CONFIG = {
+  baseURL: 'http://localhost:3002',
+  endpoints: {
+    tts: '/api/v1/tts/edge',
+    chat: '/api/v1/chat'
+  }
+};
+
+// 获取完整 API URL
+function getApiUrl(endpoint) {
+  return `${API_CONFIG.baseURL}${API_CONFIG.endpoints[endpoint]}`;
+}
+
+const pet = document.getElementById('pet');
+const eyeL = document.getElementById('eyeL');
+const eyeR = document.getElementById('eyeR');
+const fluid = document.getElementById('fluid');
+const blob1 = document.getElementById('blob1');
+const blob2 = document.getElementById('blob2');
+let _moodTimer = null;
+const blushL = document.getElementById('blushL');
+const blushR = document.getElementById('blushR');
+const particlesEl = document.getElementById('particles');
+const glassShell = document.querySelector('.glass-shell');
+const inputBar = document.getElementById('inputBar');
+const inputEl = document.getElementById('input');
+const btnVoice = document.getElementById('btnVoice');
+const messageBubble = document.getElementById('messageBubble');
+const messageContent = document.getElementById('messageContent');
+const btnChat = document.getElementById('btnChat');
+const btnScreenshot = document.getElementById('btnScreenshot');
+const btnSend = document.getElementById('btnSend');
+
+let voiceOn = true;
+let isConnected = false;
+let userInteracted = false;  // 用户是否已与页面交互
+
+// ===== 拖拽变量（必须在动画循环之前定义）=====
+let isDragging = false;
+let dragStartX = 0, dragStartY = 0;
+let petOffsetX = -window.innerWidth / 2 + 100, petOffsetY = window.innerHeight / 2 - 100;
+let startOffsetX = 0, startOffsetY = 0;
+
+// ===== 60fps 动画 =====
+let t = 0, squishing = false, targetScale = 1, curScale = 1, breathExtra = 0;
+
+// 有机运动参数
+let deepBreathPhase = 0;       // 深呼吸相位（0=正常，>0=正在深呼吸）
+let fidgetSeed = Math.random() * 100;  // 微动作种子
+let lastInteraction = Date.now();      // 上次互动时间
+
+function loop() {
+    t += 0.016;
+    curScale += (targetScale - curScale) * 0.08;
+
+    // === 多频叠加有机浮动（替代单一正弦波）===
+    const floatY = Math.sin(t * 1.3) * 3.5
+                 + Math.sin(t * 0.67) * 2
+                 + Math.sin(t * 2.3) * 0.6;
+    const floatR = Math.sin(t * 0.9) * 0.3
+                 + Math.sin(t * 0.37) * 0.2;
+
+    // === 呼吸：基础 + 偶尔深呼吸 ===
+    let breathScale = 1 + Math.sin(t * 2) * 0.01
+                        + Math.sin(t * 0.8) * 0.005;
+    if (deepBreathPhase > 0) {
+        // 深呼吸：吸气膨胀 → 呼气收缩
+        breathScale += Math.sin(deepBreathPhase) * 0.025;
+        deepBreathPhase += 0.04;
+        if (deepBreathPhase > Math.PI) deepBreathPhase = 0;
+    }
+
+    // === 微动作：细微的重心移动 ===
+    const fidgetX = Math.sin(t * 0.23 + fidgetSeed) * 0.6;
+    const fidgetR = Math.sin(t * 0.17 + fidgetSeed * 2) * 0.12;
+
+    const bounce = breathExtra > 0 ? Math.sin(t * 12) * breathExtra : 0;
+
+    if (!squishing) {
+        // 基础位置（中心 + 拖拽偏移）
+        pet.style.left = `calc(50% + ${petOffsetX}px)`;
+        pet.style.top = `calc(50% + ${petOffsetY}px)`;
+
+        if (isDragging) {
+            // 拖拽状态：简化动画，提高性能
+            const maxX = window.innerWidth / 2 - 40;
+            const stretchX = 1 + Math.abs(petOffsetX) / maxX * 0.05;
+            const stretchY = 1 - Math.abs(petOffsetX) / maxX * 0.03;
+            pet.style.transform = `translate(-50%, -50%) scale(${curScale * stretchX}, ${curScale * stretchY})`;
+        } else {
+            // 正常状态：应用浮动动画
+            pet.style.transform = `translate(-50%, -50%) translateX(${fidgetX}px) translateY(${floatY + bounce}px) rotate(${floatR + fidgetR}deg) scale(${curScale * breathScale})`;
+        }
+    }
+    
+    // 更新工具栏、输入条和消息气泡位置，跟随小助手
+    const toolbar = document.getElementById('toolbar');
+    const inputBar = document.getElementById('inputBar');
+    const messageBubble = document.getElementById('messageBubble');
+    if (toolbar) {
+        toolbar.style.top = `calc(50% + ${petOffsetY + 60}px)`;
+        toolbar.style.left = `calc(50% + ${petOffsetX}px)`;
+    }
+    if (inputBar) {
+        inputBar.style.top = `calc(50% + ${petOffsetY + 92}px)`;
+        inputBar.style.left = `calc(50% + ${petOffsetX}px)`;
+    }
+    if (messageBubble) {
+        messageBubble.style.top = `calc(50% + ${petOffsetY - 100}px)`;
+        messageBubble.style.left = `calc(50% + ${petOffsetX + 70}px)`;
+    }
+    
+    requestAnimationFrame(loop);
+}
+loop();
+
+// 深呼吸/叹气：每 20-40 秒触发一次
+setInterval(() => {
+    if (currentMood === 'talking' || currentMood === 'thinking') return;
+    if (deepBreathPhase === 0 && Math.random() < 0.5) {
+        deepBreathPhase = 0.01;
+    }
+}, 20000 + Math.random() * 20000);
+
+// 监听用户交互
+document.addEventListener('click', enableAudio);
+
+// ===== 眼睛表情 =====
+
+// 鼠标偏移量（由鼠标跟随更新）
+let mouseOffset = { x: 0, y: 0 };
+
+// 过渡速度预设
+const EYE_SPEED = {
+    snap:   '0s',                  // 瞬切（用于眨眼闭合瞬间）
+    fast:   '0.08s',               // 快速（眨眼睁开）
+    normal: '0.18s',               // 常规
+    smooth: '0.3s',                // 平滑（情绪过渡）
+    slow:   '0.45s',               // 慢（白日梦、发呆）
+    drift:  '0.6s',                // 极慢（眼神缓慢飘移）
+};
+
+function _setEyeTransition(speed) {
+    const dur = EYE_SPEED[speed] || speed || EYE_SPEED.normal;
+    const ease = speed === 'snap' || speed === 'fast'
+        ? 'linear'
+        : speed === 'slow' || speed === 'drift'
+            ? 'cubic-bezier(0.4, 0, 0.2, 1)'
+            : 'cubic-bezier(0.25, 1, 0.5, 1)';
+    const t = `width ${dur} ${ease}, height ${dur} ${ease}, border-radius ${dur} ${ease}, transform ${dur} ${ease}`;
+    eyeL.style.transition = t;
+    eyeR.style.transition = t;
+}
+
+function setEyes(L, R, speed) {
+    if (speed) _setEyeTransition(speed);
+    const d = { w:11, h:19, br:'6px', tx:0, ty:0, sx:1, sy:1, rot:0 };
+    const l = { ...d, ...L };
+    const r = R ? { ...d, ...R } : { ...l };
+    eyeL.style.width = l.w+'px'; eyeL.style.height = l.h+'px'; eyeL.style.borderRadius = l.br;
+    // 合并鼠标偏移和表情变换
+    eyeL.style.transform = `translate(${l.tx + mouseOffset.x}px,${l.ty + mouseOffset.y}px) scale(${l.sx},${l.sy}) rotate(${l.rot}deg)`;
+    eyeR.style.width = r.w+'px'; eyeR.style.height = r.h+'px'; eyeR.style.borderRadius = r.br;
+    eyeR.style.transform = `translate(${r.tx + mouseOffset.x}px,${r.ty + mouseOffset.y}px) scale(${r.sx},${r.sy}) rotate(${r.rot}deg)`;
+    // 用完后恢复默认速度
+    if (speed) setTimeout(() => _setEyeTransition('normal'), 20);
+}
+
+const EXPR = {
+    // --- normal 速度 (0.18s, 默认) ---
+    normal:     () => setEyes({ w:11, h:19, br:'6px' }),
+    lookLeft:   () => setEyes({ w:11, h:19, br:'6px', tx:-4 }),
+    lookRight:  () => setEyes({ w:11, h:19, br:'6px', tx:4 }),
+    lookUp:     () => setEyes({ w:11, h:19, br:'6px', ty:-5 }),
+    lookDown:   () => setEyes({ w:11, h:15, br:'6px', ty:4 }),
+    squint:     () => setEyes({ w:12, h:6, br:'4px', ty:1 }),
+    talking:    () => setEyes({ w:10, h:17, br:'5px' }),
+    talkBig:    () => setEyes({ w:12, h:20, br:'6px' }),
+
+    // --- snap 速度 (0s, 瞬间) ---
+    blink:      () => setEyes({ w:12, h:3, br:'3px' }, null, 'snap'),
+
+    // --- fast 速度 (0.08s, 快速反应) ---
+    halfBlink:  () => setEyes({ w:11, h:10, br:'5px' }, null, 'fast'),
+    surprised:  () => setEyes({ w:13, h:21, br:'7px' }, null, 'fast'),
+    wow:        () => setEyes({ w:16, h:16, br:'8px' }, null, 'fast'),
+    sparkle:    () => setEyes({ w:12, h:12, br:'3px', rot:45 }, null, 'fast'),
+    wink:       () => setEyes(
+        { w:13, h:7, br:'7px 7px 3px 3px', ty:1 },
+        { w:11, h:19, br:'6px' }, 'fast'
+    ),
+    winkR:      () => setEyes(
+        { w:11, h:19, br:'6px' },
+        { w:13, h:7, br:'7px 7px 3px 3px', ty:1 }, 'fast'
+    ),
+    dizzy:      () => setEyes(
+        { w:10, h:10, br:'5px', rot:25, tx:-2 },
+        { w:10, h:10, br:'5px', rot:-25, tx:2 }, 'fast'
+    ),
+    cross:      () => setEyes(
+        { w:10, h:3, br:'2px', rot:30 },
+        { w:10, h:3, br:'2px', rot:-30 }, 'fast'
+    ),
+    flattered:  () => setEyes({ w:14, h:20, br:'7px', sy:1.05 }, null, 'fast'),
+    nervous:    () => setEyes({ w:9, h:14, br:'5px', ty:1, sx:0.9 }, null, 'fast'),
+
+    // --- smooth 速度 (0.3s, 情绪过渡) ---
+    happy:      () => setEyes({ w:13, h:7, br:'7px 7px 3px 3px', ty:1 }, null, 'smooth'),
+    superHappy: () => setEyes({ w:15, h:5, br:'8px 8px 3px 3px', ty:1, sx:1.1 }, null, 'smooth'),
+    giggle:     () => setEyes(
+        { w:13, h:7, br:'7px 7px 3px 3px', ty:1, rot:-8 },
+        { w:13, h:7, br:'7px 7px 3px 3px', ty:1, rot:8 }, 'smooth'
+    ),
+    curious:    () => setEyes(
+        { w:9, h:16, br:'5px', ty:-1 },
+        { w:13, h:21, br:'7px', ty:-1 }, 'smooth'
+    ),
+    thinking:   () => setEyes({ w:10, h:17, br:'5px', ty:-3 }, null, 'smooth'),
+    hmm:        () => setEyes(
+        { w:11, h:16, br:'5px', ty:-1, rot:8 },
+        { w:9, h:13, br:'5px', ty:0, rot:-8 }, 'smooth'
+    ),
+    sad:        () => setEyes({ w:10, h:16, br:'5px', ty:3, sy:0.9 }, null, 'smooth'),
+    angry:      () => setEyes(
+        { w:12, h:14, br:'3px 6px 6px 3px', ty:-2, rot:-12 },
+        { w:12, h:14, br:'6px 3px 3px 6px', ty:-2, rot:12 }, 'smooth'
+    ),
+    love:       () => setEyes({ w:14, h:13, br:'7px 1px 7px 1px', rot:45, sx:1.1 }, null, 'smooth'),
+    smug:       () => setEyes(
+        { w:11, h:7, br:'6px 6px 3px 3px', ty:1 },
+        { w:9, h:15, br:'5px', tx:3 }, 'smooth'
+    ),
+    confused:   () => setEyes(
+        { w:11, h:19, br:'6px', ty:-2 },
+        { w:9, h:12, br:'5px', ty:2, rot:15 }, 'smooth'
+    ),
+    softSmile:  () => setEyes({ w:12, h:9, br:'6px 6px 3px 3px', ty:1 }, null, 'smooth'),
+    focus:      () => setEyes({ w:9, h:18, br:'4px', ty:-1 }, null, 'smooth'),
+    pout:       () => setEyes({ w:10, h:11, br:'5px', ty:2, sy:0.85 }, null, 'smooth'),
+    peekL:      () => setEyes(
+        { w:11, h:6, br:'4px', ty:1 },
+        { w:10, h:17, br:'5px', tx:-3 }, 'smooth'
+    ),
+    peekR:      () => setEyes(
+        { w:10, h:17, br:'5px', tx:3 },
+        { w:11, h:6, br:'4px', ty:1 }, 'smooth'
+    ),
+    mischief:   () => setEyes(
+        { w:13, h:14, br:'7px', rot:-5, ty:-1 },
+        { w:9, h:10, br:'5px', rot:10, ty:1 }, 'smooth'
+    ),
+    worried:    () => setEyes(
+        { w:11, h:16, br:'5px', ty:1, rot:5 },
+        { w:11, h:16, br:'5px', ty:1, rot:-5 }, 'smooth'
+    ),
+    sly:        () => setEyes(
+        { w:10, h:14, br:'5px', tx:3, rot:-6 },
+        { w:12, h:8, br:'6px 6px 3px 3px', tx:3, ty:1 }, 'smooth'
+    ),
+
+    // --- slow 速度 (0.45s, 慵懒渐变) ---
+    sleepy:     () => setEyes({ w:12, h:4, br:'4px', ty:2 }, null, 'slow'),
+    drowsy:     () => setEyes({ w:11, h:10, br:'5px', ty:1 }, null, 'slow'),
+    dead:       () => setEyes({ w:10, h:3, br:'2px', ty:3 }, null, 'slow'),
+    content:    () => setEyes({ w:13, h:8, br:'7px 7px 4px 4px', ty:0, sx:1.05 }, null, 'slow'),
+    bliss:      () => setEyes({ w:14, h:5, br:'7px 7px 2px 2px', ty:1, sx:1.1 }, null, 'slow'),
+
+    // --- drift 速度 (0.6s, 缓慢失焦) ---
+    daydream:   () => setEyes({ w:13, h:20, br:'7px', ty:-3, sx:0.95 }, null, 'drift'),
+    blank:      () => setEyes({ w:8, h:15, br:'4px' }, null, 'drift'),
+};
+
+// ===== 鼠标跟随 =====
+let mouseTracking = true;
+document.addEventListener('mousemove', (e) => {
+    if (!mouseTracking) return;
+    const rect = pet.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    mouseOffset.x = Math.max(-2, Math.min(2, (e.clientX - cx) / window.innerWidth * 6));
+    mouseOffset.y = Math.max(-2, Math.min(2, (e.clientY - cy) / window.innerHeight * 6));
+    // 重新应用当前表情，包含新的鼠标偏移
+    if (EXPR[currentExpr]) {
+        EXPR[currentExpr]();
+    }
+});
+
+// ===== 音频播放 =====
+let currentAudio = null;
+
+// 监听用户交互
+function enableAudio() {
+  if (!userInteracted) {
+    userInteracted = true;
+    console.log('✅ 用户已交互，音频已启用');
+    
+    // 解锁浏览器音频限制
+    const silentAudio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQQAAAAAAA==');
+    silentAudio.play().catch(() => {});
+  }
+}
+
+// 🎙️ Edge TTS 语音朗读（方案1：纯Edge TTS，音质好，等1-2秒）
+async function speakMessage(text) {
+  console.log('🎙️ speakMessage 被调用');
+  
+  // 去除标点符号和emoji（只保留中文、英文、数字）
+  const cleanText = text
+    .replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]/gu, '')  // emoji
+    .replace(/[，。？！；：""''（）【】《》「」『』、·~@#$%^&*()_+=\[\]{}|;':",.<>/?！，。：；？]/g, '')  // 标点
+    .trim();
+  
+  console.log('📝 清理后的文本:', cleanText.substring(0, 50) + (cleanText.length > 50 ? '...' : ''));
+  
+  if (!cleanText) {
+    console.log('⚠️ 清理后无文本，跳过朗读');
+    return;
+  }
+  
+  console.log('  - voiceOn:', voiceOn);
+  console.log('  - userInteracted:', userInteracted);
+  
+  if (!voiceOn) {
+    console.log('🔇 语音已关闭');
+    return;
+  }
+  
+  if (!userInteracted) {
+    console.log('⚠️ 用户未交互，跳过朗读');
+    return;
+  }
+  
+  // 停止之前的朗读
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  
+  // 显示"正在生成语音..."
+  console.log('🔄 正在调用 Edge TTS 生成语音...');
+  
+  try {
+    const response = await fetch(getApiUrl('tts'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: cleanText,  // 使用清理后的文本
+        voice: 'xiaoxiao'  // 微软晓晓 - 活泼女声
+      })
+    });
+    
+    console.log('📡 TTS API 响应状态:', response.status);
+    
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('❌ Edge TTS 错误:', data.error);
+      // 降级到浏览器语音
+      speakWithWebSpeech(text);
+      return;
+    }
+    
+    if (data.audio) {
+      console.log('✅ 获取音频成功，大小:', Math.round(data.audio.length / 1024), 'KB');
+      
+      // 播放返回的音频
+      const audioBlob = new Blob([Uint8Array.from(atob(data.audio), c => c.charCodeAt(0))], { type: 'audio/mp3' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      currentAudio = new Audio(audioUrl);
+      currentAudio.onended = () => {
+        console.log('⏹️ 音频播放完成');
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      currentAudio.onerror = (e) => {
+        console.error('❌ 音频播放错误:', e);
+      };
+      
+      // 播放
+      console.log('▶️ 开始播放音频...');
+      const playPromise = currentAudio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log('✅ 音频播放成功');
+        }).catch(err => {
+          console.error('❌ 音频播放失败:', err.message);
+          // 降级到浏览器语音
+          speakWithWebSpeech(text);
+        });
+      }
+    } else {
+      console.log('⚠️ 没有收到音频数据');
+      // 降级到浏览器语音
+      speakWithWebSpeech(text);
+    }
+  } catch (error) {
+    console.error('❌ Edge TTS 调用失败:', error);
+    // 降级到浏览器语音
+    speakWithWebSpeech(text);
+  }
+}
+
+// 降级方案：浏览器内置语音
+function speakWithWebSpeech(text) {
+  if (!window.speechSynthesis) return;
+  
+  console.log('🎙️ 降级到 Web Speech API');
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'zh-CN';
+  utterance.rate = 1.1;
+  utterance.pitch = 1;
+  
+  const voices = window.speechSynthesis.getVoices();
+  const zhVoice = voices.find(v => v.lang && v.lang.includes('zh'));
+  if (zhVoice) utterance.voice = zhVoice;
+  
+  window.speechSynthesis.speak(utterance);
+}
+const API_URL = getApiUrl('chat');
+
+async function send() {
+    const message = inputEl.value.trim();
+    if (!message) return;
+    
+    // 用户发送消息，标记已交互
+    userInteracted = true;
+    console.log('💬 发送消息:', message);
+    
+    inputEl.value = '';
+    inputBar.classList.remove('show');
+    lastInteraction = Date.now();
+    
+    // 显示思考状态
+    setMood('thinking');
+    
+    try {
+        console.log('📡 调用聊天API...');
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+        
+        console.log('📡 API响应状态:', response.status);
+        const data = await response.json();
+        console.log('💬 收到回复:', data.content ? data.content.substring(0, 50) + '...' : '无内容');
+        
+        // 显示回复
+        showMessage(data.content);
+        
+        // 检测语气并更新
+        lastTone = detectTone(data.content);
+        
+        // 根据情绪设置表情
+        setMood(data.emotion || 'happy');
+        
+    } catch (error) {
+        console.error('❌ 发送消息失败:', error);
+        showMessage('抱歉，发送消息失败了 😅');
+        setMood('sad');
+    }
+}
+
+let messageTimeout = null;
+
+function showMessage(content, duration = 30000, skipSpeech = false) {
+    console.log('📢 showMessage 被调用:', content.substring(0, 30) + '...');
+    
+    // 清除之前的定时器
+    if (messageTimeout) {
+        clearTimeout(messageTimeout);
+    }
+    messageContent.textContent = content;
+    messageBubble.classList.add('show');
+    
+    // 🎙️ 语音朗读（去除 emoji）
+    console.log('  - voiceOn:', voiceOn);
+    console.log('  - userInteracted:', userInteracted);
+    console.log('  - skipSpeech:', skipSpeech);
+    
+    if (voiceOn && userInteracted && !skipSpeech) {
+        console.log('🎙️ 准备调用语音朗读...');
+        // 去除 emoji 后朗读
+        const textWithoutEmoji = content.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1F018}-\u{1F270}]|[\u{238C}-\u{2454}]|[\u{20D0}-\u{20EF}]/gu, '');
+        speakMessage(textWithoutEmoji);
+    } else {
+        console.log('⚠️ 跳过语音朗读: voiceOn=' + voiceOn + ', userInteracted=' + userInteracted + ', skipSpeech=' + skipSpeech);
+    }
+
+    messageTimeout = setTimeout(() => {
+        messageBubble.classList.remove('show');
+        messageTimeout = null;
+    }, duration);
+}
+
+function toggleInput() {
+    inputBar.classList.toggle('show');
+    if (inputBar.classList.contains('show')) {
+        inputEl.focus();
+    }
+}
+
+function toggleVoice() {
+    voiceOn = !voiceOn;
+    btnVoice.classList.toggle('active', voiceOn);
+    // 显示状态提示
+    showMessage(voiceOn ? '语音已开启 🎤' : '语音已关闭 🔇');
+    setMood(voiceOn ? 'happy' : 'sad');
+    
+    // 如果关闭语音，停止当前播放
+    if (!voiceOn && currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+}
+
+function screenshot() {
+    alert('截图功能开发中...');
+}
+
+// ===== 情绪管理 =====
+let currentMood = 'normal';
+let currentExpr = 'normal'; // 当前实际应用的表情函数名
+let talkInterval = null; // talking 模式的眼睛动画定时器
+
+// 情绪映射表：将API返回的情绪映射到对应的表情和颜色
+const moodMap = {
+    'happy': { 
+        expr: 'happy', 
+        blush: 'rgba(255,130,130,0.4)',
+        fluid: 'linear-gradient(135deg,#ffe0b2,#fff3e0)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(255,193,7,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,152,0,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(255,235,59,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(255,183,77,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(255,193,7,0.3), 0 0 80px rgba(255,152,0,0.15)',
+        scale: 1.05, bounce: 0.02, speed: '5s'
+    },
+    'joy': { 
+        expr: 'superHappy', 
+        blush: 'rgba(255,130,130,0.45)',
+        fluid: 'linear-gradient(135deg,#ffe0b2,#fff3e0)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(255,193,7,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,152,0,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(255,235,59,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(255,183,77,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(255,193,7,0.3), 0 0 80px rgba(255,152,0,0.15)',
+        scale: 1.08, bounce: 0.025, speed: '4s'
+    },
+    'sad': { 
+        expr: 'sad', 
+        blush: 'rgba(100,150,255,0.2)',
+        fluid: 'linear-gradient(135deg,#90caf9,#bbdefb)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(30,136,229,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(66,165,245,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(144,202,249,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(21,101,192,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(66,165,245,0.3), 0 0 80px rgba(30,136,229,0.15)',
+        scale: 0.96, bounce: 0, speed: '14s'
+    },
+    'thinking': { 
+        expr: 'thinking', 
+        blush: 'rgba(180,130,255,0.25)',
+        fluid: 'linear-gradient(135deg,#d1c4e9,#ede7f6)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(103,58,183,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(123,104,238,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(179,157,219,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(94,53,177,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(123,104,238,0.3), 0 0 80px rgba(103,58,183,0.15)',
+        scale: 1, bounce: 0, speed: '12s'
+    },
+    'curious': { 
+        expr: 'curious', 
+        blush: 'rgba(255,130,130,0.3)',
+        fluid: 'linear-gradient(135deg,#ffe0b2,#fff3e0)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(255,193,7,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,152,0,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(255,235,59,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(255,183,77,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(255,193,7,0.3), 0 0 80px rgba(255,152,0,0.15)',
+        scale: 1.02, bounce: 0, speed: '6s'
+    },
+    'surprised': { 
+        expr: 'surprised', 
+        blush: 'rgba(255,200,100,0.35)',
+        fluid: 'linear-gradient(135deg,#fff9c4,#fff3e0)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(255,215,0,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,165,0,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(255,235,59,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(255,87,34,0.3),transparent 35%)',
+        glow: '0 0 50px rgba(255,215,0,0.35), 0 0 100px rgba(255,165,0,0.15)',
+        scale: 1.06, bounce: 0, speed: '6s'
+    },
+    'angry': { 
+        expr: 'angry', 
+        blush: 'rgba(255,80,80,0.3)',
+        fluid: 'linear-gradient(135deg,#ef5350,#e53935)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(211,47,47,0.9),transparent 40%),radial-gradient(circle at 70% 65%,rgba(244,67,54,0.85),transparent 40%)',
+        blob2: 'radial-gradient(circle at 50% 50%,rgba(255,82,82,0.45),transparent 35%),radial-gradient(circle at 35% 70%,rgba(183,28,28,0.35),transparent 35%)',
+        glow: '0 0 50px rgba(244,67,54,0.4), 0 0 100px rgba(211,47,47,0.2)',
+        scale: 1.04, bounce: 0.01, speed: '3s'
+    },
+    'love': { 
+        expr: 'love', 
+        blush: 'rgba(255,150,150,0.5)',
+        fluid: 'linear-gradient(135deg,#ff8a80,#ffcdd2)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(229,57,53,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,82,82,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 50% 50%,rgba(255,138,128,0.45),transparent 35%),radial-gradient(circle at 35% 70%,rgba(198,40,40,0.3),transparent 35%)',
+        glow: '0 0 45px rgba(229,57,53,0.35), 0 0 90px rgba(255,82,82,0.15)',
+        scale: 1.05, bounce: 0.015, speed: '6s'
+    },
+    'sleepy': { 
+        expr: 'sleepy', 
+        blush: 'rgba(200,150,180,0.2)',
+        fluid: 'linear-gradient(135deg,#e8d5e0,#f0e6ef)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(186,147,170,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(200,170,190,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(220,200,215,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(170,130,160,0.3),transparent 35%)',
+        glow: '0 0 30px rgba(186,147,170,0.2), 0 0 60px rgba(186,147,170,0.08)',
+        scale: 0.97, bounce: 0, speed: '16s'
+    },
+    'worried': { 
+        expr: 'worried', 
+        blush: 'rgba(255,130,130,0.2)',
+        fluid: 'linear-gradient(135deg,#90caf9,#bbdefb)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(30,136,229,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(66,165,245,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(144,202,249,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(21,101,192,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(66,165,245,0.3), 0 0 80px rgba(30,136,229,0.15)',
+        scale: 0.98, bounce: 0, speed: '10s'
+    },
+    'excited': { 
+        expr: 'superHappy', 
+        blush: 'rgba(255,100,150,0.4)',
+        fluid: 'linear-gradient(135deg,#f48fb1,#f8bbd0)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(233,30,99,0.9),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,64,129,0.85),transparent 40%)',
+        blob2: 'radial-gradient(circle at 50% 50%,rgba(248,187,208,0.45),transparent 35%),radial-gradient(circle at 35% 70%,rgba(194,24,91,0.35),transparent 35%)',
+        glow: '0 0 55px rgba(233,30,99,0.4), 0 0 110px rgba(255,64,129,0.2)',
+        scale: 1.08, bounce: 0.025, speed: '3s'
+    },
+    'confused': { 
+        expr: 'confused', 
+        blush: 'rgba(255,130,130,0.25)',
+        fluid: 'linear-gradient(135deg,#d1c4e9,#ede7f6)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(103,58,183,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(123,104,238,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(179,157,219,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(94,53,177,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(123,104,238,0.3), 0 0 80px rgba(103,58,183,0.15)',
+        scale: 1, bounce: 0, speed: '8s'
+    },
+    'talking': { 
+        expr: 'talking', 
+        blush: 'rgba(255,130,180,0.3)',
+        fluid: 'linear-gradient(135deg,#f8bbd0,#fce4ec)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(233,30,99,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,105,180,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(255,182,193,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(219,68,85,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(255,105,180,0.3), 0 0 80px rgba(233,30,99,0.15)',
+        scale: 1, bounce: 0.015, speed: '4s'
+    },
+    'normal': { 
+        expr: 'normal', 
+        blush: 'rgba(255,130,130,0.25)',
+        fluid: 'linear-gradient(135deg,#ffb3b3,#fed6e3)',
+        blob1: 'radial-gradient(circle at 30% 30%,rgba(235,87,87,0.85),transparent 40%),radial-gradient(circle at 70% 65%,rgba(255,154,108,0.8),transparent 40%)',
+        blob2: 'radial-gradient(circle at 60% 30%,rgba(255,200,150,0.4),transparent 35%),radial-gradient(circle at 35% 70%,rgba(220,60,60,0.3),transparent 35%)',
+        glow: '0 0 40px rgba(255,107,74,0.25), 0 0 80px rgba(255,107,74,0.1)',
+        scale: 1, bounce: 0, speed: '8s'
+    }
+};
+
+function setMood(mood) {
+    currentMood = mood;
+    const m = moodMap[mood] || moodMap['normal'];
+    currentExpr = m.expr;
+
+    // 清除之前的情绪定时器
+    if (_moodTimer) { clearTimeout(_moodTimer); _moodTimer = null; }
+
+    // 应用流体颜色（带过渡效果）
+    fluid.style.transition = 'filter 0.35s ease-in';
+    fluid.style.filter = 'brightness(1.6) blur(2px)';
+
+    setTimeout(() => {
+        if (m.fluid) fluid.style.background = m.fluid;
+        if (m.blob1) blob1.style.background = m.blob1;
+        if (m.blob2) blob2.style.background = m.blob2;
+
+        // 应用情绪发光效果
+        if (m.glow && glassShell) {
+            glassShell.style.boxShadow = 'inset -2px -2px 8px rgba(255,255,255,0.08), inset 2px 2px 8px rgba(255,255,255,0.35), ' + m.glow;
+        }
+        blob1.style.animation = 'fluid-spin ' + m.speed + ' linear infinite';
+
+        // 淡出回正常
+        fluid.style.transition = 'filter 0.5s ease-out';
+        fluid.style.filter = 'brightness(1) blur(0px)';
+
+        _moodTimer = setTimeout(() => {
+            fluid.style.transition = '';
+            fluid.style.filter = '';
+            _moodTimer = null;
+        }, 550);
+    }, 350);
+
+    // 应用动画速度和透明度
+    blob1.style.animationDuration = m.speed;
+    if (mood === 'sleepy' || mood === 'sad') {
+        blob1.style.transition = 'opacity 1.5s ease';
+        blob1.style.opacity = '0.6';
+    } else {
+        blob1.style.transition = 'opacity 1.0s ease';
+        blob1.style.opacity = '1';
+    }
+
+    // 应用缩放和弹跳
+    targetScale = m.scale;
+    breathExtra = m.bounce;
+
+    // 鼠标追踪控制
+    mouseTracking = (mood !== 'sleepy' && mood !== 'sad');
+
+    // talking 模式的眼睛动画
+    if (talkInterval) { clearInterval(talkInterval); talkInterval = null; }
+    if (mood === 'talking') {
+        let tog = false;
+        talkInterval = setInterval(() => { 
+            tog = !tog; 
+            tog ? EXPR.talkBig() : EXPR.talking(); 
+        }, 250);
+    } else {
+        // 应用表情
+        if (EXPR[m.expr]) {
+            EXPR[m.expr]();
+        } else {
+            EXPR.normal();
+            currentExpr = 'normal';
+        }
+    }
+
+    // 应用腮红
+    if (mood === 'happy' || mood === 'excited' || mood === 'love') {
+        blushL.style.transition = 'background 0.8s ease, opacity 0.6s ease';
+        blushR.style.transition = 'background 0.8s ease, opacity 0.6s ease';
+        blushL.style.background = mood === 'love' ? 'rgba(255,90,120,0.5)' : 'rgba(255,120,120,0.4)';
+        blushR.style.background = mood === 'love' ? 'rgba(255,90,120,0.5)' : 'rgba(255,120,120,0.4)';
+    } else {
+        blushL.style.transition = 'background 0.6s ease, opacity 0.4s ease';
+        blushR.style.transition = 'background 0.6s ease, opacity 0.4s ease';
+        blushL.style.background = m.blush;
+        blushR.style.background = m.blush;
+    }
+}
+
+// ===== 自动眨眼 =====
+function blink() {
+    EXPR.blink();
+    setTimeout(() => {
+        // 根据当前表情恢复
+        if (EXPR[currentExpr]) {
+            EXPR[currentExpr]();
+        } else {
+            EXPR.normal();
+        }
+    }, 100);
+}
+
+setInterval(() => {
+    if (currentMood !== 'talking' && currentMood !== 'thinking') {
+        blink();
+    }
+}, 3000 + Math.random() * 2000);
+
+// ===== 待机微表情系统 =====
+
+// 时间场景判定
+function getTimeScene() {
+    const h = new Date().getHours();
+    if (h >= 6 && h < 11)  return 'morning';
+    if (h >= 11 && h < 14) return 'noon';
+    if (h >= 14 && h < 18) return 'afternoon';
+    if (h >= 18 && h < 22) return 'evening';
+    return 'latenight';
+}
+
+// 语气状态（从 AI 回复文本中提取）
+let lastTone = 'neutral';
+function detectTone(text) {
+    if (!text) return 'neutral';
+    if (/哈哈|嘻嘻|😄|😆|笑|开心|太好了|棒|厉害|不错|好耶/.test(text)) return 'cheerful';
+    if (/害羞|脸红|嘿嘿|😳|😊|人家/.test(text)) return 'shy';
+    if (/生气|可恶|气死|哼|😠|😤|讨厌/.test(text)) return 'annoyed';
+    if (/难过|伤心|唉|😢|😭|呜呜|抱歉|对不起/.test(text)) return 'sad';
+    if (/好奇|为什么|怎么|吗？|呢？|🤔|想想/.test(text)) return 'curious';
+    if (/加油|冲|💪|努力|一定可以|相信/.test(text)) return 'encourage';
+    if (/困|累|😴|哈欠|想睡|好困/.test(text)) return 'tired';
+    if (/惊|天哪|什么|😱|😮|不会吧|哇/.test(text)) return 'surprised';
+    if (/嗯|好的|了解|明白|知道了|收到/.test(text)) return 'calm';
+    return 'neutral';
+}
+
+// 按心情分组的动作池
+const ACT = {
+    daily: [
+        () => { EXPR.lookLeft(); setTimeout(() => { EXPR.lookRight(); setTimeout(() => EXPR.normal(), 500); }, 500); },
+        () => { EXPR.curious(); setTimeout(() => EXPR.normal(), 800); },
+        () => { EXPR.wink(); setTimeout(() => EXPR.normal(), 700); },
+        () => { EXPR.winkR(); setTimeout(() => EXPR.normal(), 700); },
+        () => { EXPR.hmm(); setTimeout(() => EXPR.normal(), 800); },
+        () => { EXPR.sparkle(); setTimeout(() => EXPR.normal(), 500); },
+        () => { EXPR.blink(); setTimeout(() => EXPR.normal(), 80); setTimeout(() => EXPR.blink(), 250); setTimeout(() => EXPR.normal(), 330); },
+        () => { EXPR.lookLeft(); setTimeout(() => EXPR.lookRight(), 200); setTimeout(() => EXPR.lookLeft(), 400); setTimeout(() => EXPR.lookRight(), 600); setTimeout(() => EXPR.normal(), 800); },
+        () => { EXPR.softSmile(); setTimeout(() => EXPR.normal(), 1000); },
+        () => { EXPR.focus(); setTimeout(() => { EXPR.curious(); setTimeout(() => EXPR.normal(), 500); }, 800); },
+    ],
+    happy: [
+        () => { EXPR.happy(); setTimeout(() => EXPR.normal(), 1000); },
+        () => { EXPR.superHappy(); const s = targetScale; targetScale = 1.1; setTimeout(() => { targetScale = 0.93; }, 200); setTimeout(() => { targetScale = 1.08; EXPR.giggle(); }, 400); setTimeout(() => { targetScale = 0.95; }, 600); setTimeout(() => { targetScale = s; EXPR.happy(); }, 800); setTimeout(() => EXPR.normal(), 1200); },
+        () => { EXPR.giggle(); setTimeout(() => EXPR.normal(), 800); },
+        () => { const s = targetScale; EXPR.happy(); targetScale = 0.9; setTimeout(() => { targetScale = 1.12; }, 150); setTimeout(() => { targetScale = 0.93; }, 350); setTimeout(() => { targetScale = 1.05; EXPR.giggle(); }, 500); setTimeout(() => { targetScale = s; EXPR.normal(); }, 700); },
+        () => { EXPR.smug(); setTimeout(() => { EXPR.giggle(); setTimeout(() => EXPR.normal(), 600); }, 700); },
+        () => { EXPR.love(); blushL.style.transition = 'background 0.3s'; blushR.style.transition = 'background 0.3s'; blushL.style.background = 'rgba(255,80,120,0.5)'; blushR.style.background = 'rgba(255,80,120,0.5)'; setTimeout(() => { EXPR.superHappy(); blushL.style.transition = 'background 0.8s'; blushR.style.transition = 'background 0.8s'; blushL.style.background = ''; blushR.style.background = ''; }, 1000); setTimeout(() => EXPR.normal(), 1500); },
+        () => { EXPR.content(); setTimeout(() => { EXPR.softSmile(); setTimeout(() => EXPR.normal(), 800); }, 600); },
+    ],
+    shy: [
+        () => { EXPR.happy(); blushL.style.transition = 'background 0.3s'; blushR.style.transition = 'background 0.3s'; blushL.style.background = 'rgba(255,100,100,0.5)'; blushR.style.background = 'rgba(255,100,100,0.5)'; setTimeout(() => { EXPR.normal(); blushL.style.transition = 'background 0.8s'; blushR.style.transition = 'background 0.8s'; blushL.style.background = ''; blushR.style.background = ''; }, 1200); },
+        () => { EXPR.squint(); blushL.style.transition = 'background 0.3s'; blushR.style.transition = 'background 0.3s'; blushL.style.background = 'rgba(255,100,100,0.4)'; blushR.style.background = 'rgba(255,100,100,0.4)'; setTimeout(() => EXPR.lookDown(), 400); setTimeout(() => { EXPR.normal(); blushL.style.transition = 'background 0.8s'; blushR.style.transition = 'background 0.8s'; blushL.style.background = ''; blushR.style.background = ''; }, 1000); },
+        () => { EXPR.nervous(); setTimeout(() => { EXPR.peekR(); blushL.style.transition = 'background 0.3s'; blushR.style.transition = 'background 0.3s'; blushL.style.background = 'rgba(255,110,100,0.4)'; blushR.style.background = 'rgba(255,110,100,0.4)'; }, 400); setTimeout(() => { EXPR.blink(); }, 900); setTimeout(() => { EXPR.softSmile(); blushL.style.transition = 'background 0.8s'; blushR.style.transition = 'background 0.8s'; blushL.style.background = ''; blushR.style.background = ''; }, 1100); setTimeout(() => EXPR.normal(), 1600); },
+    ],
+    thinking: [
+        () => { EXPR.thinking(); setTimeout(() => EXPR.normal(), 800); },
+        () => { EXPR.hmm(); setTimeout(() => { EXPR.thinking(); setTimeout(() => EXPR.normal(), 600); }, 500); },
+        () => { EXPR.curious(); setTimeout(() => { EXPR.hmm(); setTimeout(() => EXPR.normal(), 600); }, 500); },
+        () => { EXPR.lookUp(); setTimeout(() => { EXPR.thinking(); setTimeout(() => EXPR.normal(), 700); }, 500); },
+        () => { EXPR.confused(); setTimeout(() => { EXPR.thinking(); setTimeout(() => { EXPR.sparkle(); setTimeout(() => EXPR.normal(), 400); }, 500); }, 600); },
+        () => { EXPR.thinking(); setTimeout(() => { EXPR.sparkle(); setTimeout(() => { EXPR.giggle(); setTimeout(() => EXPR.normal(), 500); }, 400); }, 800); },
+    ],
+    surprised: [
+        () => { EXPR.surprised(); setTimeout(() => EXPR.normal(), 600); },
+        () => { EXPR.wow(); setTimeout(() => { EXPR.curious(); setTimeout(() => EXPR.normal(), 600); }, 500); },
+        () => { EXPR.wow(); setTimeout(() => EXPR.love(), 400); setTimeout(() => { EXPR.superHappy(); blushL.style.transition = 'background 0.2s'; blushR.style.transition = 'background 0.2s'; blushL.style.background = 'rgba(255,100,100,0.4)'; blushR.style.background = 'rgba(255,100,100,0.4)'; }, 800); setTimeout(() => { EXPR.normal(); blushL.style.transition = 'background 0.6s'; blushR.style.transition = 'background 0.6s'; blushL.style.background = ''; blushR.style.background = ''; }, 1400); },
+        () => { EXPR.flattered(); const s = targetScale; targetScale = 1.05; setTimeout(() => { EXPR.bliss(); targetScale = s; }, 600); setTimeout(() => { EXPR.happy(); }, 1200); setTimeout(() => EXPR.normal(), 1700); },
+    ],
+    sleepy: [
+        () => { EXPR.drowsy(); setTimeout(() => { EXPR.sleepy(); setTimeout(() => { EXPR.surprised(); setTimeout(() => EXPR.normal(), 300); }, 600); }, 400); },
+        () => { EXPR.halfBlink(); setTimeout(() => EXPR.sleepy(), 500); setTimeout(() => EXPR.halfBlink(), 1200); setTimeout(() => EXPR.drowsy(), 1700); setTimeout(() => EXPR.normal(), 2200); },
+        () => { const s = targetScale; targetScale = 1.08; EXPR.sleepy(); setTimeout(() => { targetScale = s; EXPR.drowsy(); setTimeout(() => { EXPR.surprised(); setTimeout(() => EXPR.normal(), 300); }, 400); }, 1000); },
+        () => { EXPR.sleepy(); setTimeout(() => { EXPR.blink(); setTimeout(() => EXPR.sleepy(), 400); setTimeout(() => EXPR.normal(), 1200); }, 800); },
+        () => { EXPR.drowsy(); setTimeout(() => { EXPR.daydream(); setTimeout(() => { EXPR.sleepy(); setTimeout(() => { EXPR.blink(); setTimeout(() => EXPR.normal(), 100); }, 800); }, 1000); }, 600); },
+    ],
+    sad: [
+        () => { EXPR.sad(); setTimeout(() => EXPR.normal(), 1000); },
+        () => { EXPR.sad(); setTimeout(() => { EXPR.lookDown(); setTimeout(() => EXPR.normal(), 600); }, 500); },
+        () => { EXPR.pout(); setTimeout(() => { EXPR.sad(); setTimeout(() => EXPR.normal(), 800); }, 600); },
+    ],
+    default: [
+        () => { EXPR.normal(); },
+    ]
+};
+
+// 随机行为触发器
+setInterval(() => {
+    if (Date.now() - lastInteraction > 10000) { // 10秒无交互
+        const timeScene = getTimeScene();
+        let actionPool = ACT.daily;
+        
+        // 根据时间场景选择行为
+        if (timeScene === 'latenight' || timeScene === 'morning') {
+            actionPool = [...actionPool, ...ACT.sleepy];
+        }
+        
+        // 根据上一次语气选择行为
+        if (lastTone === 'cheerful') {
+            actionPool = [...actionPool, ...ACT.happy];
+        } else if (lastTone === 'shy') {
+            actionPool = [...actionPool, ...ACT.shy];
+        } else if (lastTone === 'curious') {
+            actionPool = [...actionPool, ...ACT.thinking];
+        } else if (lastTone === 'surprised') {
+            actionPool = [...actionPool, ...ACT.surprised];
+        } else if (lastTone === 'sad' || lastTone === 'tired') {
+            actionPool = [...actionPool, ...ACT.sad];
+        }
+        
+        // 随机选择一个行为
+        const randomAction = actionPool[Math.floor(Math.random() * actionPool.length)];
+        randomAction();
+    }
+}, 3000 + Math.random() * 2000);
+
+// ===== 拖拽功能 =====
+pet.addEventListener('mousedown', startDrag);
+pet.addEventListener('touchstart', startDrag, { passive: false });
+
+function startDrag(e) {
+    e.preventDefault();
+    isDragging = true;
+    const rect = pet.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    // 计算鼠标/触摸点相对于宠物元素的偏移
+    dragStartX = clientX - rect.left;
+    dragStartY = clientY - rect.top;
+    
+    // 记录当前的偏移量
+    startOffsetX = petOffsetX;
+    startOffsetY = petOffsetY;
+    
+    // 添加移动和释放事件监听
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+    
+    // 添加强调动画
+    pet.classList.add('squishing');
+    setTimeout(() => pet.classList.remove('squishing'), 350);
+}
+
+function onDrag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    
+    // 计算新的位置
+    const newX = clientX - (window.innerWidth / 2) - dragStartX + 33; // 33是宠物宽度的一半
+    const newY = clientY - (window.innerHeight / 2) - dragStartY + 33; // 33是宠物高度的一半
+    
+    // 限制边界，防止拖出屏幕
+    const maxX = window.innerWidth / 2 - 40;
+    const maxY = window.innerHeight / 2 - 40;
+    
+    petOffsetX = Math.max(-maxX, Math.min(maxX, newX));
+    petOffsetY = Math.max(-maxY, Math.min(maxY, newY));
+    
+    // 拖拽时隐藏工具栏和输入条
+    const toolbar = document.getElementById('toolbar');
+    const inputBar = document.getElementById('inputBar');
+    if (toolbar) toolbar.classList.add('dragging');
+    if (inputBar) inputBar.classList.add('dragging');
+}
+
+function stopDrag() {
+    isDragging = false;
+    
+    // 移除事件监听
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', stopDrag);
+    
+    // 显示工具栏和输入条
+    const toolbar = document.getElementById('toolbar');
+    const inputBar = document.getElementById('inputBar');
+    if (toolbar) toolbar.classList.remove('dragging');
+    if (inputBar) inputBar.classList.remove('dragging');
+}
+
+// ===== 事件监听 =====
+btnChat.addEventListener('click', toggleInput);
+btnVoice.addEventListener('click', toggleVoice);
+btnScreenshot.addEventListener('click', screenshot);
+btnSend.addEventListener('click', send);
+inputEl.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') send();
+});
+
+// 点击空白处关闭输入条
+document.addEventListener('click', (e) => {
+    if (!inputBar.contains(e.target) && !btnChat.contains(e.target)) {
+        inputBar.classList.remove('show');
+    }
+});
+
+// 初始化
+setMood('happy');
+
+// 窗口大小改变时重新定位
+window.addEventListener('resize', function() {
+    if (!isDragging) {
+        petOffsetX = -window.innerWidth / 2 + 100;
+        petOffsetY = window.innerHeight / 2 - 100;
+    }
+});
+
+// 欢迎消息
+setTimeout(() => {
+    showMessage('你好！我是你的私人小导游 🌉\n\n鼠标悬停查看工具栏，点击气泡可以和我聊天哦！');
+}, 1000);
+</script>
+</body>
+</html>
