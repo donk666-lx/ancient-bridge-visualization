@@ -155,7 +155,47 @@ app.post('/api/v1/chat', async (req, res) => {
             });
         }
         
-        // 流式聊天API端点 - 实时返回AI回复
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            console.error('API响应格式错误 - 缺少choices:', data);
+            return res.json({
+                content: 'API响应格式错误: ' + JSON.stringify(data),
+                emotion: 'sad'
+            });
+        }
+        
+        const content = data.choices[0].message.content;
+        
+        // 简单的情绪分析
+        let emotion = 'happy';
+        if (content.includes('抱歉') || content.includes('无法') || content.includes('失败')) {
+            emotion = 'sad';
+        } else if (content.includes('思考') || content.includes('想想')) {
+            emotion = 'thinking';
+        } else if (content.includes('高兴') || content.includes('开心') || content.includes('好的')) {
+            emotion = 'happy';
+        }
+        
+        console.log('回复内容:', content);
+        console.log('情绪:', emotion);
+        console.log('========================================');
+        
+        res.json({
+            content: content,
+            emotion: emotion
+        });
+        
+    } catch (error) {
+        console.error('发送消息失败:', error);
+        console.error('错误堆栈:', error.stack);
+        console.log('========================================');
+        res.json({
+            content: '抱歉，发送消息失败了 😅 错误: ' + error.message,
+            emotion: 'sad'
+        });
+    }
+});
+
+// 流式聊天API端点 - 实时返回AI回复
 app.post('/api/v1/chat/stream', async (req, res) => {
     const { message } = req.body;
     
@@ -311,46 +351,6 @@ app.post('/api/v1/chat/stream', async (req, res) => {
         console.error('流式请求失败:', error);
         res.json({
             content: '抱歉，请求失败了: ' + error.message,
-            emotion: 'sad'
-        });
-    }
-});
-        
-        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-            console.error('API响应格式错误 - 缺少choices:', data);
-            return res.json({
-                content: 'API响应格式错误: ' + JSON.stringify(data),
-                emotion: 'sad'
-            });
-        }
-        
-        const content = data.choices[0].message.content;
-        
-        // 简单的情绪分析
-        let emotion = 'happy';
-        if (content.includes('抱歉') || content.includes('无法') || content.includes('失败')) {
-            emotion = 'sad';
-        } else if (content.includes('思考') || content.includes('想想')) {
-            emotion = 'thinking';
-        } else if (content.includes('高兴') || content.includes('开心') || content.includes('好的')) {
-            emotion = 'happy';
-        }
-        
-        console.log('回复内容:', content);
-        console.log('情绪:', emotion);
-        console.log('========================================');
-        
-        res.json({
-            content: content,
-            emotion: emotion
-        });
-        
-    } catch (error) {
-        console.error('发送消息失败:', error);
-        console.error('错误堆栈:', error.stack);
-        console.log('========================================');
-        res.json({
-            content: '抱歉，发送消息失败了 😅 错误: ' + error.message,
             emotion: 'sad'
         });
     }
@@ -522,7 +522,7 @@ app.post('/api/v1/tts/edge', async (req, res) => {
     }
     
     const outputFile = `temp_${uuidv4()}.mp3`;
-    const pythonScript = './edge_tts_service.py';
+    const pythonScript = join(__dirname, 'edge_tts_service.py');
     
     try {
         // 调用 Python 脚本生成语音
@@ -672,7 +672,7 @@ app.post('/api/v1/tts/edge/stream', async (req, res) => {
                 // 调用Python生成单段TTS
                 await new Promise((resolve, reject) => {
                     const pythonProcess = spawn('python', [
-                        './edge_tts_service.py',
+                        join(__dirname, 'edge_tts_service.py'),
                         chunk,
                         voice,
                         outputFile

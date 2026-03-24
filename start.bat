@@ -1,5 +1,5 @@
 @echo off
-chcp 65001 >nul
+chcp 936 >nul
 title 桥韵·智汇 — 启动控制台
 color 0A
 
@@ -38,7 +38,23 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo  [检查通过] Node.js 和 Python 已安装
+where http-server >nul 2>&1
+if %errorlevel% neq 0 (
+    echo  [安装依赖] 正在安装 http-server...
+    npm install -g http-server
+    if %errorlevel% neq 0 (
+        echo  [错误] http-server 安装失败
+        pause
+        exit /b 1
+    )
+    echo  [安装完成] http-server
+    echo.
+) else (
+    echo  [跳过安装] http-server 已安装
+    echo.
+)
+
+echo  [检查通过] 所有依赖已就绪
 echo.
 
 :: 检查并安装 exhibition 依赖
@@ -52,10 +68,10 @@ if not exist "%ROOT%\exhibition\node_modules" (
         exit /b 1
     )
     echo  [安装完成] exhibition 依赖
-echo.
+    echo.
 ) else (
     echo  [跳过安装] exhibition 依赖已存在
-echo.
+    echo.
 )
 
 :: 检查并安装 atlas 依赖
@@ -69,24 +85,24 @@ if not exist "%ROOT%\atlas\node_modules" (
         exit /b 1
     )
     echo  [安装完成] atlas 依赖
-echo.
+    echo.
 ) else (
     echo  [跳过安装] atlas 依赖已存在
-echo.
+    echo.
 )
 
 :: 关闭已存在的相关进程（避免端口占用）
 echo  [清理] 关闭可能占用端口的旧进程...
 taskkill /F /IM "node.exe" /FI "WINDOWTITLE eq *exhibition*" >nul 2>&1
 taskkill /F /IM "node.exe" /FI "WINDOWTITLE eq *atlas*" >nul 2>&1
-taskkill /F /IM "python.exe" /FI "WINDOWTITLE eq *首页*" >nul 2>&1
+taskkill /F /IM "node.exe" /FI "WINDOWTITLE eq *http-server*" >nul 2>&1
 timeout /t 1 /nobreak >nul
 echo  [清理完成]
 echo.
 
 :: 启动首页服务 (端口 8888)
 echo  [1/5] 启动首页服务 (端口 8888)...
-start "首页 :8888" /min cmd /c "cd /d %ROOT% && python -m http.server 8888 && pause"
+start "首页 :8888" /min cmd /c "cd /d %ROOT% && http-server -p 8888 && pause"
 timeout /t 1 /nobreak >nul
 
 :: 启动展览服务 (端口 3003)
@@ -101,7 +117,7 @@ timeout /t 2 /nobreak >nul
 
 :: 启动第四页 (端口 3006)
 echo  [4/5] 启动中国古代桥梁数据报告 (端口 3006)...
-start "第四页 :3006" /min cmd /c "cd /d %ROOT%\第四页 && python -m http.server 3006 && pause"
+start "第四页 :3006" /min cmd /c "cd /d %ROOT%\第四页 && http-server -p 3006 && pause"
 timeout /t 2 /nobreak >nul
 
 :: 等待服务启动

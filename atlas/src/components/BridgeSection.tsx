@@ -255,12 +255,12 @@ const BridgeSection = ({ bridge }: { bridge: BridgeData }) => {
                           onMouseEnter={() => setHoveredPart(part.id)}
                           onMouseLeave={() => setHoveredPart(null)}
                           className={`absolute transition-all duration-500 ease-out cursor-pointer group/part`}
-                          style={{ 
-                            top: part.position.top, 
+                          style={{
+                            top: part.position.top,
                             left: part.position.left,
-                            width: hoveredPart === part.id ? '128px' : '96px',
-                            height: hoveredPart === part.id ? '128px' : '96px',
-                            transform: hoveredPart === part.id ? 'translate(-50%, -50%) scale(1.5)' : 'translate(-50%, -50%)',
+                            width: hoveredPart === part.id ? '80px' : '56px',
+                            height: hoveredPart === part.id ? '80px' : '56px',
+                            transform: hoveredPart === part.id ? 'translate(-50%, -50%) scale(1.3)' : 'translate(-50%, -50%)',
                             borderRadius: '50%',
                             background: hoveredPart === part.id 
                               ? 'radial-gradient(circle, rgba(200, 80, 80, 0.3) 0%, rgba(200, 80, 80, 0.1) 50%, transparent 70%)'

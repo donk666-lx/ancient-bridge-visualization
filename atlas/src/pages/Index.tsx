@@ -37,25 +37,25 @@ const bridgesData = [
         id: "arch",
         name: "拱券",
         description: "采用纵联分节并列砌置法，由多块拱石纵向并列砌筑而成，上覆券睑石加固，是桥身的主要承重结构。这种砌筑方式增强了桥梁的整体性和稳定性。",
-        position: { top: "40%", left: "50%" }
+        position: { top: "60%", left: "50%" }
       },
       {
         id: "railings",
         name: "护栏",
         description: "桥侧设置护栏，间嵌方形望柱，既保护行人安全，又增添桥梁的美观性。护栏的设计体现了古代工匠对安全与美学的双重考量。",
-        position: { top: "20%", left: "30%" }
+        position: { top: "30%", left: "50%" }
       },
       {
-        id: "abutment",
+        id: "abutment-left",
         name: "桥台",
         description: "桥台两侧设吴王靠式座椅，供行人坐憩，体现了以人为本的设计理念。吴王靠式座椅是江南古桥的典型特征，既实用又富有地方特色。",
-        position: { top: "75%", left: "20%" }
+        position: { top: "70%", left: "10%" }
       },
       {
-        id: "beast",
-        name: "吞水兽",
-        description: "肩墙中系梁端首雕刻为吞水兽，寓意镇水避邪，是古代桥梁装饰艺术的典型代表。这种雕刻不仅具有装饰作用，更承载着古代人们对桥梁安全的美好祈愿。",
-        position: { top: "55%", left: "70%" }
+        id: "abutment-right",
+        name: "右侧桥台",
+        description: "右侧桥台设吴王靠式座椅，与左侧桥台对称布置，共同承载着桥身的重量，展现了古代工匠对桥梁力学平衡的精准把握。",
+        position: { top: "70%", left: "90%" }
       }
     ]
   },
@@ -85,25 +85,25 @@ const bridgesData = [
         id: "pavilion",
         name: "阁楼",
         description: "桥上建有三座飞檐式阁楼，中间楼高三层，高约20米，方形三重檐歇山顶，琉璃黄瓦，蔚为壮观。阁楼不仅具有装饰作用，还为行人提供了遮风避雨的场所。",
-        position: { top: "15%", left: "50%" }
+        position: { top: "30%", left: "50%" }
       },
       {
         id: "arches",
-        name: "拱券",
+        name: "桥体主拱",
         description: "十七孔半圆形纵联式拱碹，拱券采用纵联式结构，增强了桥梁的整体性和稳定性。每孔拱券都能独立承重，体现了古代工匠对力学原理的深刻理解。",
-        position: { top: "50%", left: "30%" }
+        position: { top: "55%", left: "50%" }
       },
       {
         id: "pier",
         name: "桥墩",
         description: "桥墩上游端为尖形以分水减力，下游端为方形，有效减少水流冲击，延长桥梁寿命。这种船形桥墩设计是古代桥梁工程的重要创新。",
-        position: { top: "70%", left: "60%" }
+        position: { top: "70%", left: "50%" }
       },
       {
         id: "roof",
         name: "廊顶",
         description: "顶层建小楼一楹三间，呈'山'字形排列，顶檐分解为'品'字状三个歇山小顶，楼中有楼，檐外有檐。这种复杂而精巧的结构展现了中国古代建筑艺术的高超水平。",
-        position: { top: "25%", left: "75%" }
+        position: { top: "25%", left: "65%" }
       }
     ]
   },
@@ -133,25 +133,37 @@ const bridgesData = [
         id: "main-arch",
         name: "大拱",
         description: "主拱为坦弧形，由28道石拱圈纵向并列砌筑而成，每道拱圈都能独立支撑上方重量，避免一道拱圈受损影响其它。这种并列砌筑法是赵州桥历经千年而不倒的重要原因。",
-        position: { top: "45%", left: "50%" }
+        position: { top: "55%", left: "50%" }
       },
       {
-        id: "small-arches",
-        name: "小拱",
-        description: "大拱两肩各设两个小拱，即'敞肩拱'设计，可节省石料260立方米，减轻自身重量700吨，同时利于泄洪。这一创新设计比欧洲同类桥梁早了1200多年。",
-        position: { top: "30%", left: "25%" }
+        id: "small-arch-left",
+        name: "左侧小拱",
+        description: "大拱左肩设两个小拱，即'敞肩拱'设计，可节省石料260立方米，减轻自身重量700吨，同时利于泄洪。这一创新设计比欧洲同类桥梁早了1200多年。",
+        position: { top: "48%", left: "30%" }
+      },
+      {
+        id: "small-arch-right",
+        name: "右侧小拱",
+        description: "大拱右肩设两个小拱，即'敞肩拱'设计，可节省石料260立方米，减轻自身重量700吨，同时利于泄洪。这一创新设计比欧洲同类桥梁早了1200多年。",
+        position: { top: "48%", left: "70%" }
       },
       {
         id: "bridge-deck",
         name: "桥面",
         description: "桥面按'中间行车马、两旁走行人'理念设计，体现了古代对交通功能和人本思想的重视。桥面宽阔平坦，便于通行，展现了古代工匠的实用主义设计理念。",
-        position: { top: "15%", left: "50%" }
+        position: { top: "22%", left: "50%" }
       },
       {
-        id: "spandrel",
-        name: "拱肩",
-        description: "敞肩拱设计的核心部位，四个小拱不仅减轻了桥梁重量，还增加了桥梁的美观性和泄洪能力。这种设计巧妙地解决了承重、美观和实用三重需求。",
-        position: { top: "35%", left: "75%" }
+        id: "abutment-left",
+        name: "左侧桥台",
+        description: "桥体左侧水底基座，为桥梁提供稳固支撑，有效传递荷载至地基，确保桥梁在洪水冲击下依然稳固。",
+        position: { top: "70%", left: "15%" }
+      },
+      {
+        id: "abutment-right",
+        name: "右侧桥台",
+        description: "桥体右侧水底基座，为桥梁提供稳固支撑，有效传递荷载至地基，确保桥梁在洪水冲击下依然稳固。",
+        position: { top: "70%", left: "85%" }
       }
     ]
   },

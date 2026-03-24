@@ -214,13 +214,45 @@ async def text_to_speech(text, voice_key='xiaoxiao', output_file='output.mp3'):
     print(f"语音已保存: {output_file}, 分段数: {result['chunks']}")
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("用法: python edge_tts_service.py <文本> [语音名称] [输出文件]")
-        print(f"可用语音: {', '.join(CHINESE_VOICES.keys())}")
-        sys.exit(1)
-    
-    text = sys.argv[1]
-    voice = sys.argv[2] if len(sys.argv) > 2 else 'xiaoxiao'
-    output = sys.argv[3] if len(sys.argv) > 3 else 'output.mp3'
-    
-    asyncio.run(text_to_speech(text, voice, output))
+    import json
+
+    # 尝试从stdin读取JSON输入
+    try:
+        input_data = sys.stdin.read()
+        if input_data:
+            params = json.loads(input_data)
+            text = params.get('text', '')
+            voice = params.get('voice', 'xiaoxiao')
+            output = params.get('output', 'output.mp3')
+        else:
+            # 如果没有stdin输入，使用命令行参数（向后兼容）
+            if len(sys.argv) < 2:
+                print("用法: python edge_tts_service.py <文本> [语音名称] [输出文件]")
+                print("或通过stdin传递JSON: {'text': '...', 'voice': 'xiaoxiao', 'output': '...'}")
+                print(f"可用语音: {', '.join(CHINESE_VOICES.keys())}")
+                sys.exit(1)
+            text = sys.argv[1]
+            voice = sys.argv[2] if len(sys.argv) > 2 else 'xiaoxiao'
+            output = sys.argv[3] if len(sys.argv) > 3 else 'output.mp3'
+
+        # 如果文本是文件路径，从文件读取
+        if text.startswith('file:') and os.path.exists(text[5:]):
+            with open(text[5:], 'r', encoding='utf-8') as f:
+                text = f.read().strip()
+
+        asyncio.run(text_to_speech(text, voice, output))
+    except json.JSONDecodeError:
+        # JSON解析失败，尝试使用命令行参数
+        if len(sys.argv) < 2:
+            print("错误: 无法解析JSON输入且没有提供命令行参数")
+            sys.exit(1)
+        text = sys.argv[1]
+        voice = sys.argv[2] if len(sys.argv) > 2 else 'xiaoxiao'
+        output = sys.argv[3] if len(sys.argv) > 3 else 'output.mp3'
+
+        # 如果文本是文件路径，从文件读取
+        if text.startswith('file:') and os.path.exists(text[5:]):
+            with open(text[5:], 'r', encoding='utf-8') as f:
+                text = f.read().strip()
+
+        asyncio.run(text_to_speech(text, voice, output))
