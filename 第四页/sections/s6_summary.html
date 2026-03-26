@@ -1,0 +1,730 @@
+<style id="s6-style">
+/* Section 6 styles — prefix all classes with s6- to avoid conflicts */
+
+#summary {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d0a04 0%, #1a1008 50%, #2e200c 100%);
+  font-family: 'Noto Serif SC', serif;
+  color: #f5f0e8;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 24px 60px;
+  box-sizing: border-box;
+}
+
+#summary-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.s6-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+}
+
+/* ── Header ── */
+.s6-header {
+  text-align: center;
+}
+
+.s6-badge {
+  display: inline-block;
+  color: #c47c2b;
+  font-size: 0.85rem;
+  letter-spacing: 0.35em;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+.s6-main-title {
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  color: #f5f0e8;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 14px;
+  line-height: 1.2;
+}
+
+.s6-subtitle {
+  font-size: 1.1rem;
+  color: #5c7a8a;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+/* ── Honor Cards ── */
+.s6-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .s6-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .s6-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.s6-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 3px solid #c47c2b;
+  border-radius: 8px;
+  padding: 28px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  transition: box-shadow 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.s6-card:hover {
+  box-shadow: 0 0 24px rgba(196, 124, 43, 0.35), 0 0 48px rgba(196, 124, 43, 0.12);
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.s6-card-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.s6-card-label {
+  font-size: 0.78rem;
+  color: #c47c2b;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+
+.s6-card-name {
+  font-size: 1.25rem;
+  color: #f5f0e8;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.s6-card-desc {
+  font-size: 0.82rem;
+  color: #d8cfc0;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Stats Row ── */
+.s6-stats-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 40px 60px;
+  width: 100%;
+  padding: 32px 0;
+  border-top: 1px solid rgba(196, 124, 43, 0.2);
+  border-bottom: 1px solid rgba(196, 124, 43, 0.2);
+}
+
+.s6-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.s6-stat-number {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 700;
+  color: #e8c080;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.s6-stat-label {
+  font-size: 0.82rem;
+  color: #5c7a8a;
+  letter-spacing: 0.12em;
+}
+
+/* ── Action Buttons ── */
+.s6-actions {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.s6-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 34px;
+  border-radius: 4px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: none;
+  outline: none;
+}
+
+.s6-btn-primary {
+  background: linear-gradient(135deg, #c47c2b, #daa520);
+  color: #1a1008;
+  font-weight: 700;
+}
+
+.s6-btn-primary:hover {
+  background: linear-gradient(135deg, #daa520, #e8c080);
+  box-shadow: 0 4px 20px rgba(196, 124, 43, 0.45);
+  transform: translateY(-2px);
+}
+
+.s6-btn-secondary {
+  background: transparent;
+  color: #c47c2b;
+  border: 1.5px solid #c47c2b;
+}
+
+.s6-btn-secondary:hover {
+  background: rgba(196, 124, 43, 0.12);
+  box-shadow: 0 4px 16px rgba(196, 124, 43, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ── Closing Quote ── */
+.s6-quote {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #5c7a8a;
+  text-align: center;
+  letter-spacing: 0.06em;
+  line-height: 1.8;
+  max-width: 540px;
+  padding: 0 16px;
+}
+
+/* ── Poster Modal ── */
+.s6-poster-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.s6-poster-modal.s6-open {
+  display: flex;
+}
+
+.s6-poster-modal img {
+  max-width: 90vw;
+  max-height: 70vh;
+  border: 2px solid #c47c2b;
+  border-radius: 6px;
+}
+
+.s6-poster-modal-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.s6-poster-modal-close {
+  position: absolute;
+  top: 20px; right: 28px;
+  font-size: 1.8rem;
+  color: #d8cfc0;
+  cursor: pointer;
+  line-height: 1;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.s6-poster-modal-close:hover {
+  color: #f5f0e8;
+}
+</style>
+
+<section id="summary">
+  <canvas id="summary-canvas"></canvas>
+
+  <div class="s6-inner">
+
+    <!-- Section Header -->
+    <header class="s6-header">
+      <p class="s6-badge">· 千年桥史 ·</p>
+      <h2 class="s6-main-title">千年匠心 数字刻碑</h2>
+      <p class="s6-subtitle">中国古代桥梁的历史印记</p>
+    </header>
+
+    <!-- Honor Cards 3×2 -->
+    <div class="s6-cards-grid" id="s6-cards-grid">
+
+      <div class="s6-card">
+        <span class="s6-card-icon">🏛️</span>
+        <p class="s6-card-label">最古老</p>
+        <p class="s6-card-name">赵州桥</p>
+        <p class="s6-card-desc">公元605年建造，距今约1420年</p>
+      </div>
+
+      <div class="s6-card">
+        <span class="s6-card-icon">📏</span>
+        <p class="s6-card-label">最长石梁</p>
+        <p class="s6-card-name">安平桥</p>
+        <p class="s6-card-desc">全长2255米，五里石桥横卧闽南</p>
+      </div>
+
+      <div class="s6-card">
+        <span class="s6-card-icon">🌊</span>
+        <p class="s6-card-label">首座海港</p>
+        <p class="s6-card-name">洛阳桥</p>
+        <p class="s6-card-desc">1059年建成，筏形基础世界首创</p>
+      </div>
+
+      <div class="s6-card">
+        <span class="s6-card-icon">🪨</span>
+        <p class="s6-card-label">最重石梁</p>
+        <p class="s6-card-name">虎渡桥</p>
+        <p class="s6-card-desc">单块石梁重达200余吨</p>
+      </div>
+
+      <div class="s6-card">
+        <span class="s6-card-icon">🔩</span>
+        <p class="s6-card-label">无钉铆构</p>
+        <p class="s6-card-name">程阳风雨桥</p>
+        <p class="s6-card-desc">全木榫卯，侗族建筑巅峰</p>
+      </div>
+
+      <div class="s6-card">
+        <span class="s6-card-icon">🎨</span>
+        <p class="s6-card-label">最美廊桥</p>
+        <p class="s6-card-name">泰顺芙蓉桥</p>
+        <p class="s6-card-desc">清代木构，世界最美廊桥之誉</p>
+      </div>
+
+    </div>
+
+    <!-- Stats Summary Row -->
+    <div class="s6-stats-row">
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-bridges">0</span></span>
+        <span class="s6-stat-label">座古桥</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-dynasties">0</span></span>
+        <span class="s6-stat-label">个朝代</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-types">0</span></span>
+        <span class="s6-stat-label">种类型</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-provinces">0</span></span>
+        <span class="s6-stat-label">个省份</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-years">0</span></span>
+        <span class="s6-stat-label">年历史</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="s6-actions">
+      <button class="s6-btn s6-btn-primary" onclick="generatePoster()">
+        &#128444; 生成分享海报
+      </button>
+      <button class="s6-btn s6-btn-secondary" onclick="scrollToSection(0)">
+        &#8593; 回到封面
+      </button>
+    </div>
+
+    <!-- Closing Quote -->
+    <p class="s6-quote">
+      "以桥为证，文明延续；匠心所至，千年不朽。"
+    </p>
+
+  </div>
+
+  <!-- Poster Modal -->
+  <div class="s6-poster-modal" id="s6-poster-modal">
+    <button class="s6-poster-modal-close" onclick="s6ClosePosterModal()" title="关闭">&#215;</button>
+    <img id="s6-poster-img" src="" alt="分享海报" />
+    <div class="s6-poster-modal-actions">
+      <a id="s6-poster-download" class="s6-btn s6-btn-primary" download="bridges-report.png">
+        &#8595; 下载海报
+      </a>
+      <button class="s6-btn s6-btn-secondary" onclick="s6ClosePosterModal()">关闭</button>
+    </div>
+  </div>
+
+</section>
+
+<script id="s6-script">
+(function () {
+
+  /* ── Local countUp fallback ── */
+  function s6CountUp(id, target, duration) {
+    if (typeof countUp === 'function') {
+      countUp(id, target, duration);
+      return;
+    }
+    var el = document.getElementById(id);
+    if (!el) return;
+    var v = 0;
+    var step = target / (duration / 16);
+    var timer = setInterval(function () {
+      v = Math.min(v + step, target);
+      el.textContent = Math.floor(v);
+      if (v >= target) clearInterval(timer);
+    }, 16);
+  }
+
+  /* ── Particle System ── */
+  var s6Canvas, s6Ctx, s6Particles = [], s6AnimId;
+  var S6_PARTICLE_COUNT = 80;
+  var S6_COLORS = ['#c47c2b', '#daa520', '#e8c080', 'rgba(245,240,232,0.4)'];
+
+  function s6CreateParticle(forceRandom) {
+    var canvas = s6Canvas;
+    var y = forceRandom
+      ? Math.random() * canvas.height
+      : canvas.height + Math.random() * 40;
+    return {
+      x: Math.random() * canvas.width,
+      y: y,
+      vy: 0.3 + Math.random() * 0.7,
+      vx: (Math.random() - 0.5) * 0.25,
+      opacity: 0.3 + Math.random() * 0.5,
+      radius: 1 + Math.random() * 2,
+      color: S6_COLORS[Math.floor(Math.random() * S6_COLORS.length)],
+      twinkle: Math.random() * Math.PI * 2
+    };
+  }
+
+  function s6ResizeCanvas() {
+    if (!s6Canvas) return;
+    var section = document.getElementById('summary');
+    s6Canvas.width = section.offsetWidth;
+    s6Canvas.height = section.offsetHeight;
+  }
+
+  function s6InitParticles() {
+    s6Canvas = document.getElementById('summary-canvas');
+    if (!s6Canvas) return;
+    s6Ctx = s6Canvas.getContext('2d');
+    s6ResizeCanvas();
+    s6Particles = [];
+    for (var i = 0; i < S6_PARTICLE_COUNT; i++) {
+      s6Particles.push(s6CreateParticle(true));
+    }
+    window.addEventListener('resize', s6ResizeCanvas);
+  }
+
+  function s6AnimateParticles() {
+    if (!s6Canvas || !s6Ctx) return;
+    s6Ctx.clearRect(0, 0, s6Canvas.width, s6Canvas.height);
+    for (var i = 0; i < s6Particles.length; i++) {
+      var p = s6Particles[i];
+      p.y -= p.vy;
+      p.x += p.vx;
+      p.twinkle += 0.04;
+      var osc = 0.12 * Math.sin(p.twinkle);
+      var op = Math.max(0, Math.min(1, p.opacity + osc));
+
+      s6Ctx.save();
+      s6Ctx.globalAlpha = op;
+      s6Ctx.beginPath();
+      s6Ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      s6Ctx.fillStyle = p.color;
+      s6Ctx.fill();
+      s6Ctx.restore();
+
+      if (p.y < -10 || p.x < -20 || p.x > s6Canvas.width + 20) {
+        s6Particles[i] = s6CreateParticle(false);
+      }
+    }
+    s6AnimId = requestAnimationFrame(s6AnimateParticles);
+  }
+
+  /* ── Honor Cards Entrance Animation ── */
+  function s6AnimateCards() {
+    var cards = document.querySelectorAll('#s6-cards-grid .s6-card');
+    if (!cards.length) return;
+
+    if (typeof gsap !== 'undefined') {
+      gsap.to(cards, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power2.out'
+      });
+    } else {
+      /* CSS fallback */
+      cards.forEach(function (card, idx) {
+        setTimeout(function () {
+          card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, idx * 100);
+      });
+    }
+  }
+
+  /* ── Intersection Observer to trigger animations on scroll ── */
+  function s6SetupObserver() {
+    var section = document.getElementById('summary');
+    if (!section) return;
+
+    var triggered = false;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !triggered) {
+          triggered = true;
+          s6AnimateCards();
+          setTimeout(function () {
+            s6CountUp('s6-cnt-bridges',   25,   1800);
+            s6CountUp('s6-cnt-dynasties',  7,   1400);
+            s6CountUp('s6-cnt-types',      5,   1200);
+            s6CountUp('s6-cnt-provinces', 15,   1600);
+            s6CountUp('s6-cnt-years',   1400,   2000);
+          }, 300);
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.15 });
+
+    observer.observe(section);
+  }
+
+  /* ── initSummary (global) ── */
+  window.initSummary = function () {
+    s6InitParticles();
+    s6AnimateParticles();
+    s6SetupObserver();
+  };
+
+  /* ── generatePoster (global) ── */
+  window.generatePoster = function () {
+    var W = 800, H = 450;
+    var offscreen = document.createElement('canvas');
+    offscreen.width  = W;
+    offscreen.height = H;
+    var ctx = offscreen.getContext('2d');
+
+    /* Background gradient */
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#1a1008');
+    bg.addColorStop(0.55, '#1e1509');
+    bg.addColorStop(1, '#2e200c');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    /* Decorative ink circles */
+    var circleData = [
+      { x: 0.08 * W, y: 0.25 * H, r: 90,  a: 0.07 },
+      { x: 0.92 * W, y: 0.75 * H, r: 110, a: 0.06 },
+      { x: 0.5  * W, y: 0.85 * H, r: 60,  a: 0.05 },
+      { x: 0.75 * W, y: 0.18 * H, r: 50,  a: 0.06 },
+      { x: 0.15 * W, y: 0.80 * H, r: 70,  a: 0.04 }
+    ];
+    circleData.forEach(function (c) {
+      ctx.save();
+      ctx.globalAlpha = c.a;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.strokeStyle = '#c47c2b';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    /* Top decorative line */
+    ctx.save();
+    ctx.strokeStyle = '#c47c2b';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(60, 38);
+    ctx.lineTo(W - 60, 38);
+    ctx.stroke();
+    ctx.restore();
+
+    /* Bridge silhouette path */
+    ctx.save();
+    ctx.strokeStyle = 'rgba(196,124,43,0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    /* Arch bridge simplified silhouette */
+    var bx = 160, by = 360, bw = 480;
+    ctx.moveTo(bx, by);
+    /* Deck */
+    ctx.lineTo(bx + bw, by);
+    /* Left pier */
+    ctx.moveTo(bx + 80, by);
+    ctx.lineTo(bx + 80, by + 30);
+    ctx.moveTo(bx + 160, by);
+    ctx.lineTo(bx + 160, by + 30);
+    ctx.moveTo(bx + 240, by);
+    ctx.lineTo(bx + 240, by + 30);
+    ctx.moveTo(bx + 320, by);
+    ctx.lineTo(bx + 320, by + 30);
+    ctx.moveTo(bx + 400, by);
+    ctx.lineTo(bx + 400, by + 30);
+    /* Arches */
+    ctx.moveTo(bx, by);
+    ctx.bezierCurveTo(bx + 40, by - 50, bx + 120, by - 60, bx + 160, by);
+    ctx.moveTo(bx + 160, by);
+    ctx.bezierCurveTo(bx + 200, by - 50, bx + 280, by - 60, bx + 320, by);
+    ctx.moveTo(bx + 320, by);
+    ctx.bezierCurveTo(bx + 360, by - 50, bx + 440, by - 60, bx + bw, by);
+    ctx.stroke();
+    ctx.restore();
+
+    /* Badge text */
+    ctx.save();
+    ctx.font = '500 13px "Noto Serif SC", serif';
+    ctx.fillStyle = '#c47c2b';
+    ctx.globalAlpha = 0.85;
+    ctx.textAlign = 'center';
+    ctx.fillText('· 千年桥史 ·', W / 2, 72);
+    ctx.restore();
+
+    /* Main title */
+    ctx.save();
+    ctx.font = 'bold 48px "Noto Serif SC", serif';
+    ctx.fillStyle = '#f5f0e8';
+    ctx.textAlign = 'center';
+    ctx.fillText('中国古代桥梁', W / 2, 138);
+    ctx.restore();
+
+    /* Subtitle */
+    ctx.save();
+    ctx.font = '400 22px "Noto Serif SC", serif';
+    ctx.fillStyle = '#e8c080';
+    ctx.textAlign = 'center';
+    ctx.fillText('千年匠心  数字刻碑', W / 2, 180);
+    ctx.restore();
+
+    /* Divider */
+    ctx.save();
+    ctx.strokeStyle = 'rgba(196,124,43,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(200, 202);
+    ctx.lineTo(W - 200, 202);
+    ctx.stroke();
+    ctx.restore();
+
+    /* 5 Stats */
+    var stats = [
+      { num: '25座',   label: '古桥' },
+      { num: '7个',    label: '朝代' },
+      { num: '5种',    label: '类型' },
+      { num: '15个',   label: '省份' },
+      { num: '1400+',  label: '年历史' }
+    ];
+    var statsY = 268;
+    var slotW = W / 5;
+    stats.forEach(function (s, i) {
+      var cx = slotW * i + slotW / 2;
+      ctx.save();
+      ctx.font = 'bold 26px "Noto Serif SC", serif';
+      ctx.fillStyle = '#e8c080';
+      ctx.textAlign = 'center';
+      ctx.fillText(s.num, cx, statsY);
+      ctx.font = '400 13px "Noto Serif SC", serif';
+      ctx.fillStyle = '#5c7a8a';
+      ctx.fillText(s.label, cx, statsY + 24);
+      ctx.restore();
+    });
+
+    /* Closing quote */
+    ctx.save();
+    ctx.font = 'italic 400 13px "Noto Serif SC", serif';
+    ctx.fillStyle = 'rgba(92,122,138,0.85)';
+    ctx.textAlign = 'center';
+    ctx.fillText('"以桥为证，文明延续；匠心所至，千年不朽。"', W / 2, 330);
+    ctx.restore();
+
+    /* Bottom decorative line */
+    ctx.save();
+    ctx.strokeStyle = '#c47c2b';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.4;
+    ctx.beginPath();
+    ctx.moveTo(60, 392);
+    ctx.lineTo(W - 60, 392);
+    ctx.stroke();
+    ctx.restore();
+
+    /* Source note */
+    ctx.save();
+    ctx.font = '400 11px "Noto Serif SC", serif';
+    ctx.fillStyle = 'rgba(216,207,192,0.5)';
+    ctx.textAlign = 'center';
+    ctx.fillText('数据来源：茅以升《中国古代桥梁史》', W / 2, 416);
+    ctx.restore();
+
+    /* Export */
+    var dataUrl = offscreen.toDataURL('image/png');
+    var img = document.getElementById('s6-poster-img');
+    var link = document.getElementById('s6-poster-download');
+    if (img) img.src = dataUrl;
+    if (link) link.href = dataUrl;
+
+    var modal = document.getElementById('s6-poster-modal');
+    if (modal) modal.classList.add('s6-open');
+  };
+
+  /* ── Modal close helper (global) ── */
+  window.s6ClosePosterModal = function () {
+    var modal = document.getElementById('s6-poster-modal');
+    if (modal) modal.classList.remove('s6-open');
+  };
+
+  /* Close modal on overlay click */
+  document.addEventListener('click', function (e) {
+    var modal = document.getElementById('s6-poster-modal');
+    if (modal && e.target === modal) {
+      modal.classList.remove('s6-open');
+    }
+  });
+
+  /* Auto-init when DOM is ready */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.initSummary);
+  } else {
+    window.initSummary();
+  }
+
+}());
+</script>

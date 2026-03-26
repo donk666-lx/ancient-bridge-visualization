@@ -1,0 +1,193 @@
+<style>
+#types{padding:40px 20px;background:#0a0a0a;}
+.ty-header{text-align:center;margin-bottom:36px;}
+.ty-header h2{font-size:2rem;color:#c8a96e;letter-spacing:4px;margin:0 0 8px;}
+.ty-header p{color:#888;font-size:.9rem;letter-spacing:2px;}
+.ty-layout{display:flex;gap:24px;align-items:flex-start;max-width:1200px;margin:0 auto;}
+.ty-radar-panel{flex:0 0 400px;background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:16px;}
+.ty-radar-panel h3{text-align:center;color:#c8a96e;font-size:.9rem;letter-spacing:3px;margin:0 0 8px;}
+#ty-radar{width:100%;height:360px;}
+.ty-cards{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.ty-card{background:#111;border:1px solid #2a2a2a;border-radius:8px;padding:20px;cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;border-top:3px solid var(--tc);}
+.ty-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.5);}
+.ty-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.03),transparent);pointer-events:none;}
+.ty-card-icon{font-size:2rem;margin-bottom:8px;}
+.ty-card-name{font-size:1.1rem;color:#c8a96e;font-weight:600;margin-bottom:4px;}
+.ty-card-cnt{font-size:.8rem;color:#888;margin-bottom:8px;}
+.ty-card-bar-bg{background:#1a1a1a;border-radius:4px;height:4px;overflow:hidden;}
+.ty-card-bar{height:100%;border-radius:4px;background:var(--tc);transition:width .6s ease;}
+.ty-card-pct{font-size:.75rem;color:#666;margin-top:4px;}
+.ty-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.ty-overlay.open{opacity:1;pointer-events:all;}
+.ty-modal{background:#111;border:1px solid #2a2a2a;border-radius:12px;width:min(680px,92vw);max-height:80vh;overflow-y:auto;padding:28px;position:relative;transform:translateY(20px);transition:transform .3s;}
+.ty-overlay.open .ty-modal{transform:translateY(0);}
+.ty-modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:#888;font-size:1.4rem;cursor:pointer;line-height:1;}
+.ty-modal-head{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #222;}
+.tm-icon{font-size:2.5rem;}
+.tm-name{font-size:1.4rem;color:#c8a96e;font-weight:600;}
+.tm-cnt{font-size:.85rem;color:#888;margin-top:2px;}
+.ty-modal-section{margin-bottom:16px;}
+.tm-label{font-size:.75rem;color:#666;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.tm-desc{color:#ccc;font-size:.9rem;line-height:1.7;}
+.tm-tags{display:flex;flex-wrap:wrap;gap:8px;}
+.tm-tag{background:#1a1a1a;border:1px solid #333;border-radius:4px;padding:4px 10px;font-size:.8rem;color:#aaa;}
+.tm-exs{display:flex;flex-direction:column;gap:6px;}
+.tm-ex-item{background:#141414;border-left:3px solid #c8a96e;padding:6px 12px;font-size:.85rem;color:#bbb;border-radius:0 4px 4px 0;}
+.tm-princ{color:#aaa;font-size:.85rem;line-height:1.6;font-style:italic;}
+@media(max-width:700px){.ty-layout{flex-direction:column;}.ty-radar-panel{flex:none;width:100%;}.ty-cards{grid-template-columns:1fr;}}
+</style>
+
+<section id="types">
+  <div class="ty-header">
+    <h2>&#x25C6; 结构类型篇 &#x25C6;</h2>
+    <p>BRIDGE STRUCTURE TYPOLOGY</p>
+  </div>
+  <div class="ty-layout">
+    <div class="ty-radar-panel">
+      <h3>类型特征雷达图</h3>
+      <div id="ty-radar"></div>
+    </div>
+    <div class="ty-cards" id="ty-cards">
+      <div class="ty-card" data-t="0" style="--tc:#8b1520">
+        <div class="ty-card-icon">&#x1F309;</div>
+        <div class="ty-card-name">石拱桥</div>
+        <div class="ty-card-cnt">13座 &middot; 52%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:52%"></div></div>
+        <div class="ty-card-pct">52%</div>
+      </div>
+      <div class="ty-card" data-t="1" style="--tc:#5a7a4a">
+        <div class="ty-card-icon">&#x1F3DB;</div>
+        <div class="ty-card-name">石梁桥</div>
+        <div class="ty-card-cnt">6座 &middot; 24%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:24%"></div></div>
+        <div class="ty-card-pct">24%</div>
+      </div>
+      <div class="ty-card" data-t="2" style="--tc:#7a5a2a">
+        <div class="ty-card-icon">&#x26F0;</div>
+        <div class="ty-card-name">廊桥</div>
+        <div class="ty-card-cnt">3座 &middot; 12%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:12%"></div></div>
+        <div class="ty-card-pct">12%</div>
+      </div>
+      <div class="ty-card" data-t="3" style="--tc:#2a5a7a">
+        <div class="ty-card-icon">&#x26D3;</div>
+        <div class="ty-card-name">铁索桥</div>
+        <div class="ty-card-cnt">2座 &middot; 8%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:8%"></div></div>
+        <div class="ty-card-pct">8%</div>
+      </div>
+      <div class="ty-card" data-t="4" style="--tc:#4a4a8a;grid-column:1/-1">
+        <div class="ty-card-icon">&#x1F6A2;</div>
+        <div class="ty-card-name">浮桥</div>
+        <div class="ty-card-cnt">1座 &middot; 4%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:4%"></div></div>
+        <div class="ty-card-pct">4%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERLAY -->
+<div class="ty-overlay" id="ty-overlay" onclick="if(event.target===this)closeTyModal()">
+  <div class="ty-modal">
+    <button class="ty-modal-close" onclick="closeTyModal()">&#x2715;</button>
+    <div class="ty-modal-head">
+      <div class="tm-icon" id="tm-icon"></div>
+      <div>
+        <div class="tm-name" id="tm-name"></div>
+        <div class="tm-cnt" id="tm-cnt"></div>
+      </div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">概述</div>
+      <div class="tm-desc" id="tm-desc"></div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">核心技法</div>
+      <div class="tm-tags" id="tm-tags"></div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">代表案例</div>
+      <div class="tm-exs" id="tm-exs"></div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">力学原理</div>
+      <div class="tm-princ" id="tm-princ"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var TYPE_DATA=[
+  {icon:"&#x1F309;",name:"石拱桥",cnt:"13座",pct:"52%",color:"#8b1520",
+   desc:"以石块砂券裁建，利用拱圈受压将荷载传至桥墩，在本地历史桥梁中占比最高，广泛分布于山區宽谷地带。",
+   tech:["拱券础筑技术","干础浆砖工艺","平衡拱加固"],
+   exs:["赵州桥式单孔圆拱","当地多座山区石拱桥"],
+   princ:"垂直荷载在拱轴方向分解为水平推力与竖向压力，由桥墩纠结安全平衡。"},
+  {icon:"&#x1F3DB;",name:"石梁桥",cnt:"6座",pct:"24%",color:"#5a7a4a",
+   desc:"采用天然石材或开凿石条作为主梁，简洁实用，适合跨度较小的渊沟或小河，是最早期桥梁形式之一。",
+   tech:["石材切割将坚","敢跳式多孔布局","天然岩层利用"],
+   exs:["平泉小石梁桥","山区本地天然岩板桥"],
+   princ:"梁式结构以展向压弹抖承荷载，将荷载直接传至桥墩，结构直观易松。"},
+  {icon:"&#x26F0;",name:"廊桥",cnt:"3座",pct:"12%",color:"#7a5a2a",
+   desc:"桥面覆盖屋顶廊屋的特殊桥梁，兼具交通与避雨休息功能，常出现于西南少数民族聚居区域，具有鸠美的地域文化特色。",
+   tech:["木枱桦枱结构","层叠桦枱技法","山岖防水设计"],
+   exs:["得尔坦程阳风雨桥","南方少数民族廊桥群"],
+   princ:"主结构多采木桁枱架，桥面版村承荷载，屋面起防水保护作用。"},
+  {icon:"&#x26D3;",name:"铁索桥",cnt:"2座",pct:"8%",color:"#2a5a7a",
+   desc:"以铁销或黑铁索为承荷主体，属悉桥的早期形式，多见于西南山岳大山峷谷地带，是山地交通的重要突破口。",
+   tech:["铁锁环连接工艺","锤销锻造技术","桥塔锦固系统"],
+   exs:["泸定泸定铁索桥","西藏山区古代履汐桥"],
+   princ:"铁索承受张力，两岐桥塔承受压力，桥面板倒挂于索链上随荦形垂垂。"},
+  {icon:"&#x1F6A2;",name:"浮桥",cnt:"1座",pct:"4%",color:"#4a4a8a",
+   desc:"以船只或浮筏联系构成浮动式桥面，多用于江面宽阔而山岣高山桥墩难以执行的地带，可随水位自动适应。",
+   tech:["船只锁定技法","浮体联接系统","水位自适应设计"],
+   exs:["古代江南浮桥记载","战时临时浮桥工程"],
+   princ:"利用水的浮力提供支撑，船只或浮筏负荷，浮桥面局不依赖固定桥墩。"}
+];
+function initTypes(){
+  var el=document.getElementById("ty-radar");
+  if(\!el)return;
+  var rc=echarts.getInstanceByDom(el)||echarts.init(el,null,{renderer:"canvas"});
+  rc.setOption({
+    backgroundColor:"transparent",
+    title:{text:"类型特征对比",left:"center",top:4,textStyle:{color:"#c8a96e",fontSize:12}},
+    radar:{indicator:[
+      {name:"历史性",max:100},{name:"工艺难度",max:100},
+      {name:"普及度",max:100},{name:"观赏性",max:100},{name:"实用性",max:100}
+    ],axisName:{color:"#aaa",fontSize:11},splitLine:{lineStyle:{color:"#333"}},
+    splitArea:{areaStyle:{color:["rgba(255,255,255,.02)","rgba(255,255,255,.04)"]}},
+    axisLine:{lineStyle:{color:"#333"}}},
+    series:[{type:"radar",data:[
+      {value:[90,85,95,70,80],name:"石拱桥",lineStyle:{color:"#8b1520"},areaStyle:{color:"rgba(139,21,32,.2)"},itemStyle:{color:"#8b1520"}},
+      {value:[75,40,80,50,85],name:"石梁桥",lineStyle:{color:"#5a7a4a"},areaStyle:{color:"rgba(90,122,74,.2)"},itemStyle:{color:"#5a7a4a"}},
+      {value:[70,70,30,95,60],name:"廊桥",lineStyle:{color:"#7a5a2a"},areaStyle:{color:"rgba(122,90,42,.2)"},itemStyle:{color:"#7a5a2a"}},
+      {value:[85,80,20,65,55],name:"铁索桥",lineStyle:{color:"#2a5a7a"},areaStyle:{color:"rgba(42,90,122,.2)"},itemStyle:{color:"#2a5a7a"}},
+      {value:[65,30,10,45,70],name:"浮桥",lineStyle:{color:"#4a4a8a"},areaStyle:{color:"rgba(74,74,138,.2)"},itemStyle:{color:"#4a4a8a"}}
+    ]}]
+  });
+  var cards=document.getElementById("ty-cards");
+  if(cards){
+    cards.addEventListener("click",function(e){
+      var c=e.target.closest(".ty-card");
+      if(c)openTyModal(parseInt(c.dataset.t,10));
+    });
+  }
+}
+function openTyModal(idx){
+  var d=TYPE_DATA[idx];
+  if(\!d)return;
+  document.getElementById("tm-icon").innerHTML=d.icon;
+  document.getElementById("tm-name").textContent=d.name;
+  document.getElementById("tm-cnt").textContent=d.cnt+" · "+d.pct;
+  document.getElementById("tm-desc").textContent=d.desc;
+  document.getElementById("tm-tags").innerHTML=d.tech.map(function(t){return "<span class=\"tm-tag\">"+t+"</span>";}).join("");
+  document.getElementById("tm-exs").innerHTML=d.exs.map(function(e){return "<div class=\"tm-ex-item\">"+e+"</div>";}).join("");
+  document.getElementById("tm-princ").textContent=d.princ;
+  document.getElementById("ty-overlay").classList.add("open");
+}
+function closeTyModal(){
+  document.getElementById("ty-overlay").classList.remove("open");
+}
+document.addEventListener("DOMContentLoaded",initTypes);
+</script>

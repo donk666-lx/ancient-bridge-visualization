@@ -1,0 +1,595 @@
+<style id="s5-style">
+/* Section 5 styles — prefix all classes with s5- to avoid conflicts */
+
+#culture {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #f5f0e8, #ede5d8);
+  padding: 3rem 2rem 4rem;
+  font-family: 'Noto Serif SC', serif;
+  color: #1a1008;
+  box-sizing: border-box;
+}
+
+.s5-inner {
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+/* Section Header */
+#culture .sec-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+#culture .sec-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #8b1520;
+  letter-spacing: 0.15em;
+  position: relative;
+  display: inline-block;
+}
+
+#culture .sec-title::before,
+#culture .sec-title::after {
+  content: '◆';
+  color: #c47c2b;
+  font-size: 0.9rem;
+  margin: 0 0.8rem;
+  vertical-align: middle;
+}
+
+#culture .sec-sub {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #5c7a8a;
+  letter-spacing: 0.25em;
+}
+
+/* Two-column grid */
+.s5-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+/* ── LEFT COLUMN ── */
+.s5-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+/* Word Cloud */
+.s5-wc-wrap {
+  background: #faf7f2;
+  border: 1px solid #d8cfc0;
+  border-radius: 8px;
+  padding: 1.2rem 1.2rem 0.8rem;
+  box-shadow: 0 2px 12px rgba(26,16,8,0.06);
+}
+
+.s5-wc-label {
+  font-size: 0.75rem;
+  color: #5c7a8a;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.s5-wc-container {
+  position: relative;
+  height: 260px;
+  overflow: hidden;
+}
+
+.s5-wc-container span {
+  position: absolute;
+  cursor: pointer;
+  line-height: 1.2;
+  transition: opacity 0.25s, transform 0.25s;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.s5-wc-container span:hover {
+  opacity: 0.75;
+  transform: scale(1.12) !important;
+  z-index: 10;
+}
+
+/* Sankey chart */
+.s5-sankey-wrap {
+  background: #faf7f2;
+  border: 1px solid #d8cfc0;
+  border-radius: 8px;
+  padding: 1.2rem;
+  box-shadow: 0 2px 12px rgba(26,16,8,0.06);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.s5-sankey-label {
+  font-size: 0.75rem;
+  color: #5c7a8a;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.6rem;
+}
+
+#chart-sankey {
+  width: 100%;
+  flex: 1;
+  min-height: 150px;
+}
+
+/* ── RIGHT COLUMN ── */
+.s5-right {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.s5-stories-header {
+  font-size: 0.8rem;
+  color: #5c7a8a;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.9rem;
+  padding-left: 0.2rem;
+}
+
+.s5-stories-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Custom scrollbar */
+.s5-stories-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.s5-stories-scroll::-webkit-scrollbar-track {
+  background: #e8c08050;
+  border-radius: 4px;
+}
+.s5-stories-scroll::-webkit-scrollbar-thumb {
+  background: #c47c2b80;
+  border-radius: 4px;
+}
+.s5-stories-scroll::-webkit-scrollbar-thumb:hover {
+  background: #c47c2b;
+}
+
+/* Story Card */
+.s5-card {
+  background: #faf7f2;
+  border: 1px solid #d8cfc0;
+  border-radius: 8px;
+  padding: 1.1rem 1.3rem;
+  box-shadow: 0 2px 10px rgba(26,16,8,0.05);
+  transition: box-shadow 0.3s, border-color 0.3s;
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.s5-card.s5-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.s5-card:hover {
+  box-shadow: 0 4px 20px rgba(196,124,43,0.18);
+  border-color: #c47c2b60;
+}
+
+.s5-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.s5-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #8b1520;
+  letter-spacing: 0.06em;
+}
+
+.s5-dynasty-badge {
+  font-size: 0.68rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 20px;
+  background: #c47c2b18;
+  border: 1px solid #c47c2b60;
+  color: #c47c2b;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.s5-poem {
+  font-style: italic;
+  color: #c47c2b;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  border-left: 3px solid #c47c2b80;
+  padding-left: 0.75rem;
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+.s5-story-body {
+  font-size: 0.83rem;
+  line-height: 1.9;
+  color: #3a2810;
+  text-align: justify;
+}
+
+/* Highlight effect for targeted card */
+.s5-card.s5-highlighted {
+  border-color: #c47c2b;
+  box-shadow: 0 0 0 3px rgba(196,124,43,0.22), 0 4px 20px rgba(196,124,43,0.2);
+  background: #fdf4e7;
+}
+
+@media (max-width: 900px) {
+  .s5-grid {
+    grid-template-columns: 1fr;
+  }
+  .s5-stories-scroll {
+    max-height: none;
+  }
+}
+</style>
+
+<section id="culture">
+  <div class="s5-inner">
+
+    <!-- Section Header -->
+    <div class="sec-header">
+      <div class="sec-title">文化价值篇</div>
+      <div class="sec-sub">千年匠心 · 诗桥合一 · 文化传承</div>
+    </div>
+
+    <div class="s5-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="s5-left">
+
+        <!-- Word Cloud -->
+        <div class="s5-wc-wrap">
+          <div class="s5-wc-label">关键词云 · 点击跳转故事</div>
+          <div class="s5-wc-container" id="s5-wordcloud">
+            <!-- spans injected by JS -->
+          </div>
+        </div>
+
+        <!-- Sankey Chart -->
+        <div class="s5-sankey-wrap">
+          <div class="s5-sankey-label">材料 → 桥型 · 建造关联图</div>
+          <div id="chart-sankey"></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="s5-right">
+        <div class="s5-stories-header">传奇故事 · 共 8 篇</div>
+        <div class="s5-stories-scroll" id="s5-stories-scroll">
+
+          <!-- Card 1 -->
+          <div class="s5-card" id="s5-card-0" data-keywords="赵州桥,李春,敞肩拱,隋代">
+            <div class="s5-card-header">
+              <div class="s5-card-title">赵州桥的传说</div>
+              <div class="s5-dynasty-badge">隋</div>
+            </div>
+            <div class="s5-poem">「百尺高虹横水面，一弯新月出云霄」</div>
+            <div class="s5-story-body">工匠李春设计赵州桥，传说鲁班曾化身老人前来考验，赵州桥建成后历经多次洪水、地震而屹立不倒。桥面的仙迹（驴蹄印、车辙）被认为是神仙过桥的痕迹，成为民间传说的核心。这座敞肩拱桥比欧洲同类设计早1200年，展现了隋代工匠的卓越智慧。</div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="s5-card" id="s5-card-1" data-keywords="枫桥夜泊,唐代,诗词,文人">
+            <div class="s5-card-header">
+              <div class="s5-card-title">枫桥夜泊</div>
+              <div class="s5-dynasty-badge">唐</div>
+            </div>
+            <div class="s5-poem">「姑苏城外寒山寺，夜半钟声到客船」</div>
+            <div class="s5-story-body">唐天宝年间，张继科举落第，夜泊枫桥，听寒山寺钟声，写下《枫桥夜泊》。这首诗让一座普通小桥名扬千古，成为江南水乡的永恒符号。千年后，日本两次重建"唐诗之路"，专为凭吊枫桥意境而来。</div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="s5-card" id="s5-card-2" data-keywords="卢沟桥,燕京八景,千年">
+            <div class="s5-card-header">
+              <div class="s5-card-title">卢沟桥的石狮</div>
+              <div class="s5-dynasty-badge">金</div>
+            </div>
+            <div class="s5-poem">「卢沟桥上多石狮，大小不同各异姿」</div>
+            <div class="s5-story-body">卢沟桥485只石狮，形态各异，无一相同。明代官员记载，数狮子数不清，"卢沟桥的狮子——数不清"成为北京著名歇后语。1937年七七事变在此爆发，卢沟桥成为中国全面抗战的历史起点，桥上每一只石狮都见证了那个悲壮的夜晚。</div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="s5-card" id="s5-card-3" data-keywords="洛阳桥,牡蛎固基,筏形基础,宋代">
+            <div class="s5-card-header">
+              <div class="s5-card-title">洛阳桥的牡蛎工程</div>
+              <div class="s5-dynasty-badge">宋</div>
+            </div>
+            <div class="s5-poem">「化蛎为基千古奇，筏形墩脚立江湄」</div>
+            <div class="s5-story-body">蔡襄主持建造洛阳桥时，面对软泥海底的难题，首创"筏形基础"——在水下堆砌大量石块形成船型基础，并在其上人工养殖牡蛎，让牡蛎将石块胶结成整体。这是人类历史上最早将生物工程用于桥梁建设的案例，比现代仿生工程早近千年。</div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="s5-card" id="s5-card-4" data-keywords="广济桥,浮桥,宋代,石梁">
+            <div class="s5-card-header">
+              <div class="s5-card-title">广济桥的十八梭船</div>
+              <div class="s5-dynasty-badge">宋</div>
+            </div>
+            <div class="s5-poem">「十八梭船廿四洲，十里长桥跨彼流」</div>
+            <div class="s5-story-body">广济桥中段以18只木船并列连接两段石桥，白天通航时拉开浮桥让船只通过，夜晚重新合拢。这一"启闭式"设计让广济桥成为世界最早的开合桥，其每日开合的壮观景象吸引了无数文人墨客前来观赏记录。</div>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="s5-card" id="s5-card-5" data-keywords="程阳风雨桥,榫卯,侗族,廊桥">
+            <div class="s5-card-header">
+              <div class="s5-card-title">程阳风雨桥的榫卯奇迹</div>
+              <div class="s5-dynasty-badge">民国</div>
+            </div>
+            <div class="s5-poem">「无钉无铆结天工，侗寨风情画桥中」</div>
+            <div class="s5-story-body">程阳桥由侗族工匠纯手工建造，全程无一颗铁钉，全靠榫卯结构咬合。侗族没有文字，建桥技艺全靠口传身授，代代相承。桥上的5座楼亭19个桥亭，每个细节都暗含侗族对自然与神灵的敬畏，是活着的文化遗产。</div>
+          </div>
+
+          <!-- Card 7 -->
+          <div class="s5-card" id="s5-card-6" data-keywords="泸定桥,铁索,清代,茶马古道">
+            <div class="s5-card-header">
+              <div class="s5-card-title">泸定桥的铁链之约</div>
+              <div class="s5-dynasty-badge">清</div>
+            </div>
+            <div class="s5-poem">「大渡桥横铁索寒，飞夺泸定英雄胆」</div>
+            <div class="s5-story-body">康熙年间修建泸定桥时，13根铁链共重约40吨，从康定运至泸定，翻越二郎山，历时数月才完成铁链穿江的壮举。1935年，红军飞夺泸定桥，战士们抓着铁索匍匐前进，用生命诠释了革命精神。泸定桥从此成为中国近现代史的精神丰碑。</div>
+          </div>
+
+          <!-- Card 8 -->
+          <div class="s5-card" id="s5-card-7" data-keywords="唐东杰布,铁索桥,苗族,纳西族,世界遗产,丝绸之路">
+            <div class="s5-card-header">
+              <div class="s5-card-title">唐东杰布的藏戏筹资</div>
+              <div class="s5-dynasty-badge">明</div>
+            </div>
+            <div class="s5-poem">「铁索跨江连两岸，藏戏筹资建桥传」</div>
+            <div class="s5-story-body">唐东杰布为在藏区修建铁索桥方便百姓，创立藏戏以筹集资金，一生在雅鲁藏布江等河流上建造铁索桥58座，被藏人尊为"铁桥活佛"。他以艺术服务工程建设的创举，开创了人类文明史上独特的先例，藏戏也因此成为世界非物质文化遗产。</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- OVERLAY -->
+<!-- (no overlay needed for this section) -->
+
+<script id="s5-script">
+function initCulture() {
+
+  /* ─────────────────────────────────────────
+     WORD CLOUD DATA
+  ───────────────────────────────────────── */
+  var wcWords = [
+    { text: '敞肩拱',   size: 1.6, color: '#8b1520',  rot: -8,  x: 5,   y: 3,  cardId: 0 },
+    { text: '筏形基础', size: 1.0, color: '#5c7a8a',  rot:  5,  x: 55,  y: 2,  cardId: 3 },
+    { text: '榫卯',     size: 1.9, color: '#c47c2b',  rot: -12, x: 20,  y: 11, cardId: 5 },
+    { text: '铁索',     size: 1.5, color: '#8b1520',  rot:  8,  x: 68,  y: 8, cardId: 6 },
+    { text: '廊桥',     size: 1.3, color: '#5c7a8a',  rot: -5,  x: 40,  y: 18, cardId: 5 },
+    { text: '石梁',     size: 1.1, color: '#1a1008',  rot:  3,  x: 80,  y: 15, cardId: 4 },
+    { text: '浮桥',     size: 1.0, color: '#c47c2b',  rot: -10, x: 10,  y: 29, cardId: 4 },
+    { text: '李春',     size: 1.4, color: '#8b1520',  rot:  6,  x: 60,  y: 23, cardId: 0 },
+    { text: '赵州桥',   size: 2.0, color: '#8b1520',  rot: -4,  x: 28,  y: 3,  cardId: 0 },
+    { text: '卢沟桥',   size: 1.7, color: '#5c7a8a',  rot:  10, x: 72,  y: 29, cardId: 2 },
+    { text: '洛阳桥',   size: 1.5, color: '#c47c2b',  rot: -7,  x: 3,   y: 44, cardId: 3 },
+    { text: '因地制宜', size: 0.9, color: '#5c7a8a',  rot:  4,  x: 45,  y: 36, cardId: -1 },
+    { text: '匠心',     size: 1.8, color: '#c47c2b',  rot: -14, x: 82,  y: 37, cardId: -1 },
+    { text: '千年',     size: 1.5, color: '#8b1520',  rot:  9,  x: 25,  y: 45, cardId: -1 },
+    { text: '宋代',     size: 1.1, color: '#1a1008',  rot: -6,  x: 63,  y: 45, cardId: 3 },
+    { text: '清代',     size: 1.0, color: '#5c7a8a',  rot:  12, x: 15,  y: 58, cardId: 6 },
+    { text: '隋代',     size: 1.0, color: '#c47c2b',  rot: -3,  x: 50,  y: 50, cardId: 0 },
+    { text: '唐代',     size: 1.1, color: '#8b1520',  rot:  7,  x: 78,  y: 50, cardId: 1 },
+    { text: '文人',     size: 0.9, color: '#5c7a8a',  rot: -11, x: 38,  y: 58, cardId: 1 },
+    { text: '诗词',     size: 1.3, color: '#c47c2b',  rot:  5,  x: 5,   y: 66, cardId: 1 },
+    { text: '枫桥夜泊', size: 1.6, color: '#8b1520',  rot: -8,  x: 60,  y: 60, cardId: 1 },
+    { text: '牡蛎固基', size: 1.1, color: '#5c7a8a',  rot:  6,  x: 25,  y: 66, cardId: 3 },
+    { text: '燕京八景', size: 0.9, color: '#1a1008',  rot: -4,  x: 50,  y: 68, cardId: 2 },
+    { text: '茶马古道', size: 1.2, color: '#c47c2b',  rot:  10, x: 78,  y: 63, cardId: 6 },
+    { text: '侗族',     size: 1.0, color: '#5c7a8a',  rot: -9,  x: 70,  y: 70, cardId: 5 },
+    { text: '苗族',     size: 0.8, color: '#8b1520',  rot:  3,  x: 40,  y: 73, cardId: 7 },
+    { text: '纳西族',   size: 0.7, color: '#5c7a8a',  rot: -7,  x: 10,  y: 75, cardId: 7 },
+    { text: '世界遗产', size: 1.3, color: '#c47c2b',  rot:  8,  x: 56,  y: 73, cardId: 7 },
+    { text: '丝绸之路', size: 1.2, color: '#8b1520',  rot: -5,  x: 82,  y: 73, cardId: 7 },
+    { text: '海上丝路', size: 1.0, color: '#5c7a8a',  rot:  6,  x: 28,  y: 76, cardId: 3 }
+  ];
+
+  var container = document.getElementById('s5-wordcloud');
+  if (container) {
+    container.innerHTML = '';
+    wcWords.forEach(function(w) {
+      var span = document.createElement('span');
+      span.textContent = w.text;
+      span.style.fontSize    = w.size + 'rem';
+      span.style.color       = w.color;
+      span.style.left        = w.x + '%';
+      span.style.top         = w.y + '%';
+      span.style.transform   = 'rotate(' + w.rot + 'deg)';
+      span.style.fontWeight  = w.size >= 1.5 ? '700' : (w.size >= 1.1 ? '600' : '400');
+      span.style.opacity     = '0.88';
+      if (w.cardId >= 0) {
+        span.style.cursor = 'pointer';
+        span.title = '点击查看相关故事';
+        span.addEventListener('click', function() {
+          s5ScrollToCard(w.cardId);
+        });
+      }
+      container.appendChild(span);
+    });
+  }
+
+  /* ─────────────────────────────────────────
+     SCROLL TO CARD
+  ───────────────────────────────────────── */
+  function s5ScrollToCard(cardIndex) {
+    var card = document.getElementById('s5-card-' + cardIndex);
+    var scroll = document.getElementById('s5-stories-scroll');
+    if (!card || !scroll) return;
+
+    // Remove previous highlights
+    var cards = scroll.querySelectorAll('.s5-card');
+    cards.forEach(function(c) { c.classList.remove('s5-highlighted'); });
+
+    // Scroll card into view within the scrollable container
+    var cardTop    = card.offsetTop - scroll.offsetTop;
+    var scrollTop  = cardTop - 16;
+    scroll.scrollTo({ top: scrollTop, behavior: 'smooth' });
+
+    // Highlight briefly
+    card.classList.add('s5-highlighted');
+    setTimeout(function() {
+      card.classList.remove('s5-highlighted');
+    }, 2200);
+  }
+
+  /* ─────────────────────────────────────────
+     SANKEY CHART
+  ───────────────────────────────────────── */
+  var sankeyDom = document.getElementById('chart-sankey');
+  if (sankeyDom && typeof echarts !== 'undefined') {
+    var sankeyChart = echarts.init(sankeyDom, null, { renderer: 'canvas' });
+
+    var sankeyOption = {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'item',
+        triggerOn: 'mousemove',
+        formatter: function(params) {
+          if (params.dataType === 'edge') {
+            return params.data.source + ' → ' + params.data.target + '：' + params.data.value + ' 座';
+          }
+          return params.name;
+        },
+        backgroundColor: '#faf7f2',
+        borderColor: '#c47c2b',
+        borderWidth: 1,
+        textStyle: { color: '#1a1008', fontFamily: "'Noto Serif SC', serif", fontSize: 12 }
+      },
+      series: [{
+        type: 'sankey',
+        left: '2%',
+        right: '10%',
+        top: '6%',
+        bottom: '6%',
+        nodeWidth: 14,
+        nodeGap: 10,
+        emphasis: { focus: 'adjacency' },
+        data: [
+          { name: '石材',  itemStyle: { color: '#8b6040' } },
+          { name: '木材',  itemStyle: { color: '#5c7a8a' } },
+          { name: '铁链',  itemStyle: { color: '#6a6060' } },
+          { name: '船只',  itemStyle: { color: '#4a7a6a' } },
+          { name: '石拱桥', itemStyle: { color: '#8b1520' } },
+          { name: '石梁桥', itemStyle: { color: '#c47c2b' } },
+          { name: '廊桥',   itemStyle: { color: '#5c7a8a' } },
+          { name: '铁索桥', itemStyle: { color: '#6a6060' } },
+          { name: '浮桥',   itemStyle: { color: '#4a7a6a' } }
+        ],
+        links: [
+          { source: '石材', target: '石拱桥', value: 12 },
+          { source: '石材', target: '石梁桥', value: 8  },
+          { source: '木材', target: '廊桥',   value: 4  },
+          { source: '木材', target: '石拱桥', value: 1  },
+          { source: '铁链', target: '铁索桥', value: 2  },
+          { source: '船只', target: '浮桥',   value: 1  }
+        ],
+        lineStyle: {
+          color: 'gradient',
+          opacity: 0.4,
+          curveness: 0.52
+        },
+        label: {
+          color: '#1a1008',
+          fontFamily: "'Noto Serif SC', serif",
+          fontSize: 11
+        },
+        itemStyle: {
+          borderWidth: 0
+        }
+      }]
+    };
+
+    sankeyChart.setOption(sankeyOption);
+
+    window.addEventListener('resize', function() {
+      sankeyChart.resize();
+    });
+  }
+
+  /* ─────────────────────────────────────────
+     ENTRANCE ANIMATIONS (GSAP)
+  ───────────────────────────────────────── */
+  var allCards = document.querySelectorAll('#s5-stories-scroll .s5-card');
+
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(
+      allCards,
+      { opacity: 0, y: 22 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.55,
+        ease: 'power2.out',
+        stagger: 0.09,
+        onComplete: function() {
+          allCards.forEach(function(c) { c.classList.add('s5-visible'); });
+        }
+      }
+    );
+
+    // Animate word cloud spans
+    var wcSpans = document.querySelectorAll('#s5-wordcloud span');
+    gsap.fromTo(
+      wcSpans,
+      { opacity: 0, scale: 0.6 },
+      {
+        opacity: 0.88,
+        scale: 1,
+        duration: 0.4,
+        ease: 'back.out(1.4)',
+        stagger: 0.03,
+        delay: 0.2
+      }
+    );
+
+    // Animate left column panels
+    var leftPanels = document.querySelectorAll('#culture .s5-wc-wrap, #culture .s5-sankey-wrap');
+    gsap.fromTo(
+      leftPanels,
+      { opacity: 0, x: -24 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        stagger: 0.15
+      }
+    );
+  } else {
+    // Fallback: just show everything
+    allCards.forEach(function(c) {
+      c.style.opacity = '1';
+      c.style.transform = 'translateY(0)';
+      c.classList.add('s5-visible');
+    });
+  }
+
+}
+</script>

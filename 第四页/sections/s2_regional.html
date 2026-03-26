@@ -1,0 +1,142 @@
+<style>
+/* ===== SECTION 2: REGIONAL ===== */
+#regional { background: #faf7f2; }
+.r-header { text-align:center; margin-bottom:1.2rem; }
+.r-layout {
+  width:100%; max-width:1380px; padding:0 2rem;
+  display:grid; grid-template-columns:1.1fr 0.9fr; gap:1.5rem; align-items:start;
+}
+.r-panel {
+  background:rgba(255,255,255,.75); border:1px solid #e0d8cc;
+  border-radius:6px; padding:.9rem; backdrop-filter:blur(4px);
+}
+.r-panel h3 { font-size:.78rem; color:#5c7a8a; letter-spacing:.1em; margin-bottom:.55rem; font-weight:400; }
+.r-map-wrap { height:360px; }
+.r-stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:.65rem; margin-top:.9rem; }
+.r-stat-box {
+  background:rgba(255,255,255,.8); border:1px solid #e0d8cc;
+  border-top:2px solid #c47c2b; border-radius:4px; padding:.65rem;
+  text-align:center; transition:transform .2s;
+}
+.r-stat-box:hover { transform:translateY(-2px); }
+.rsb-n { font-size:1.3rem; font-weight:700; color:#c47c2b; }
+.rsb-l { font-size:.67rem; color:#5c7a8a; margin-top:.15rem; }
+.r-pie-wrap { height:205px; }
+.r-bar-wrap { height:190px; margin-top:.8rem; }
+</style>
+
+<section id="regional">
+  <div class="r-header">
+    <h2 class="sec-title">地域分布篇</h2>
+    <p class="sec-sub">山川为骨，水系为脉 &nbsp;·&nbsp; 古桥全国分布图谱</p>
+  </div>
+  <div class="r-layout">
+    <div>
+      <div class="r-panel r-map-wrap">
+        <h3>🗺 各省古桥数量热力图（点击省份查看详情）</h3>
+        <div id="chart-map" style="height:calc(100% - 1.6rem)"></div>
+      </div>
+      <div class="r-stat-row">
+        <div class="r-stat-box"><div class="rsb-n">华东</div><div class="rsb-l">数量最多 · 9座</div></div>
+        <div class="r-stat-box"><div class="rsb-n">福建</div><div class="rsb-l">省份第一 · 5座</div></div>
+        <div class="r-stat-box"><div class="rsb-n">15省</div><div class="rsb-l">地理覆盖</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="r-panel r-pie-wrap">
+        <h3>🍩 七大地理分区（双层环形）</h3>
+        <div id="chart-region-pie" style="height:calc(100% - 1.6rem)"></div>
+      </div>
+      <div class="r-panel r-bar-wrap">
+        <h3>📊 省份古桥数量 Top 13</h3>
+        <div id="chart-province-bar" style="height:calc(100% - 1.6rem)"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function initRegional() {
+  const PROVINCE = [
+    {name:"福建",value:5},{name:"江苏",value:5},{name:"北京",value:3},
+    {name:"广西",value:2},{name:"云南",value:2},{name:"浙江",value:2},
+    {name:"河北",value:2},{name:"四川",value:1},{name:"广东",value:1},
+    {name:"湖南",value:1},{name:"贵州",value:1},{name:"山西",value:1},
+    {name:"西藏",value:1}
+  ];
+  const REGION = [
+    {name:"华东",value:9,color:"#4169E1"},{name:"华南",value:7,color:"#c47c2b"},
+    {name:"华北",value:6,color:"#8b1520"},{name:"西南",value:5,color:"#9932CC"},
+    {name:"华中",value:1,color:"#2E8B57"},{name:"东北",value:0,color:"#5c7a8a"},
+    {name:"西北",value:0,color:"#daa520"}
+  ];
+
+  // Map chart
+  const mapEl = document.getElementById("chart-map");
+  const mapChart = echarts.init(mapEl);
+  const mapOpt = (geoData) => ({
+    backgroundColor:"transparent",
+    tooltip:{trigger:"item",formatter:p=>p.value>0?`<b>${p.name}</b><br>古桥数量：${p.value} 座`:`${p.name}：暂无记录`,
+      backgroundColor:"rgba(26,16,8,.88)",borderColor:"rgba(196,124,43,.4)",textStyle:{color:"#f5f0e8",fontSize:12}},
+    visualMap:{min:0,max:5,left:"left",top:"bottom",text:["多","少"],calculable:true,
+      inRange:{color:["#f0ebe0","#e8c070","#c47c2b","#8b1520"]},
+      textStyle:{color:"#5c7a8a",fontSize:10}},
+    series:[{type:"map",map:"china",roam:false,data:PROVINCE,
+      label:{show:false},
+      emphasis:{label:{show:true,color:"#fff",fontSize:11},itemStyle:{areaColor:"#8b1520",shadowBlur:12}},
+      selectedMode:"single",select:{itemStyle:{areaColor:"#c47c2b"}},
+      itemStyle:{areaColor:"#ede8dc",borderColor:"#c8bfb0",borderWidth:.8}}]
+  });
+  fetch("https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json")
+    .then(r=>r.json()).then(geo=>{ echarts.registerMap("china",geo); mapChart.setOption(mapOpt()); })
+    .catch(()=>{
+      mapChart.setOption({backgroundColor:"transparent",
+        tooltip:{trigger:"axis"},
+        grid:{left:"12%",right:"5%",top:"5%",bottom:"5%"},
+        xAxis:{type:"value",axisLabel:{color:"#5c7a8a",fontSize:9},splitLine:{lineStyle:{color:"#ede8dc"}}},
+        yAxis:{type:"category",data:PROVINCE.map(d=>d.name),axisLabel:{color:"#5c7a8a",fontSize:10}},
+        series:[{type:"bar",data:PROVINCE.map(d=>d.value),barMaxWidth:18,
+          itemStyle:{color:new echarts.graphic.LinearGradient(1,0,0,0,[{offset:0,color:"#c47c2b"},{offset:1,color:"#e8c080"}])}}]});
+    });
+
+  // Dual-ring pie
+  const pieChart = echarts.init(document.getElementById("chart-region-pie"));
+  pieChart.setOption({
+    backgroundColor:"transparent",
+    tooltip:{trigger:"item",formatter:"{b}: {c}座 ({d}%)",
+      backgroundColor:"rgba(26,16,8,.88)",borderColor:"rgba(196,124,43,.4)",textStyle:{color:"#f5f0e8"}},
+    legend:{bottom:0,textStyle:{color:"#5c7a8a",fontSize:8.5},itemWidth:10,itemHeight:10,itemGap:5},
+    series:[
+      {type:"pie",radius:["22%","42%"],center:["50%","44%"],
+       data:REGION.map(d=>({name:d.name,value:d.value,itemStyle:{color:d.color}})),
+       label:{show:false},emphasis:{itemStyle:{shadowBlur:8}}},
+      {type:"pie",radius:["47%","63%"],center:["50%","44%"],
+       data:REGION.filter(d=>d.value>0).map(d=>({name:d.name,value:d.value,itemStyle:{color:d.color,opacity:.72}})),
+       label:{show:true,fontSize:9,formatter:"{b}
+{c}座",color:"#5c7a8a"},
+       emphasis:{itemStyle:{shadowBlur:8}}}
+    ]
+  });
+
+  // Province bar
+  const barChart = echarts.init(document.getElementById("chart-province-bar"));
+  barChart.setOption({
+    backgroundColor:"transparent",
+    tooltip:{trigger:"axis",backgroundColor:"rgba(26,16,8,.88)",textStyle:{color:"#f5f0e8"}},
+    grid:{left:"11%",right:"5%",top:"6%",bottom:"6%"},
+    xAxis:{type:"category",data:PROVINCE.map(d=>d.name),
+      axisLabel:{color:"#5c7a8a",fontSize:9},axisLine:{lineStyle:{color:"#d8cfc0"}}},
+    yAxis:{type:"value",axisLabel:{color:"#5c7a8a",fontSize:9},
+      splitLine:{lineStyle:{color:"#ede8dc",type:"dashed"}}},
+    series:[{type:"bar",data:PROVINCE.map(d=>d.value),barMaxWidth:20,
+      itemStyle:{color:p=>new echarts.graphic.LinearGradient(0,0,0,1,[
+        {offset:0,color:["#8b1520","#c47c2b","#4169E1","#9932CC","#2E8B57",
+          "#5c7a8a","#8b6914","#dc143c","#daa520","#ff6347","#2e8b57","#4169e1","#c47c2b"][p.dataIndex]},
+        {offset:1,color:"rgba(196,124,43,.3)"}]),borderRadius:[3,3,0,0]},
+      label:{show:true,position:"top",color:"#5c7a8a",fontSize:8,formatter:"{c}座"}}]
+  });
+
+  gsap.fromTo("#regional .sec-title",{opacity:0,y:25},{opacity:1,y:0,duration:.8});
+  gsap.fromTo("#regional .sec-sub",{opacity:0,y:15},{opacity:1,y:0,duration:.7,delay:.15});
+}
+</script>

@@ -1,0 +1,162 @@
+<style>
+/* ===== SECTION 1: COVER ===== */
+#cover {
+  background: linear-gradient(160deg, #0d0a04 0%, #1a1008 35%, #241808 60%, #2e200c 100%);
+  color: #f5f0e8;
+}
+.ink-drop {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  animation: inkFloat 8s ease-in-out infinite;
+}
+@keyframes inkFloat {
+  0%,100%{transform:translateY(0) scale(1);opacity:.3}
+  50%{transform:translateY(-20px) scale(1.08);opacity:.7}
+}
+.cover-content {
+  position: relative; z-index: 5; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.cover-badge {
+  font-size:.75rem; letter-spacing:.5em; color:rgba(196,124,43,.65);
+  border:1px solid rgba(196,124,43,.25); padding:.3rem 1.2rem;
+  margin-bottom:1.5rem; opacity:0; transform:translateY(20px);
+}
+.cover-main-title {
+  font-size:clamp(2.8rem,7vw,5rem); font-weight:700; line-height:1.2;
+  margin-bottom:.8rem; opacity:0; transform:translateY(30px);
+}
+.cover-main-title .hl {
+  color:#c47c2b; position:relative;
+}
+.cover-main-title .hl::after {
+  content:'; position:absolute; bottom:-4px; left:0; right:0;
+  height:2px; background:linear-gradient(90deg,#c47c2b,transparent);
+}
+.cover-tagline {
+  font-size:.88rem; letter-spacing:.4em; color:rgba(245,240,232,.4);
+  margin-bottom:1.8rem; opacity:0;
+}
+.cover-dividers {
+  display:flex; align-items:center; gap:1rem; margin-bottom:2rem; opacity:0;
+}
+.cover-dividers span { width:50px; height:1px; background:linear-gradient(90deg,transparent,rgba(196,124,43,.45)); }
+.cover-dividers em { font-size:.65rem; letter-spacing:.35em; color:rgba(196,124,43,.45); font-style:normal; }
+.cover-stats {
+  display:flex; gap:2.8rem; margin-bottom:2.5rem; opacity:0; transform:translateY(20px);
+}
+.cover-stat { text-align:center; }
+.cover-stat-n {
+  font-size:2.6rem; font-weight:700; color:#c47c2b; line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.cover-stat-sfx { font-size:.95rem; color:rgba(196,124,43,.7); }
+.cover-stat-l { font-size:.68rem; letter-spacing:.18em; color:rgba(245,240,232,.32); margin-top:.35rem; }
+.cover-cta { opacity:0; transform:translateY(20px); }
+.cover-btn {
+  background:transparent; border:1px solid rgba(196,124,43,.55);
+  color:#c47c2b; font-family:inherit; font-size:.88rem; letter-spacing:.3em;
+  padding:.8rem 2.5rem; cursor:pointer; transition:all .4s; position:relative; overflow:hidden;
+}
+.cover-btn::before {
+  content:'; position:absolute; inset:0; background:#c47c2b;
+  transform:translateX(-100%); transition:transform .4s; z-index:-1;
+}
+.cover-btn:hover { color:#1a1008; }
+.cover-btn:hover::before { transform:translateX(0); }
+.cover-scroll-hint {
+  position:absolute; bottom:1.8rem; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:.4rem;
+  color:rgba(245,240,232,.28); font-size:.65rem; letter-spacing:.2em;
+  animation:scrollBounce 2.2s ease-in-out infinite;
+}
+@keyframes scrollBounce {
+  0%,100%{opacity:.25;transform:translateX(-50%) translateY(0)}
+  50%{opacity:.7;transform:translateX(-50%) translateY(6px)}
+}
+.scroll-arr {
+  width:14px; height:14px;
+  border-right:1px solid rgba(196,124,43,.4); border-bottom:1px solid rgba(196,124,43,.4);
+  transform:rotate(45deg);
+}
+.bridge-silhouette {
+  position:absolute; bottom:0; left:0; right:0; height:170px;
+  opacity:.11; pointer-events:none;
+}
+</style>
+
+<section id="cover">
+  <!-- Ink atmosphere -->
+  <div class="ink-drop" style="width:650px;height:650px;top:-220px;left:-220px;background:radial-gradient(circle,rgba(196,124,43,.12) 0%,transparent 70%);animation-delay:0s"></div>
+  <div class="ink-drop" style="width:450px;height:450px;bottom:-150px;right:-100px;background:radial-gradient(circle,rgba(92,122,138,.1) 0%,transparent 70%);animation-delay:2.5s"></div>
+  <div class="ink-drop" style="width:300px;height:300px;top:25%;right:12%;background:radial-gradient(circle,rgba(196,124,43,.08) 0%,transparent 70%);animation-delay:4.5s"></div>
+
+  <!-- Bridge SVG silhouette -->
+  <svg class="bridge-silhouette" viewBox="0 0 1400 170" preserveAspectRatio="xMidYMid meet">
+    <path d="M0,170 L0,105 Q50,68 100,105 Q150,135 200,105 Q250,75 300,105 Q350,130 400,105 L400,45 Q440,10 480,45 Q520,80 560,45 L560,105 Q610,135 660,105 L660,45 Q700,10 740,45 Q780,80 820,45 L820,105 Q870,130 920,105 Q970,80 1020,105 Q1070,135 1120,105 Q1170,75 1220,105 Q1270,135 1320,105 Q1360,80 1400,105 L1400,170 Z" fill="rgba(92,122,138,0.55)"/>
+    <ellipse cx="480" cy="45" rx="80" ry="38" fill="none" stroke="rgba(196,124,43,0.6)" stroke-width="1.5"/>
+    <ellipse cx="740" cy="45" rx="80" ry="38" fill="none" stroke="rgba(196,124,43,0.6)" stroke-width="1.5"/>
+    <line x1="400" y1="105" x2="400" y2="158" stroke="rgba(196,124,43,0.4)" stroke-width="2"/>
+    <line x1="560" y1="105" x2="560" y2="158" stroke="rgba(196,124,43,0.4)" stroke-width="2"/>
+    <line x1="660" y1="105" x2="660" y2="158" stroke="rgba(196,124,43,0.4)" stroke-width="2"/>
+    <line x1="820" y1="105" x2="820" y2="158" stroke="rgba(196,124,43,0.4)" stroke-width="2"/>
+    <path d="M0,158 Q700,148 1400,158" fill="none" stroke="rgba(92,122,138,0.35)" stroke-width="1"/>
+    <path d="M0,165 Q700,155 1400,165" fill="none" stroke="rgba(92,122,138,0.2)" stroke-width="1"/>
+  </svg>
+
+  <div class="cover-content">
+    <div class="cover-badge">茅以升《中国古代桥梁史》· 全国重点文物保护单位名录</div>
+    <h1 class="cover-main-title">
+      中国古代<span class="hl">桥梁</span><br>数据报告
+    </h1>
+    <p class="cover-tagline">因地制宜 ·  文用合一 ·  千年匠心</p>
+    <div class="cover-dividers">
+      <span></span>
+      <em>DATA VISUALIZATION · 数字文化遗产</em>
+      <span style="transform:scaleX(-1)"></span>
+    </div>
+    <div class="cover-stats">
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-bridges">0</span><span class="cover-stat-sfx">+</span></div>
+        <div class="cover-stat-l">代表性古桥</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-dynasties">0</span></div>
+        <div class="cover-stat-l">历史朝代</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-provinces">0</span></div>
+        <div class="cover-stat-l">省份覆盖</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-years">0</span><span class="cover-stat-sfx">+</span></div>
+        <div class="cover-stat-l">年历史跨度</div>
+      </div>
+    </div>
+    <div class="cover-cta">
+      <button class="cover-btn" onclick="scrollToSection(1)">开启报告  →</button>
+    </div>
+  </div>
+  <div class="cover-scroll-hint">
+    <div class="scroll-arr"></div>
+    <span>向下滚动</span>
+  </div>
+</section>
+
+<script>
+function initCover() {
+  const tl = gsap.timeline({ delay: 0.2 });
+  tl.to('.cover-badge',       { opacity:1, y:0, duration:.7, ease:'power2.out' })
+    .to('.cover-main-title',  { opacity:1, y:0, duration:.9, ease:'power2.out' }, '-=.4')
+    .to('.cover-tagline',     { opacity:1, duration:.7, ease:'power2.out' }, '-=.5')
+    .to('.cover-dividers',    { opacity:1, duration:.6 }, '-=.4')
+    .to('.cover-stats',       { opacity:1, y:0, duration:.8, ease:'power2.out' }, '-=.3')
+    .to('.cover-cta',         { opacity:1, y:0, duration:.6, ease:'power2.out' }, '-=.4');
+
+  setTimeout(() => {
+    countUp(document.getElementById('cnt-bridges'),  25,  1400);
+    countUp(document.getElementById('cnt-dynasties'), 7,  1100);
+    countUp(document.getElementById('cnt-provinces'), 15, 1200);
+    countUp(document.getElementById('cnt-years'),    1400, 1600);
+  }, 600);
+}
+</script>

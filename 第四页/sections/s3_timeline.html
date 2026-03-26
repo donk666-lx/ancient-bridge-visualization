@@ -1,0 +1,133 @@
+<style>
+/* ===== SECTION 3: TIMELINE ===== */
+#timeline { background: linear-gradient(180deg, #f5f0e8 0%, #ede5d8 100%); }
+.tl-header { text-align:center; margin-bottom:1rem; }
+.tl-layout { width:100%; max-width:1380px; padding:0 2rem; }
+.dynasty-strip {
+  display:flex; margin-bottom:1.2rem; border:1px solid #d8cfc0;
+  border-radius:4px; overflow:hidden; position:relative;
+}
+.dynasty-strip::before {
+  content:''; position:absolute; top:50%; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,#8B6914,#DAA520,#4169E1,#2E8B57,#DC143C,#9932CC,#FF6347);
+  pointer-events:none;
+}
+.dyn-btn {
+  flex:1; padding:.65rem .3rem; background:rgba(255,255,255,.55);
+  border:none; border-right:1px solid #d8cfc0; cursor:pointer;
+  font-family:inherit; transition:all .3s; position:relative; z-index:1;
+  display:flex; flex-direction:column; align-items:center; gap:.18rem;
+}
+.dyn-btn:last-child { border-right:none; }
+.dyn-btn .dn { font-size:.95rem; font-weight:700; }
+.dyn-btn .dc { font-size:.65rem; color:#5c7a8a; }
+.dyn-btn.active,.dyn-btn:hover { background:rgba(255,255,255,.95); }
+.dyn-btn.active { box-shadow:inset 0 -3px 0 currentColor; }
+.tl-charts { display:grid; grid-template-columns:1.6fr 1fr; gap:1.2rem; }
+.tl-bar-panel { height:265px; background:rgba(255,255,255,.75); border:1px solid #e0d8cc; border-radius:6px; padding:.7rem; }
+.tl-info-panel { background:rgba(255,255,255,.75); border:1px solid #e0d8cc; border-radius:6px; padding:1rem; display:flex; flex-direction:column; }
+.dyn-card h4 { font-size:.95rem; font-weight:700; color:#1a1008; margin-bottom:.3rem; }
+.dyn-tech-badge {
+  display:inline-block; background:#c47c2b; color:#fff;
+  font-size:.68rem; padding:.12rem .55rem; border-radius:2px; margin-bottom:.45rem;
+}
+.dyn-card-desc { font-size:.76rem; color:#5c7a8a; line-height:1.75; margin-bottom:.5rem; }
+.dyn-tags { display:flex; flex-wrap:wrap; gap:.3rem; margin-bottom:.5rem; }
+.dyn-tag { background:rgba(139,105,20,.1); color:#8b6914; font-size:.66rem; padding:.1rem .45rem; border-radius:2px; }
+.world-box { background:rgba(65,105,225,.07); border-left:2px solid #4169E1; padding:.4rem .65rem; border-radius:0 3px 3px 0; }
+.world-box .wb-lbl { font-size:.62rem; color:#4169E1; letter-spacing:.1em; }
+.world-box .wb-txt { font-size:.73rem; color:#1a1008; margin-top:.1rem; line-height:1.5; }
+</style>
+
+<section id="timeline">
+  <div class="tl-header">
+    <h2 class="sec-title">历史时间篇</h2>
+    <p class="sec-sub">千年建桥史 &nbsp;·&nbsp; 朝代技术演进与世界对比</p>
+  </div>
+  <div class="tl-layout">
+    <div class="dynasty-strip" id="dynasty-strip">
+      <button class="dyn-btn active" data-idx="0" style="color:#8B6914"><span class="dn">隅</span><span class="dc">2座</span></button>
+      <button class="dyn-btn" data-idx="1" style="color:#DAA520"><span class="dn">唐</span><span class="dc">3座</span></button>
+      <button class="dyn-btn" data-idx="2" style="color:#4169E1"><span class="dn">宋</span><span class="dc">9座</span></button>
+      <button class="dyn-btn" data-idx="3" style="color:#2E8B57"><span class="dn">元</span><span class="dc">0座</span></button>
+      <button class="dyn-btn" data-idx="4" style="color:#DC143C"><span class="dn">明</span><span class="dc">5座</span></button>
+      <button class="dyn-btn" data-idx="5" style="color:#9932CC"><span class="dn">清</span><span class="dc">5座</span></button>
+      <button class="dyn-btn" data-idx="6" style="color:#FF6347"><span class="dn">民国</span><span class="dc">1座</span></button>
+    </div>
+    <div class="tl-charts">
+      <div class="tl-bar-panel"><div id="chart-dynasty-bar" style="height:100%"></div></div>
+      <div class="tl-info-panel">
+        <div class="dyn-card" id="dyn-card">
+          <h4 id="dyn-title">隅代（581—618）</h4>
+          <span class="dyn-tech-badge" id="dyn-tech">敌肩拱桥技术</span>
+          <p class="dyn-card-desc" id="dyn-desc">隅代国祟虽短，却开创了中国桥梁史的辉煌时代。工匠李春设计赵州桥（605年），首创敌肩拱结构，跨径37.02米，比欧洲同类技术早约800年，被誉为「世界桥梁史七大奇迹」之一。</p>
+          <div class="dyn-tags" id="dyn-tags">
+            <span class="dyn-tag">敌肩拱桥</span><span class="dyn-tag">李春设计</span><span class="dyn-tag">超越欧洲800年</span>
+          </div>
+          <div class="world-box">
+            <div class="wb-lbl">🌍 同期世界</div>
+            <div class="wb-txt" id="dyn-world">拜占庭帝国建穹顶式建筑，欧洲尚未出现敌肩拱结构</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const TL_DATA = [
+  {name:'隅',yr:'581—618',cnt:2,color:'#8B6914',tech:'敌肩拱桥技术',desc:'隅代国祟虽短，却开创了中国桥梁史的辉煌时代。工匠李春设计赵州桥（605年），首创敌肩拱结构，跨径37.02米，比欧洲同类技术早约800年，被誉为「世界桥梁史七大奇迹」之一。',tags:['敌肩拱桥','李春设计','超越欧洲800年'],world:'拜占庭帝国建穹顶式建筑，欧洲尚未出现敌肩拱结构'},
+  {name:'唐',yr:'618—907',cnt:3,color:'#DAA520',tech:'多孔连拱·运河桥梁',desc:'唐代经济文化鼎盛，宝带枇53孔连续石拱横跨运河，枫桥因张继《枫桥夜泊》名传千古，「二十四桥明月夜」成为扬州的永恒符号。',tags:['多孔连续石拱','运河文化载体','诗桥合一'],world:'欧洲中世纪建罗曼式小石拱桥，规模远不及唐代运河大桥'},
+  {name:'宋',yr:'960—1279',cnt:9,color:'#4169E1',tech:'筏形基础·浮梁结合',desc:'宋代是中国古代桥梁黄金时代。洛阳桥首创筏形基础与牁蛎固基；安平杆2255米成史上最长石梁桥；广济桥首创浮梁结合；组兴八字桥是世界最早城市立交桥，技术创新层出不穷。',tags:['筏形基础','浮梁结合','牁蛎固基','城市立交'],world:'欧洲建造伦敦桥（石拱，1176年），技术与宋代筏形基础相比差距明显'},
+  {name:'元',yr:'1271—1368',cnt:0,color:'#2E8B57',tech:'南北技术融合',desc:'元代蒙古族统治带来南北建筑技术广泛交流，虽建桥数量不及宋代，但在技术融合与文化传播上有突破，为明清桥梁发展奠定基础。',tags:['南北技术融合','文化交流'],world:'马可·波罗（1271-1295年）盛赞卢沟桥为世界最美桥梁'},
+  {name:'明',yr:'1368—1644',cnt:5,color:'#DC143C',tech:'廊桥成熟·茶马古道',desc:'明代廊桥技术趣于成熟，侗族风雨桥形成独特体系。茶马古道沿线桥梁建设达到顶峰，江南水乡桥梁景观基本定型，郑和下西洋带动沿海港口发展。',tags:['廊桥成熟','茶马古道','海上丝路','江南水乡'],world:'欧洲文艺复兴，意大利建威尼斯里亚托桥（1591年），比安平桥短400余年'},
+  {name:'清',yr:'1644—1912',cnt:5,color:'#9932CC',tech:'皇家园林艺术·铁索桥',desc:'清代皇家园林建设达顶峰，颁和园十七孔桥、玉带桥为精华。泸定杗1706年建成13根铁索横跨大渡河，双龙枇17孔横卧云南，皇家工程与民间技艺并进。',tags:['皇家园林','铁索桥','西藏通道','乾隆时代'],world:'欧洲工业革命开始用铸铁建桥（1779年铁桥）'},
+  {name:'民国',yr:'1912—1949',cnt:1,color:'#FF6347',tech:'传统技艺集大成',desc:'程阳风雨桥（1916年）是侗族传统木构技艺集大成之作，全桥无一钉一铆，是传统与现代过渡期保存最完整的古典廊桥，已列为全国重点文物保护单位。',tags:['中西技术交汇','传统手工艺集成','文化遗产保护'],world:'西方钓筋混凝土桥梁技术引入中国，传统木构廊桥技艺面临传承挑战'},
+];
+
+function initTimeline() {
+  const barEl = document.getElementById('chart-dynasty-bar');
+  const barChart = echarts.getInstanceByDom(barEl) || echarts.init(barEl);
+  const cum = TL_DATA.reduce((a,d,i)=>{ a.push((a[i-1]||0)+d.cnt); return a; },[]);
+  barChart.setOption({
+    backgroundColor:'transparent',
+    title:{text:'各朝代建桥数量 & 累计趋势',textStyle:{color:'#5c7a8a',fontSize:10},left:'center',top:2},
+    tooltip:{trigger:'axis',backgroundColor:'rgba(26,16,8,.9)',borderColor:'rgba(196,124,43,.4)',textStyle:{color:'#f5f0e8'},axisPointer:{type:'cross',crossStyle:{color:'#c47c2b'}}},
+    legend:{top:18,right:8,data:['建桥数量','累计'],textStyle:{color:'#5c7a8a',fontSize:8.5}},
+    grid:{left:'8%',right:'10%',top:'20%',bottom:'12%'},
+    xAxis:{type:'category',data:TL_DATA.map(d=>d.name),axisLabel:{color:'#5c7a8a',fontSize:11},axisLine:{lineStyle:{color:'#d8cfc0'}}},
+    yAxis:[
+      {type:'value',name:'座',nameTextStyle:{color:'#5c7a8a',fontSize:8},axisLabel:{color:'#5c7a8a',fontSize:8},splitLine:{lineStyle:{color:'#ede8dc',type:'dashed'}}},
+      {type:'value',name:'累计',nameTextStyle:{color:'#c47c2b',fontSize:8},axisLabel:{color:'#c47c2b',fontSize:8},splitLine:{show:false}}
+    ],
+    series:[
+      {name:'建桥数量',type:'bar',data:TL_DATA.map(d=>d.cnt),barMaxWidth:34,yAxisIndex:0,itemStyle:{color:p=>TL_DATA[p.dataIndex].color,borderRadius:[4,4,0,0]},label:{show:true,position:'top',color:'#5c7a8a',fontSize:8.5,formatter:p=>p.value+'座'}},
+      {name:'累计',type:'line',yAxisIndex:1,data:cum,smooth:true,symbol:'circle',symbolSize:6,lineStyle:{color:'#c47c2b',width:2.5},itemStyle:{color:'#c47c2b',borderColor:'#fff',borderWidth:2},areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(196,124,43,.18)'},{offset:1,color:'rgba(196,124,43,0)'}])}}
+    ]
+  });
+  barChart.on('click', p => { selectDyn(p.dataIndex); highlightBtn(p.dataIndex); });
+  document.getElementById('dynasty-strip').addEventListener('click', e => {
+    const btn = e.target.closest('.dyn-btn');
+    if (\!btn) return;
+    const idx = parseInt(btn.dataset.idx);
+    highlightBtn(idx);
+    selectDyn(idx);
+    barChart.dispatchAction({type:'highlight',seriesIndex:0,dataIndex:idx});
+    setTimeout(()=>barChart.dispatchAction({type:'downplay',seriesIndex:0,dataIndex:idx}),1200);
+  });
+}
+
+function highlightBtn(idx) {
+  document.querySelectorAll('.dyn-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+}
+
+function selectDyn(idx) {
+  const d = TL_DATA[idx];
+  document.getElementById('dyn-title').textContent = d.name+'代（'+d.yr+'）';
+  document.getElementById('dyn-tech').textContent = d.tech;
+  document.getElementById('dyn-desc').textContent = d.desc;
+  document.getElementById('dyn-world').textContent = d.world;
+  document.getElementById('dyn-tags').innerHTML = d.tags.map(t=>`<span class="dyn-tag">\</span>`).join('');
+  gsap.fromTo('#dyn-card',{opacity:0,x:-15},{opacity:1,x:0,duration:.4,ease:'power2.out'});
+}
+</script>
