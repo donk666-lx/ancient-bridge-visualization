@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IronHill Scroll Animation | TTTISE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Fredoka+One&display=swap" rel="stylesheet">
+
+   <script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+    "three/examples/jsm/loaders/GLTFLoader.js": "https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js",
+    "gsap": "https://cdn.skypack.dev/gsap",
+    "lenis": "https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.mjs"
+  }
+}
+</script>
+  <script type="module" crossorigin src="./assets/index-6lXs8PMu.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-C_IcMpVN.css">
+</head>
+
+<body>
+    <!-- 全局黑暗蒙层，由 initSecondProject 驱动 -->
+    <div class="sky-dark-mask"></div>
+
+    <!-- 开头部分 -->
+    <section class="intro-section">
+        <p class="intro-title">桥韵—智<span class="small-hui">汇</span></p>
+    </section>
+    <section class="spotlight-section">
+        <div class="project-index">
+            <h1>01/10</h1>
+        </div>
+        <div class="project-images">
+            <div class="project-img"><img src="./assets/img1-B4OgBCla.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img2-Dp8-Y2DV.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img3-BAkvZ3ED.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img4-XfQTc-lb.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img5-DpTJyajH.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img6-6gv0v6kh.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img7-DYnVUYMl.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img8-CZGS05Dq.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img9-Cg4TUe6K.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./assets/img10-B03wanUr.jpg" alt="" loading="lazy"></div>
+        </div>
+        <div class="project-names">
+            <p>通津桥</p>
+            <p>.</p>
+            <p>.</p>
+            <p>双龙桥</p>
+            <p>.</p>
+            <p>.</p>
+            <p>赵州桥</p>
+            <p>.</p>
+            <p>.</p>
+            <p>.</p>
+        </div>
+    </section>
+    <!-- 原有项目内容 -->
+    <section class="hero">
+        <div class="hero-img">
+            <img src="./assets/background-BFgakRrE.jpg" alt="" loading="lazy" />
+        </div>
+
+        <div class="hero-header">
+        </div>
+
+        <canvas class="hero-canvas"></canvas>
+
+        <div class="hero-content">
+            <div class="hero-subtitle">
+                <p>承桥之韵，启智之汇。</p>
+                <p>跨越边界，连接每一份思考。</p>
+            </div>
+            <h2>开起你的桥之旅</h2>
+        </div>
+    </section>
+
+    <!-- 第二个项目内容 -->
+    <section class="hero jeskojets-hero">
+        <div class="sky-container">
+            <img src="./assets/sky-B-ksUmVz.png" alt="" loading="lazy" />
+
+            <div class="sky-overlay">
+                <div class="sky-center-block">
+                    <div class="sky-year-badge">
+                    <span class="sky-year-num">1770</span>
+                    <span class="sky-year-label">年建</span>
+                </div>
+                <div class="sky-main-title">双龙桥</div>
+                <div class="sky-divider-line"></div>
+                <div class="sky-sub-slogan">十七孔连拱 · 滇南名桥</div>
+                </div>
+
+                <div class="poem">十七孔桥卧双龙<br />滇南水乡映长虹</div>
+
+                <div class="intro-bar">
+                    <div class="intro-content">
+                        <div class="intro-title">双龙桥</div>
+                        <div class="intro-subtitle">云南建水·多孔连拱古石桥</div>
+                        <div class="intro-desc">十七孔连拱，规模宏大</div>
+                        <div class="intro-honor">国家重点文物保护单位</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-copy">
+            <h1>
+
+            </h1>
+        </div>
+
+        <div class="window-container">
+            <img src="./assets/windows-hngp6zp7.png" alt="" loading="lazy" />
+        </div>
+
+        <div class="hero-header">
+            <div class="col">
+                <h1>
+                    静境通津
+                </h1>
+            </div>
+            <div class="col">
+                <p>桥映水乡</p>
+                <h1>
+                    咫尺心安
+                </h1>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="tttise-footer-container">
+            <div id="tttise-footer-canvas"></div>
+
+            <div class="tttise-footer-content">
+                <div class="tttise-zhaozhou-bridge-header" aria-label="桥梁标题与简介">
+                    <h1 class="tttise-bridge-main-title">赵州桥</h1>
+                    <p class="tttise-bridge-subtitle">天下第一桥 · 千年石拱桥典范</p>
+
+                </div>
+                
+                <div class="tttise-zhaozhou-stage" id="tttise-zhaozhou-stage" aria-label="赵州桥信息可视化" data-active="">
+                    <div class="tttise-zhaozhou-left" aria-label="左侧信息展示">
+                        <section class="tttise-zhaozhou-module tttise-zhaozhou-module--author" aria-label="匠师信息">
+                            <div class="tttise-zhaozhou-module__cap">匠师</div>
+                            <div class="tttise-zhaozhou-module__title">李春</div>
+                            <div class="tttise-zhaozhou-module__meta">隋代著名工匠</div>
+                        </section>
+
+                        <section class="tttise-zhaozhou-module tttise-zhaozhou-module--intro" aria-label="桥梁历史简介">
+                            <div class="tttise-zhaozhou-module__cap">千年名桥</div>
+                            <div class="tttise-zhaozhou-module__title">赵州桥 · 安济桥</div>
+                            <div class="tttise-zhaozhou-module__meta">隋开皇年间（约595—605）营建 · 河北赵县</div>
+                            <div class="tttise-zhaozhou-module__grid">
+                                <div class="tttise-zhaozhou-module__kv">
+                                    <span class="tttise-zhaozhou-module__k">结构特征</span>
+                                    <span class="tttise-zhaozhou-module__v">单孔石拱为主拱，敞肩拱为辅拱，减轻自重，利于泄洪与分散应力。</span>
+                                </div>
+                                <div class="tttise-zhaozhou-module__kv">
+                                    <span class="tttise-zhaozhou-module__k">历史意义</span>
+                                    <span class="tttise-zhaozhou-module__v">中国桥梁建筑史的里程碑，结构逻辑与构造美感兼具标杆价值。</span>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="tttise-zhaozhou-title-right" aria-label="赵州桥诗句">
+                        <div class="tttise-zhaozhou-title-column">千年古韵</div>
+                        <div class="tttise-zhaozhou-title-column">石拱飞虹</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 返回首页按钮 -->
+        <button class="next-page-btn" onclick="window.location.href='/'" style="left: 20px; right: auto;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+            <span>返回首页</span>
+        </button>
+
+        <!-- 跳转第三页按钮 -->
+        <button class="next-page-btn" onclick="window.location.href='/atlas/'" style="right: 20px;">
+            <span>桥韵·图鉴</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </button>
+
+    </footer>
+
+</body>
+</html>

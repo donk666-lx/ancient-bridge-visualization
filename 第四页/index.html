@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国古代桥梁数据报告 · 水墨沉浸式</title>
+<script src="https://unpkg.com/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<style>
+/* RESET */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink-jiao:#0a0a0a;
+  --ink-nong:#1a1a1a;
+  --ink-zhong:#2d2d2d;
+  --ink-dan:#5a5a5a;
+  --ink-qing:#8a8a8a;
+  --xuan-bai:#f8f5f0;
+  --zhu-sha:#8b1a1a;
+  --border:#1a1a1a;
+  --border-light:#c8c0b4;
+  font-size:125%;
+}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Noto Serif SC','Songti SC',serif;
+  background:var(--xuan-bai);
+  color:var(--ink-nong);
+  overflow:hidden;
+  height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-blend-mode:multiply;
+  opacity:0.03;
+  pointer-events:none;
+  z-index:9998;
+}
+#scroll-wrap{
+  height:100vh;overflow-y:scroll;
+  scroll-snap-type:y mandatory;scroll-behavior:smooth;
+}
+#scroll-wrap::-webkit-scrollbar{width:3px;}
+#scroll-wrap::-webkit-scrollbar-track{background:transparent;}
+#scroll-wrap::-webkit-scrollbar-thumb{background:rgba(26,26,26,0.25);}
+section{
+  height:100vh;scroll-snap-align:start;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:1rem 0;background:var(--xuan-bai);
+}
+#nav-dots{
+  position:fixed;right:1.5rem;top:50%;transform:translateY(-50%);
+  z-index:999;display:flex;flex-direction:column;gap:.9rem;pointer-events:all;
+}
+#back-nav{
+  position:fixed;top:1.2rem;left:1.2rem;z-index:1000;
+  display:flex;gap:.6rem;pointer-events:all;
+}
+.back-btn{
+  display:flex;align-items:center;gap:.4rem;
+  padding:.35rem .8rem;border:1px solid var(--border-light);
+  background:rgba(248,245,240,0.9);backdrop-filter:blur(4px);
+  color:var(--ink-zhong);font-size:.65rem;letter-spacing:.1em;
+  font-family:'Noto Serif SC',serif;text-decoration:none;
+  transition:all .3s;cursor:pointer;
+}
+.back-btn:hover{
+  background:var(--ink-jiao);color:var(--xuan-bai);border-color:var(--ink-jiao);
+}
+.back-btn svg{width:12px;height:12px;}
+.nav-dot{
+  width:9px;height:9px;background:transparent;
+  border:1.9px solid var(--ink-qing);cursor:pointer;transition:all .3s;position:relative;
+}
+.nav-dot::after{
+  content:attr(data-label);position:absolute;right:calc(100% + 10px);top:50%;
+  transform:translateY(-50%);font-size:.64rem;color:var(--ink-dan);
+  white-space:nowrap;opacity:0;transition:opacity .2s;
+  font-family:'Noto Serif SC',serif;letter-spacing:.1em;
+}
+.nav-dot:hover::after{opacity:1;}
+.nav-dot.active{background:var(--ink-nong);border-color:var(--ink-nong);transform:scale(1.5);}
+#nav-progress{
+  position:fixed;left:0;top:0;width:2.5px;height:0%;
+  background:var(--ink-zhong);z-index:998;transition:height .3s;
+}
+.sec-title{
+  font-family:'Ma Shan Zheng','Noto Serif SC',serif;
+  font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:400;
+  color:var(--ink-jiao);text-align:center;margin-bottom:.4rem;
+  position:relative;display:inline-block;letter-spacing:.15em;
+}
+.sec-title::before{content:"【";color:var(--zhu-sha);margin-right:.4rem;font-size:.8em;}
+.sec-title::after{content:"】";color:var(--zhu-sha);margin-left:.4rem;font-size:.8em;}
+.sec-sub{font-size:.78rem;color:var(--ink-dan);text-align:center;letter-spacing:.2em;margin-bottom:0;}
+.sec-header{text-align:center;margin-bottom:1rem;}
+.ink-panel{background:rgba(248,245,240,0.95);border:1px solid var(--border-light);padding:.8rem;}
+.ink-panel h3{font-size:.72rem;color:var(--ink-dan);letter-spacing:.12em;margin-bottom:.5rem;font-weight:400;}
+/* Loading */
+#loading{
+  position:fixed;inset:0;background:var(--xuan-bai);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .8s,visibility .8s;
+}
+#loading.hidden{opacity:0;visibility:hidden;}
+.loading-ink-circle{
+  width:100px;height:100px;border:1.25px solid var(--ink-qing);border-radius:50%;
+  position:relative;margin-bottom:2.5rem;
+  animation:inkExpand 2s ease-in-out infinite;
+}
+.loading-ink-circle::before{
+  content:"";position:absolute;inset:8px;
+  border:1px solid var(--ink-zhong);border-radius:50%;
+  animation:inkExpand 2s ease-in-out infinite .3s;
+}
+.loading-ink-circle::after{
+  content:"墨";position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  font-family:'Ma Shan Zheng',serif;font-size:1.4rem;color:var(--ink-nong);
+}
+@keyframes inkExpand{0%,100%{opacity:.4;transform:scale(1);}50%{opacity:1;transform:scale(1.05);}}
+.loading-title{
+  font-size:.92rem;color:var(--ink-dan);letter-spacing:.5em;margin-bottom:1.5rem;
+  font-family:'Noto Serif SC',serif;
+}
+.loading-bar-wrap{width:200px;height:1.25px;background:var(--border-light);overflow:hidden;}
+.loading-bar{height:100%;width:0%;background:var(--ink-zhong);transition:width .05s linear;}
+.loading-pct{font-size:.75rem;color:var(--ink-qing);margin-top:.5rem;letter-spacing:.2em;}
+</style>
+<style>
+/* SECTION 1 COVER */
+#cover{background:var(--xuan-bai);color:var(--ink-jiao);}
+.ink-blob{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(10,10,10,0.055) 0%,transparent 65%);
+  animation:inkFloat 9s ease-in-out infinite;
+}
+@keyframes inkFloat{0%,100%{transform:translateY(0) scale(1);opacity:.4}50%{transform:translateY(-18px) scale(1.06);opacity:.8}}
+.cover-bridge-art{position:absolute;bottom:0;left:0;right:0;height:263px;opacity:.1;pointer-events:none;}
+.cover-content{
+  position:relative;z-index:5;text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+}
+.cover-badge{
+  font-size:.68rem;letter-spacing:.5em;color:var(--ink-dan);
+  border:1px solid var(--border-light);padding:.25rem 1rem;
+  margin-bottom:1.8rem;opacity:0;transform:translateY(20px);
+  font-family:'Noto Serif SC',serif;
+}
+.cover-main-title{
+  font-family:'Ma Shan Zheng',serif;
+  font-size:clamp(3rem,8vw,5.5rem);font-weight:400;line-height:1.15;
+  margin-bottom:.6rem;opacity:0;transform:translateY(30px);
+  color:var(--ink-jiao);letter-spacing:.05em;
+}
+.cover-main-title .cover-hl{color:var(--zhu-sha);position:relative;}
+.cover-main-title .cover-hl::after{
+  content:"";position:absolute;bottom:-3px;left:0;right:0;
+  height:1px;background:var(--zhu-sha);
+}
+.cover-tagline{
+  font-size:.82rem;letter-spacing:.45em;color:var(--ink-qing);
+  margin-bottom:1.6rem;opacity:0;font-family:'Noto Serif SC',serif;
+}
+.cover-divider{display:flex;align-items:center;gap:1.2rem;margin-bottom:1.8rem;opacity:0;}
+.cover-divider-line{width:75px;height:1.25px;background:var(--border-light);}
+.cover-divider-text{font-size:.65rem;letter-spacing:.3em;color:var(--ink-qing);font-family:'Noto Serif SC',serif;}
+.cover-stats{
+  display:flex;gap:0;margin-bottom:2rem;opacity:0;transform:translateY(20px);
+  border:1px solid var(--border-light);
+}
+.cover-stat{
+  text-align:center;padding:.8rem 1.8rem;
+  border-right:1px solid var(--border-light);
+}
+.cover-stat:last-child{border-right:none;}
+.cover-stat-n{
+  font-size:2.6rem;font-weight:700;color:var(--ink-jiao);line-height:1;
+  font-variant-numeric:tabular-nums;font-family:'Noto Serif SC',serif;
+}
+.cover-stat-sfx{font-size:.9rem;color:var(--ink-zhong);}
+.cover-stat-l{font-size:.68rem;letter-spacing:.2em;color:var(--ink-qing);margin-top:.3rem;}
+.cover-cta{opacity:0;transform:translateY(20px);}
+.cover-btn{
+  background:transparent;border:1px solid var(--ink-zhong);
+  color:var(--ink-nong);font-family:'Noto Serif SC',serif;
+  font-size:.85rem;letter-spacing:.35em;padding:.75rem 2.5rem;
+  cursor:pointer;transition:all .35s;position:relative;overflow:hidden;
+}
+.cover-btn::before{
+  content:"";position:absolute;inset:0;background:var(--ink-nong);
+  transform:translateX(-101%);transition:transform .35s;z-index:-1;
+}
+.cover-btn:hover{color:var(--xuan-bai);}
+.cover-btn:hover::before{transform:translateX(0);}
+.cover-scroll-hint{
+  position:absolute;bottom:1.8rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  color:var(--ink-qing);font-size:.62rem;letter-spacing:.22em;
+  animation:scrollBounce 2.5s ease-in-out infinite;font-family:'Noto Serif SC',serif;
+}
+@keyframes scrollBounce{
+  0%,100%{opacity:.3;transform:translateX(-50%) translateY(0)}
+  50%{opacity:.8;transform:translateX(-50%) translateY(6px)}
+}
+.scroll-arrow{width:15px;height:15px;border-right:1.25px solid var(--ink-qing);border-bottom:1.25px solid var(--ink-qing);transform:rotate(45deg);}
+.cover-seal{position:absolute;bottom:3rem;right:3rem;opacity:.6;}
+.seal{
+  display:inline-block;border:1.5px solid var(--zhu-sha);color:var(--zhu-sha);
+  font-size:.68rem;padding:.2rem .5rem;letter-spacing:.1em;
+  font-family:'Noto Serif SC',serif;position:relative;
+}
+.seal::before{content:"";position:absolute;inset:2px;border:.5px solid rgba(139,26,26,.3);}
+/* SECTION 2 REGIONAL */
+#regional{background:var(--xuan-bai);padding-top:5rem;}
+.r-header{text-align:center;margin-bottom:.6rem;}
+.r-layout{
+  width:100%;max-width:1380px;padding:0 2rem;
+  display:grid;grid-template-columns:1.1fr 0.9fr;gap:1.5rem;align-items:stretch;height:calc(100vh - 180px);
+}
+.r-left{display:flex;flex-direction:column;gap:.8rem;max-height:60vh;}
+.r-right{display:flex;flex-direction:column;gap:.8rem;max-height:60vh;}
+.r-panel{background:rgba(248,245,240,.95);border:1px solid var(--border-light);padding:.9rem;display:flex;flex-direction:column;}
+.r-panel h3{font-size:.8rem;color:var(--ink-dan);letter-spacing:.12em;margin-bottom:.5rem;font-weight:400;flex-shrink:0;}
+.r-map-wrap{flex:1;min-height:0;}
+.r-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;flex-shrink:0;min-height:0;}
+.r-stat-box{
+  background:var(--xuan-bai);border:1px solid var(--border-light);
+  border-top:2px solid var(--ink-nong);padding:.4rem;text-align:center;transition:transform .2s;min-height:60px;
+}
+.r-stat-box:hover{transform:translateY(-2px);}
+.rsb-n{font-size:1.2rem;font-weight:700;color:var(--ink-jiao);}
+.rsb-l{font-size:.7rem;color:var(--ink-dan);margin-top:.15rem;letter-spacing:.1em;}
+.r-pie-wrap{flex:1;min-height:0;}
+.r-bar-wrap{flex:1;min-height:0;}
+/* SECTION 3 TIMELINE */
+#timeline{background:var(--xuan-bai);}
+.tl-header{text-align:center;margin-bottom:1rem;}
+.tl-layout{width:100%;max-width:1380px;padding:0 2rem;}
+.dynasty-strip{
+  display:flex;margin-bottom:1rem;
+  border:1px solid var(--border-light);overflow:hidden;
+}
+.dyn-btn{
+  flex:1;padding:.55rem .2rem;background:var(--xuan-bai);
+  border:none;border-right:1px solid var(--border-light);
+  cursor:pointer;font-family:'Noto Serif SC',serif;
+  transition:all .25s;display:flex;flex-direction:column;align-items:center;gap:.15rem;
+}
+.dyn-btn:last-child{border-right:none;}
+.dyn-btn .dn{font-size:1.05rem;font-weight:700;color:var(--ink-zhong);}
+.dyn-btn .dc{font-size:.8rem;color:var(--ink-qing);}
+.dyn-btn:hover{background:rgba(10,10,10,.05);}
+.dyn-btn.active{background:var(--ink-nong);}
+.dyn-btn.active .dn{color:var(--xuan-bai);}
+.dyn-btn.active .dc{color:rgba(248,245,240,.7);}
+.tl-charts{display:grid;grid-template-columns:1.6fr 1fr;gap:1.2rem;}
+.tl-bar-panel{height:325px;background:rgba(248,245,240,.95);border:1px solid var(--border-light);padding:.7rem;}
+.tl-info-panel{background:rgba(248,245,240,.95);border:1px solid var(--border-light);padding:1rem;display:flex;flex-direction:column;}
+.dyn-card h4{font-size:.92rem;font-weight:700;color:var(--ink-jiao);margin-bottom:.3rem;}
+.dyn-tech-badge{
+  display:inline-block;background:var(--ink-nong);color:var(--xuan-bai);
+  font-size:.65rem;padding:.1rem .5rem;margin-bottom:.4rem;letter-spacing:.08em;
+}
+.dyn-card-desc{font-size:.73rem;color:var(--ink-zhong);line-height:1.8;margin-bottom:.5rem;}
+.dyn-tags{display:flex;flex-wrap:wrap;gap:.28rem;margin-bottom:.45rem;}
+.dyn-tag{background:transparent;border:1px solid var(--border-light);color:var(--ink-dan);font-size:.68rem;padding:.08rem .38rem;}
+.world-box{background:rgba(10,10,10,.04);border-left:2px solid var(--ink-zhong);padding:.38rem .6rem;}
+.world-box .wb-lbl{font-size:.65rem;color:var(--ink-dan);letter-spacing:.1em;}
+.world-box .wb-txt{font-size:.7rem;color:var(--ink-zhong);margin-top:.1rem;line-height:1.5;}
+/* SECTION 4 TYPES */
+#types{background:var(--xuan-bai);padding:36px 20px;}
+.ty-header{text-align:center;margin-bottom:1.8rem;}
+.ty-header h2{font-family:'Ma Shan Zheng',serif;font-size:2rem;color:var(--ink-jiao);letter-spacing:4px;margin:0 0 6px;font-weight:400;}
+.ty-header p{color:var(--ink-qing);font-size:.8rem;letter-spacing:2px;}
+.ty-layout{display:flex;gap:22px;align-items:stretch;max-width:1200px;margin:0 auto;min-height:600px;}
+.ty-radar-panel{flex:0 0 450px;background:rgba(248,245,240,.95);border:1px solid var(--border-light);padding:14px;display:flex;flex-direction:column;}
+.ty-radar-panel h3{text-align:center;color:var(--ink-dan);font-size:.8rem;letter-spacing:3px;margin:0 0 8px;font-weight:400;flex-shrink:0;}
+#ty-radar{width:100%;flex:1;min-height:0;}
+.ty-cards{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.ty-card{
+  background:rgba(248,245,240,.95);border:1px solid var(--border-light);
+  border-top:2px solid var(--ink-zhong);padding:16px 14px;cursor:pointer;
+  transition:transform .2s,border-top-color .2s;display:flex;flex-direction:column;
+}
+.ty-card:hover{transform:translateY(-3px);border-top-color:var(--zhu-sha);}
+.ty-card[data-t="4"]{grid-column:1/-1;flex:1;}
+.ty-card-icon{font-size:1.7rem;margin-bottom:5px;}
+.bridge-icon{font-family:'Ma Shan Zheng','Noto Serif SC',serif;font-size:1.9rem;color:var(--ink-jiao);display:inline-block;width:2.2rem;height:2.2rem;line-height:2.2rem;text-align:center;border:1.5px solid var(--ink-dan);border-radius:50%;background:rgba(10,10,10,.03);}
+.ty-card-name{font-size:.96rem;color:var(--ink-jiao);font-weight:700;margin-bottom:3px;}
+.ty-card-cnt{font-size:.78rem;color:var(--ink-dan);margin-bottom:6px;letter-spacing:.05em;}
+.ty-card-bar-bg{background:rgba(10,10,10,.08);height:3px;overflow:hidden;}
+.ty-card-bar{height:100%;background:var(--ink-zhong);transition:width .6s ease;}
+.ty-card-pct{font-size:.75rem;color:var(--ink-qing);margin-top:3px;}
+.ty-overlay{position:fixed;inset:0;background:rgba(10,10,10,.75);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.ty-overlay.open{opacity:1;pointer-events:all;}
+.ty-modal{background:var(--xuan-bai);border:1px solid var(--border-light);width:min(660px,92vw);max-height:80vh;overflow-y:auto;padding:26px;position:relative;transform:translateY(20px);transition:transform .3s;}
+.ty-overlay.open .ty-modal{transform:translateY(0);}
+.ty-modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--ink-qing);font-size:1.4rem;cursor:pointer;line-height:1;}
+.ty-modal-close:hover{color:var(--ink-jiao);}
+.ty-modal-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border-light);}
+.tm-icon{font-size:2.2rem;}
+.tm-name{font-size:1.25rem;color:var(--ink-jiao);font-weight:700;}
+.tm-cnt{font-size:.8rem;color:var(--ink-dan);margin-top:2px;}
+.ty-modal-section{margin-bottom:13px;}
+.tm-label{font-size:.72rem;color:var(--ink-qing);letter-spacing:2px;margin-bottom:5px;}
+.tm-desc{color:var(--ink-zhong);font-size:.84rem;line-height:1.75;}
+.tm-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tm-tag{border:1px solid var(--border-light);color:var(--ink-dan);font-size:.77rem;padding:3px 8px;}
+.prov-bridge-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:9px;margin-top:4px;}
+.pbi{padding:9px 10px;background:rgba(10,10,10,.04);border-left:3px solid var(--ink-zhong);}
+.pbi-name{font-size:.9rem;color:var(--ink-jiao);font-weight:700;}
+.pbi-meta{font-size:.76rem;color:var(--ink-dan);margin-top:3px;line-height:1.5;}
+.pbi-status{font-size:.68rem;color:var(--ink-qing);margin-top:4px;}
+.pbi-source{font-size:.65rem;color:var(--ink-dan);margin-top:5px;opacity:.75;line-height:1.4;word-break:break-all;}
+.prov-empty{color:var(--ink-qing);font-size:.85rem;padding:20px 0;text-align:center;grid-column:1/-1;}
+.tm-exs{display:flex;flex-direction:column;gap:5px;}
+.tm-ex-item{background:rgba(10,10,10,.04);border-left:2px solid var(--ink-zhong);padding:5px 10px;font-size:.8rem;color:var(--ink-zhong);}
+.tm-princ{color:var(--ink-dan);font-size:.8rem;line-height:1.65;font-style:italic;}
+@media(max-width:700px){.ty-layout{flex-direction:column;}.ty-radar-panel{flex:none;width:100%;}.ty-cards{grid-template-columns:1fr;}}
+/* SECTION 5 CULTURE */
+#culture{min-height:100vh;background:var(--xuan-bai);padding:2.5rem 2rem 3rem;box-sizing:border-box;}
+.s5-inner{max-width:1380px;margin:0 auto;}
+#culture .sec-header{text-align:center;margin-bottom:1.8rem;}
+#culture .sec-title{font-family:'Ma Shan Zheng',serif;font-size:2rem;font-weight:400;color:var(--ink-jiao);letter-spacing:.18em;display:inline-block;}
+#culture .sec-title::before{content:"【";color:var(--zhu-sha);margin-right:.4rem;font-size:.8em;}
+#culture .sec-title::after{content:"】";color:var(--zhu-sha);margin-left:.4rem;font-size:.8em;}
+#culture .sec-sub{margin-top:.5rem;font-size:.82rem;color:var(--ink-dan);letter-spacing:.25em;}
+.s5-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:1.5rem;align-items:end;height:80vh;}
+.s5-left{display:flex;flex-direction:column;gap:.3rem;height:100%;}
+.s5-right{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;justify-content:flex-end;}
+.s5-wc-wrap{background:rgba(248,245,240,.95);border:1px solid var(--border-light);padding:1rem;flex:1;min-height:180px;display:flex;flex-direction:column;}
+.s5-wc-label{font-size:.9rem;color:var(--ink-dan);letter-spacing:.2em;margin-bottom:.8rem;}
+.s5-wc-container{position:relative;flex:1;overflow:hidden;width:100%;}
+.s5-wc-container span{position:absolute;cursor:pointer;line-height:1.2;transition:opacity .25s,transform .25s;user-select:none;white-space:nowrap;}
+.s5-wc-container span:hover{opacity:.65!important;transform:scale(1.1)!important;z-index:10;}
+.s5-sankey-wrap{background:rgba(248,245,240,.95);border:1px solid var(--border-light);padding:1rem;height:280px;display:flex;flex-direction:column;flex-shrink:0;margin-top:auto;}
+.s5-sankey-label{font-size:.9rem;color:var(--ink-dan);letter-spacing:.2em;margin-bottom:.6rem;}
+#chart-sankey{width:100%;height:240px;}
+.s5-stories-header{font-size:.95rem;color:var(--ink-dan);letter-spacing:.2em;margin-bottom:.8rem;padding-left:.2rem;}
+.s5-stories-scroll{flex:1;overflow-y:auto;padding-right:.5rem;display:flex;flex-direction:column;gap:.85rem;min-height:0;}
+.s5-stories-scroll::-webkit-scrollbar{width:3px;}
+.s5-stories-scroll::-webkit-scrollbar-track{background:rgba(10,10,10,.05);}
+.s5-stories-scroll::-webkit-scrollbar-thumb{background:rgba(10,10,10,.18);}
+.s5-card{background:rgba(248,245,240,.95);border:1px solid var(--border-light);padding:1.3rem 1.4rem;transition:border-color .3s;opacity:0;transform:translateY(16px);flex-shrink:0;}
+.s5-card.s5-visible{opacity:1;transform:translateY(0);}
+.s5-card:hover{border-color:var(--ink-zhong);}
+.s5-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;}
+.s5-card-title{font-size:1.3rem;font-weight:700;color:var(--ink-jiao);letter-spacing:.06em;}
+.s5-dynasty-badge{font-size:.85rem;padding:.2rem .6rem;border:1px solid var(--border-light);color:var(--ink-dan);letter-spacing:.1em;}
+.s5-poem{color:var(--ink-zhong);font-size:1.05rem;line-height:1.7;border-left:2px solid var(--ink-qing);padding-left:.75rem;margin-bottom:.8rem;letter-spacing:.04em;font-style:italic;}
+.s5-story-body{font-size:1rem;line-height:1.9;color:var(--ink-zhong);text-align:justify;}
+.s5-card.s5-highlighted{border-color:var(--zhu-sha);background:rgba(139,26,26,.04);}
+@media(max-width:900px){.s5-grid{grid-template-columns:1fr;}.s5-stories-scroll{max-height:none;}}
+/* SECTION 6 SUMMARY */
+#summary{
+  position:relative;min-height:100vh;background:var(--ink-jiao);
+  color:var(--xuan-bai);overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;
+  padding:65px 24px 48px;box-sizing:border-box;
+}
+#summary::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:.04;pointer-events:none;
+}
+#summary-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+.s6-inner{position:relative;z-index:1;width:100%;max-width:1080px;display:flex;flex-direction:column;align-items:center;gap:44px;}
+.s6-header{text-align:center;}
+.s6-badge{display:inline-block;color:var(--ink-qing);font-size:.8rem;letter-spacing:.38em;margin-bottom:14px;}
+.s6-main-title{font-family:'Ma Shan Zheng',serif;font-size:clamp(2rem,5vw,2.8rem);color:var(--xuan-bai);font-weight:400;letter-spacing:.12em;margin:0 0 12px;line-height:1.2;}
+.s6-subtitle{font-size:.98rem;color:var(--ink-dan);letter-spacing:.12em;margin:0;}
+.s6-cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;}
+@media(max-width:768px){.s6-cards-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.s6-cards-grid{grid-template-columns:1fr;}}
+.s6-card{
+  background:rgba(248,245,240,.06);border:1px solid rgba(248,245,240,.15);
+  border-top:2px solid rgba(248,245,240,.35);
+  padding:22px 18px 18px;display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  transition:background .3s,transform .3s;opacity:0;transform:translateY(24px);
+}
+.s6-card:hover{background:rgba(248,245,240,.1);transform:translateY(-3px);}
+.s6-card-icon{font-size:1.7rem;line-height:1;}
+.s6-card-label{font-size:.76rem;color:var(--ink-qing);letter-spacing:.12em;margin:0;}
+.s6-card-name{font-size:1.1rem;color:var(--xuan-bai);font-weight:700;margin:0;letter-spacing:.05em;}
+.s6-card-desc{font-size:.8rem;color:rgba(248,245,240,.5);line-height:1.6;margin:0;}
+.s6-stats-row{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:32px 48px;width:100%;
+  padding:26px 0;
+  border-top:1px solid rgba(248,245,240,.12);
+  border-bottom:1px solid rgba(248,245,240,.12);
+}
+.s6-stat-item{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.s6-stat-number{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;color:var(--xuan-bai);line-height:1;font-variant-numeric:tabular-nums;}
+.s6-stat-label{font-size:.76rem;color:var(--ink-dan);letter-spacing:.12em;}
+.s6-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+.s6-btn{
+  display:inline-flex;align-items:center;gap:7px;padding:11px 28px;
+  font-family:'Noto Serif SC',serif;font-size:.88rem;letter-spacing:.08em;cursor:pointer;
+  transition:all .25s;border:none;outline:none;
+}
+.s6-btn-primary{background:var(--xuan-bai);color:var(--ink-jiao);font-weight:700;}
+.s6-btn-primary:hover{background:rgba(248,245,240,.85);}
+.s6-btn-secondary{background:transparent;color:rgba(248,245,240,.65);border:1px solid rgba(248,245,240,.25);}
+.s6-btn-secondary:hover{border-color:rgba(248,245,240,.65);color:var(--xuan-bai);}
+.s6-quote{font-size:.84rem;color:var(--ink-dan);text-align:center;letter-spacing:.06em;line-height:1.9;max-width:500px;padding:0 16px;font-style:italic;}
+.s6-poster-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.s6-poster-modal.s6-open{display:flex;}
+.s6-poster-modal img{max-width:90vw;max-height:70vh;border:1px solid rgba(248,245,240,.25);}
+.s6-poster-modal-actions{display:flex;gap:12px;}
+.s6-poster-modal-close{position:absolute;top:18px;right:24px;font-size:1.8rem;color:var(--ink-qing);cursor:pointer;line-height:1;background:none;border:none;padding:4px 8px;transition:color .2s;}
+.s6-poster-modal-close:hover{color:var(--xuan-bai);}
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading">
+  <div class="loading-ink-circle"></div>
+  <div class="loading-title">中国古代桥梁数据报告</div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  <div class="loading-pct" id="loading-pct">0%</div>
+</div>
+
+<!-- Progress bar -->
+<div id="nav-progress"></div>
+
+<!-- Back Navigation -->
+<div id="back-nav">
+  <a href="/atlas/" class="back-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    <span>返回图鉴</span>
+  </a>
+  <a href="/" class="back-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>返回首页</span>
+  </a>
+</div>
+
+<!-- Navigation Dots -->
+<div id="nav-dots">
+  <div class="nav-dot active" data-idx="0" data-label="封面" onclick="scrollToSection(0)"></div>
+  <div class="nav-dot" data-idx="1" data-label="地域分布" onclick="scrollToSection(1)"></div>
+  <div class="nav-dot" data-idx="2" data-label="历史时间" onclick="scrollToSection(2)"></div>
+  <div class="nav-dot" data-idx="3" data-label="结构类型" onclick="scrollToSection(3)"></div>
+  <div class="nav-dot" data-idx="4" data-label="文化价值" onclick="scrollToSection(4)"></div>
+  <div class="nav-dot" data-idx="5" data-label="彩蛋总结" onclick="scrollToSection(5)"></div>
+</div>
+
+<!-- Main Scroll Wrapper -->
+<div id="scroll-wrap">
+
+<!-- ===== SECTION 1: COVER ===== -->
+<section id="cover">
+  <!-- Ink wash atmosphere blobs -->
+  <div class="ink-blob" style="width:875px;height:875px;top:-313px;left:-313px;animation-delay:0s"></div>
+  <div class="ink-blob" style="width:625px;height:625px;bottom:-225px;right:-163px;animation-delay:2.5s"></div>
+  <div class="ink-blob" style="width:438px;height:438px;top:20%;right:10%;animation-delay:4.5s"></div>
+  <div class="ink-blob" style="width:313px;height:313px;top:35%;left:8%;animation-delay:6s"></div>
+
+  <!-- Zhao Zhou Bridge SVG line art (水墨单线描) -->
+  <svg class="cover-bridge-art" viewBox="0 0 1400 210" preserveAspectRatio="xMidYMid meet">
+    <!-- Water ripples -->
+    <ellipse cx="700" cy="195" rx="680" ry="8" fill="none" stroke="#1a1a1a" stroke-width="0.5" opacity="0.4"/>
+    <ellipse cx="700" cy="202" rx="600" ry="5" fill="none" stroke="#1a1a1a" stroke-width="0.4" opacity="0.25"/>
+    <!-- Main arch bridge silhouette - Zhao Zhou style single arch -->
+    <path d="M100,170 L300,170 Q500,40 700,170 Q900,40 1100,170 L1300,170" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+    <!-- Deck -->
+    <line x1="100" y1="170" x2="1300" y2="170" stroke="#1a1a1a" stroke-width="1"/>
+    <!-- Spandrel arches (敞肩拱) -->
+    <path d="M300,170 Q360,130 420,170" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <path d="M980,170 Q1040,130 1100,170" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <!-- Abutments -->
+    <rect x="90" y="168" width="20" height="30" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <rect x="1290" y="168" width="20" height="30" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <!-- Parapet details -->
+    <line x1="100" y1="158" x2="1300" y2="158" stroke="#1a1a1a" stroke-width="0.5"/>
+    <!-- Vertical posts -->
+    <line x1="200" y1="158" x2="200" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <line x1="350" y1="158" x2="350" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <line x1="500" y1="158" x2="500" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <line x1="650" y1="158" x2="650" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <line x1="750" y1="158" x2="750" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <line x1="900" y1="158" x2="900" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <line x1="1050" y1="158" x2="1050" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <line x1="1200" y1="158" x2="1200" y2="170" stroke="#1a1a1a" stroke-width="0.5"/>
+    <!-- Mountain hints in background -->
+    <path d="M0,210 L80,120 L160,190 L240,95 L320,175 L400,210" fill="none" stroke="#1a1a1a" stroke-width="0.5" opacity="0.3"/>
+    <path d="M1000,210 L1100,140 L1180,200 L1280,110 L1360,190 L1400,210" fill="none" stroke="#1a1a1a" stroke-width="0.5" opacity="0.3"/>
+  </svg>
+
+  <div class="cover-content">
+    <div class="cover-badge">中国古代桥梁数据集 · 综合文献整理</div>
+    <h1 class="cover-main-title">
+      中国古代<span class="cover-hl">桥梁</span><br>数据报告
+    </h1>
+    <p class="cover-tagline">因地制宜 · 文用合一 · 千年匠心</p>
+    <div class="cover-divider">
+      <span class="cover-divider-line"></span>
+      <span class="cover-divider-text">DATA VISUALIZATION · 数字文化遗产</span>
+      <span class="cover-divider-line"></span>
+    </div>
+    <div class="cover-stats">
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-bridges">0</span><span class="cover-stat-sfx">座</span></div>
+        <div class="cover-stat-l">代表性古桥</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-dynasties">0</span></div>
+        <div class="cover-stat-l">历史朝代</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-provinces">0</span></div>
+        <div class="cover-stat-l">省份覆盖</div>
+      </div>
+      <div class="cover-stat">
+        <div class="cover-stat-n"><span id="cnt-years">0</span><span class="cover-stat-sfx">+</span></div>
+        <div class="cover-stat-l">年历史跨度</div>
+      </div>
+    </div>
+    <div class="cover-cta">
+      <button class="cover-btn" onclick="scrollToSection(1)">开启报告 →</button>
+    </div>
+  </div>
+  <div class="cover-scroll-hint">
+    <div class="scroll-arrow"></div>
+    <span>向下滚动</span>
+  </div>
+  <!-- Red seal stamp -->
+  <div class="cover-seal">
+    <div class="seal">文化遗产</div>
+  </div>
+</section>
+
+<!-- ===== SECTION 2: REGIONAL ===== -->
+<section id="regional">
+  <div class="r-header">
+    <h2 class="sec-title">地域分布篇</h2>
+    <p class="sec-sub">山川为骨，水系为脉 · 古桥全国分布图谱</p>
+  </div>
+  <div class="r-layout">
+    <div class="r-left">
+      <div class="r-panel r-map-wrap">
+        <h3>各省古桥数量热力图（点击省份查看详情）</h3>
+        <div id="chart-map" style="height:calc(100% - 1.5rem)"></div>
+      </div>
+      <div class="r-stat-row">
+        <div class="r-stat-box"><div class="rsb-n">华东</div><div class="rsb-l">数量最多 · 38座</div></div>
+        <div class="r-stat-box"><div class="rsb-n">浙江</div><div class="rsb-l">省份第一 · 14座</div></div>
+        <div class="r-stat-box"><div class="rsb-n">28省</div><div class="rsb-l">地理覆盖</div></div>
+      </div>
+    </div>
+    <div class="r-right">
+      <div class="r-panel r-pie-wrap">
+        <h3>七大地理分区（双层环形）</h3>
+        <div id="chart-region-pie" style="height:calc(100% - 1.5rem)"></div>
+      </div>
+      <div class="r-panel r-bar-wrap">
+        <h3>省份古桥数量 Top 28</h3>
+        <div id="chart-province-bar" style="height:calc(100% - 1.5rem)"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 3: TIMELINE ===== -->
+<section id="timeline">
+  <div class="tl-header">
+    <h2 class="sec-title">历史时间篇</h2>
+    <p class="sec-sub">千年建桥史 · 朝代技术演进与世界对比</p>
+  </div>
+  <div class="tl-layout">
+    <div class="dynasty-strip" id="dynasty-strip">
+      <button class="dyn-btn active" data-idx="0"><span class="dn">战国</span><span class="dc">1座</span></button>
+      <button class="dyn-btn" data-idx="1"><span class="dn">秦汉</span><span class="dc">4座</span></button>
+      <button class="dyn-btn" data-idx="2"><span class="dn">东晋</span><span class="dc">2座</span></button>
+      <button class="dyn-btn" data-idx="3"><span class="dn">隋</span><span class="dc">5座</span></button>
+      <button class="dyn-btn" data-idx="4"><span class="dn">唐</span><span class="dc">11座</span></button>
+      <button class="dyn-btn" data-idx="5"><span class="dn">宋</span><span class="dc">29座</span></button>
+      <button class="dyn-btn" data-idx="6"><span class="dn">辽金</span><span class="dc">3座</span></button>
+      <button class="dyn-btn" data-idx="7"><span class="dn">元</span><span class="dc">3座</span></button>
+      <button class="dyn-btn" data-idx="8"><span class="dn">明</span><span class="dc">22座</span></button>
+      <button class="dyn-btn" data-idx="9"><span class="dn">清</span><span class="dc">20座</span></button>
+    </div>
+    <div class="tl-charts">
+      <div class="tl-bar-panel"><div id="chart-dynasty-bar" style="height:100%"></div></div>
+      <div class="tl-info-panel">
+        <div class="dyn-card" id="dyn-card">
+          <h4 id="dyn-title">战国时期（前475—前221）</h4>
+          <span class="dyn-tech-badge" id="dyn-tech">早期石梁桥技术</span>
+          <p class="dyn-card-desc" id="dyn-desc">战国时期已有石梁桥建造记录，灵渠及相关水利工程的修建为后代大规模桥梁建设积累了经验。</p>
+          <div class="dyn-tags" id="dyn-tags">
+            <span class="dyn-tag">石材加工</span><span class="dyn-tag">水利工程</span><span class="dyn-tag">桥梁萌芽</span>
+          </div>
+          <div class="world-box">
+            <div class="wb-lbl">同期世界</div>
+            <div class="wb-txt" id="dyn-world">希腊古典时期，罗马开始修建军事道路网络</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 4: TYPES ===== -->
+<section id="types">
+  <div class="ty-header">
+    <h2>【结构类型篇】</h2>
+    <p>BRIDGE STRUCTURE TYPOLOGY · 五种桥型解析</p>
+  </div>
+  <div class="ty-layout">
+    <div class="ty-radar-panel">
+      <h3>类型特征雷达图</h3>
+      <div id="ty-radar"></div>
+    </div>
+    <div class="ty-cards" id="ty-cards">
+      <div class="ty-card" data-t="0">
+        <div class="ty-card-icon"><span class="bridge-icon arch">拱</span></div>
+        <div class="ty-card-name">石拱桥</div>
+        <div class="ty-card-cnt">66座 · 66%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:66%"></div></div>
+        <div class="ty-card-pct">66%</div>
+      </div>
+      <div class="ty-card" data-t="1">
+        <div class="ty-card-icon"><span class="bridge-icon beam">梁</span></div>
+        <div class="ty-card-name">石梁桥</div>
+        <div class="ty-card-cnt">18座 · 18%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:18%"></div></div>
+        <div class="ty-card-pct">18%</div>
+      </div>
+      <div class="ty-card" data-t="2">
+        <div class="ty-card-icon"><span class="bridge-icon corridor">廊</span></div>
+        <div class="ty-card-name">廊桥</div>
+        <div class="ty-card-cnt">7座 · 7%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:7%"></div></div>
+        <div class="ty-card-pct">7%</div>
+      </div>
+      <div class="ty-card" data-t="3">
+        <div class="ty-card-icon"><span class="bridge-icon chain">索</span></div>
+        <div class="ty-card-name">铁索桥</div>
+        <div class="ty-card-cnt">4座 · 4%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:4%"></div></div>
+        <div class="ty-card-pct">4%</div>
+      </div>
+      <div class="ty-card" data-t="4" style="grid-column:1/-1">
+        <div class="ty-card-icon"><span class="bridge-icon float">浮</span></div>
+        <div class="ty-card-name">浮桥/木桥</div>
+        <div class="ty-card-cnt">5座 · 5%</div>
+        <div class="ty-card-bar-bg"><div class="ty-card-bar" style="width:5%"></div></div>
+        <div class="ty-card-pct">5%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 5: CULTURE ===== -->
+<section id="culture">
+  <div class="s5-inner">
+    <div class="sec-header">
+      <div class="sec-title">文化价值篇</div>
+      <div class="sec-sub">千年匠心 · 诗桥合一 · 文化传承</div>
+    </div>
+    <div class="s5-grid">
+      <div class="s5-left">
+        <div class="s5-wc-wrap">
+          <div class="s5-wc-label">关键词云 · 点击跳转故事</div>
+          <div class="s5-wc-container" id="s5-wordcloud"></div>
+        </div>
+        <div class="s5-sankey-wrap">
+          <div class="s5-sankey-label">材料 → 桥型 · 建造关联图</div>
+          <div id="chart-sankey"></div>
+        </div>
+      </div>
+      <div class="s5-right">
+        <div class="s5-stories-header">传奇故事 · 共 8 篇</div>
+        <div class="s5-stories-scroll" id="s5-stories-scroll">
+          <div class="s5-card" id="s5-card-0" data-keywords="赵州桥,李春,敞肩拱,隋代">
+            <div class="s5-card-header">
+              <div class="s5-card-title">赵州桥的传说</div>
+              <div class="s5-dynasty-badge">隋</div>
+            </div>
+            <div class="s5-poem">「百尺高虹横水面，一弯新月出云霄」</div>
+            <div class="s5-story-body">工匠李春设计赵州桥，传说鲁班曾化身老人前来考验，赵州桥建成后历经多次洪水、地震而屹立不倒。桥面的仙迹（驴蹄印、车辙）被认为是神仙过桥的痕迹，成为民间传说的核心。这座敞肩拱桥比欧洲同类设计早800年，展现了隋代工匠的卓越智慧。</div>
+          </div>
+          <div class="s5-card" id="s5-card-1" data-keywords="枫桥夜泊,唐代,诗词,文人">
+            <div class="s5-card-header">
+              <div class="s5-card-title">枫桥夜泊</div>
+              <div class="s5-dynasty-badge">唐</div>
+            </div>
+            <div class="s5-poem">「姑苏城外寒山寺，夜半钟声到客船」</div>
+            <div class="s5-story-body">唐天宝年间，张继科举落第，夜泊枫桥，听寒山寺钟声，写下《枫桥夜泊》。这首诗让一座普通小桥名扬千古，成为江南水乡的永恒符号。千年后，日本两次重建「唐诗之路」，专为凭吊枫桥意境而来。</div>
+          </div>
+          <div class="s5-card" id="s5-card-2" data-keywords="卢沟桥,燕京八景,千年">
+            <div class="s5-card-header">
+              <div class="s5-card-title">卢沟桥的石狮</div>
+              <div class="s5-dynasty-badge">金</div>
+            </div>
+            <div class="s5-poem">「卢沟桥上多石狮，大小不同各异姿」</div>
+            <div class="s5-story-body">卢沟桥485只石狮，形态各异，无一相同。明代官员记载，数狮子数不清，「卢沟桥的狮子——数不清」成为北京著名歇后语。1937年七七事变在此爆发，卢沟桥成为中国全面抗战的历史起点，桥上每一只石狮都见证了那个悲壮的夜晚。</div>
+          </div>
+          <div class="s5-card" id="s5-card-3" data-keywords="洛阳桥,牡蛎固基,筏形基础,宋代">
+            <div class="s5-card-header">
+              <div class="s5-card-title">洛阳桥的牡蛎工程</div>
+              <div class="s5-dynasty-badge">宋</div>
+            </div>
+            <div class="s5-poem">「化蛎为基千古奇，筏形墩脚立江湄」</div>
+            <div class="s5-story-body">蔡襄主持建造洛阳桥时，面对软泥海底的难题，首创「筏形基础」——在水下堆砌大量石块形成船型基础，并在其上人工养殖牡蛎，让牡蛎将石块胶结成整体。这是人类历史上最早将生物工程用于桥梁建设的案例，比现代仿生工程早近千年。</div>
+          </div>
+          <div class="s5-card" id="s5-card-4" data-keywords="广济桥,浮桥,宋代,石梁">
+            <div class="s5-card-header">
+              <div class="s5-card-title">广济桥的十八梭船</div>
+              <div class="s5-dynasty-badge">宋</div>
+            </div>
+            <div class="s5-poem">「十八梭船廿四洲，十里长桥跨彼流」</div>
+            <div class="s5-story-body">广济桥中段以18只木船并列连接两段石桥，白天通航时拉开浮桥让船只通过，夜晚重新合拢。这一「启闭式」设计让广济桥成为世界最早的开合桥，其每日开合的壮观景象吸引了无数文人墨客前来观赏记录。</div>
+          </div>
+          <div class="s5-card" id="s5-card-5" data-keywords="程阳风雨桥,榫卯,侗族,廊桥">
+            <div class="s5-card-header">
+              <div class="s5-card-title">程阳风雨桥的榫卯奇迹</div>
+              <div class="s5-dynasty-badge">清</div>
+            </div>
+            <div class="s5-poem">「无钉无铆结天工，侗寨风情画桥中」</div>
+            <div class="s5-story-body">程阳桥由侗族工匠纯手工建造，全程无一颗铁钉，全靠榫卯结构咬合。侗族没有文字，建桥技艺全靠口传身授，代代相承。桥上的5座楼亭19个桥亭，每个细节都暗含侗族对自然与神灵的敬畏，是活着的文化遗产。</div>
+          </div>
+          <div class="s5-card" id="s5-card-6" data-keywords="泸定桥,铁索,清代,茶马古道">
+            <div class="s5-card-header">
+              <div class="s5-card-title">泸定桥的铁链之约</div>
+              <div class="s5-dynasty-badge">清</div>
+            </div>
+            <div class="s5-poem">「大渡桥横铁索寒，飞夺泸定英雄胆」</div>
+            <div class="s5-story-body">康熙年间修建泸定桥时，13根铁链共重约40吨，从康定运至泸定，翻越二郎山，历时数月才完成铁链穿江的壮举。1935年，红军飞夺泸定桥，战士们抓着铁索匍匐前进，用生命诠释了革命精神。泸定桥从此成为中国近现代史的精神丰碑。</div>
+          </div>
+          <div class="s5-card" id="s5-card-7" data-keywords="唐东杰布,铁索桥,藏族,藏戏,世界遗产,茶马古道">
+            <div class="s5-card-header">
+              <div class="s5-card-title">唐东杰布的藏戏筹资</div>
+              <div class="s5-dynasty-badge">明</div>
+            </div>
+            <div class="s5-poem">「铁索跨江连两岸，藏戏筹资建桥传」</div>
+            <div class="s5-story-body">唐东杰布为在藏区修建铁索桥方便百姓，创立藏戏以筹集资金，一生在雅鲁藏布江等河流上建造铁索桥58座，被藏人尊为「铁桥活佛」。他以艺术服务工程建设的创举，开创了人类文明史上独特的先例，藏戏也因此成为世界非物质文化遗产。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 6: SUMMARY ===== -->
+<section id="summary">
+  <canvas id="summary-canvas"></canvas>
+
+  <!-- Bridge silhouette row at bottom -->
+  <svg style="position:absolute;bottom:0;left:0;right:0;height:100px;opacity:0.07;pointer-events:none;" viewBox="0 0 1400 100" preserveAspectRatio="xMidYMid meet">
+    <path d="M0,80 Q100,30 200,80 Q300,30 400,80 Q450,10 500,80 Q550,30 600,80 Q700,20 800,80 Q900,30 1000,80 Q1050,10 1100,80 Q1150,30 1200,80 Q1300,40 1400,80 L1400,100 L0,100 Z" fill="var(--xuan-bai)"/>
+    <line x1="0" y1="80" x2="1400" y2="80" stroke="var(--xuan-bai)" stroke-width="1"/>
+  </svg>
+
+  <div class="s6-inner">
+    <header class="s6-header">
+      <p class="s6-badge">· 千年桥史 ·</p>
+      <h2 class="s6-main-title">千年匠心 数字刻碑</h2>
+      <p class="s6-subtitle">中国古代桥梁的历史印记</p>
+    </header>
+
+    <div class="s6-cards-grid" id="s6-cards-grid">
+      <div class="s6-card">
+        <span class="s6-card-icon"><span class="bridge-icon ancient">古</span></span>
+        <p class="s6-card-label">最古老</p>
+        <p class="s6-card-name">赵州桥</p>
+        <p class="s6-card-desc">公元605年建造，距今约1420年</p>
+      </div>
+      <div class="s6-card">
+        <span class="s6-card-icon"><span class="bridge-icon long">长</span></span>
+        <p class="s6-card-label">最长石梁</p>
+        <p class="s6-card-name">安平桥</p>
+        <p class="s6-card-desc">全长2255米，五里石桥横卧闽南</p>
+      </div>
+      <div class="s6-card">
+        <span class="s6-card-icon"><span class="bridge-icon sea">海</span></span>
+        <p class="s6-card-label">首座海港</p>
+        <p class="s6-card-name">洛阳桥</p>
+        <p class="s6-card-desc">1059年建成，筏形基础世界首创</p>
+      </div>
+      <div class="s6-card">
+        <span class="s6-card-icon"><span class="bridge-icon heavy">重</span></span>
+        <p class="s6-card-label">最重石梁</p>
+        <p class="s6-card-name">虎渡桥</p>
+        <p class="s6-card-desc">单块石梁重达200余吨</p>
+      </div>
+      <div class="s6-card">
+        <span class="s6-card-icon"><span class="bridge-icon mortise">榫</span></span>
+        <p class="s6-card-label">无钉铆构</p>
+        <p class="s6-card-name">程阳风雨桥</p>
+        <p class="s6-card-desc">全木榫卯，侗族建筑巅峰</p>
+      </div>
+      <div class="s6-card">
+        <span class="s6-card-icon"><span class="bridge-icon beauty">美</span></span>
+        <p class="s6-card-label">最美廊桥</p>
+        <p class="s6-card-name">泰顺芙蓉桥</p>
+        <p class="s6-card-desc">清代木构，世界最美廊桥之誉</p>
+      </div>
+    </div>
+
+    <div class="s6-stats-row">
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-bridges">0</span></span>
+        <span class="s6-stat-label">座古桥</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-dynasties">0</span></span>
+        <span class="s6-stat-label">个朝代</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-types">0</span></span>
+        <span class="s6-stat-label">种类型</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-provinces">0</span></span>
+        <span class="s6-stat-label">个省份</span>
+      </div>
+      <div class="s6-stat-item">
+        <span class="s6-stat-number"><span id="s6-cnt-years">0</span></span>
+        <span class="s6-stat-label">年历史</span>
+      </div>
+    </div>
+
+    <div class="s6-actions">
+      <button class="s6-btn s6-btn-primary" onclick="generatePoster()">&#128444; 生成分享海报</button>
+      <button class="s6-btn s6-btn-secondary" onclick="scrollToSection(0)">&#8593; 回到封面</button>
+    </div>
+
+    <p class="s6-quote">
+      「以桥为证，文明延续；匠心所至，千年不朽。」
+    </p>
+  </div>
+
+  <div class="s6-poster-modal" id="s6-poster-modal">
+    <button class="s6-poster-modal-close" onclick="s6ClosePosterModal()" title="关闭">&#215;</button>
+    <img id="s6-poster-img" src="" alt="分享海报" />
+    <div class="s6-poster-modal-actions">
+      <a id="s6-poster-download" class="s6-btn s6-btn-primary" download="bridges-report.png">&#8595; 下载海报</a>
+      <button class="s6-btn s6-btn-secondary" onclick="s6ClosePosterModal()">关闭</button>
+    </div>
+  </div>
+</section>
+
+</div><!-- /scroll-wrap -->
+
+<!-- Types Modal -->
+<div class="ty-overlay" id="ty-overlay" onclick="if(event.target===this)closeTyModal()">
+  <div class="ty-modal">
+    <button class="ty-modal-close" onclick="closeTyModal()">&#x2715;</button>
+    <div class="ty-modal-head">
+      <div class="tm-icon" id="tm-icon"></div>
+      <div>
+        <div class="tm-name" id="tm-name"></div>
+        <div class="tm-cnt" id="tm-cnt"></div>
+      </div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">概述</div>
+      <div class="tm-desc" id="tm-desc"></div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">核心技法</div>
+      <div class="tm-tags" id="tm-tags"></div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">代表案例</div>
+      <div class="tm-exs" id="tm-exs"></div>
+    </div>
+    <div class="ty-modal-section">
+      <div class="tm-label">力学原理</div>
+      <div class="tm-princ" id="tm-princ"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Province Detail Modal -->
+<div class="ty-overlay" id="prov-overlay" onclick="if(event.target===this)closeProvModal()">
+  <div class="ty-modal" style="width:min(720px,94vw)">
+    <button class="ty-modal-close" onclick="closeProvModal()">&#x2715;</button>
+    <div class="ty-modal-head">
+      <div class="tm-icon">&#x5730;&#x56fe;</div>
+      <div>
+        <div class="tm-name" id="prov-title"></div>
+        <div class="tm-cnt" id="prov-cnt"></div>
+      </div>
+    </div>
+    <div id="prov-bridge-list" class="prov-bridge-list"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CORE: Scroll, Navigation, Section Lifecycle
+// ============================================================
+gsap.registerPlugin(ScrollTrigger);
+
+const wrap = document.getElementById('scroll-wrap');
+const sections = document.querySelectorAll('section');
+const navDots = document.querySelectorAll('.nav-dot');
+const progressBar = document.getElementById('nav-progress');
+let currentIdx = 0;
+const inited = new Set();
+
+function scrollToSection(idx) {
+  sections[idx]?.scrollIntoView({ behavior: 'smooth' });
+}
+
+const sectionObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const idx = [...sections].indexOf(entry.target);
+      currentIdx = idx;
+      navDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      progressBar.style.height = `${(idx / (sections.length - 1)) * 100}%`;
+      if (!inited.has(idx)) {
+        inited.add(idx);
+        initSection(idx);
+      }
+    }
+  });
+}, { root: wrap, threshold: 0.55 });
+sections.forEach(s => sectionObserver.observe(s));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' && currentIdx < sections.length - 1) scrollToSection(currentIdx + 1);
+  if (e.key === 'ArrowUp' && currentIdx > 0) scrollToSection(currentIdx - 1);
+});
+
+function initSection(idx) {
+  switch (idx) {
+    case 0: if(typeof initCover==='function') initCover(); break;
+    case 1: if(typeof initRegional==='function') initRegional(); break;
+    case 2: if(typeof initTimeline==='function') initTimeline(); break;
+    case 3: if(typeof initTypes==='function') initTypes(); break;
+    case 4: if(typeof initCulture==='function') initCulture(); break;
+    case 5: if(typeof initSummary==='function') initSummary(); break;
+  }
+}
+
+// Shared countUp utility
+function countUp(id, target, duration) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let v = 0; const step = target / (duration / 16);
+  const t = setInterval(() => {
+    v = Math.min(v + step, target);
+    el.textContent = Math.floor(v);
+    if (v >= target) clearInterval(t);
+  }, 16);
+}
+
+// Loading animation
+window.addEventListener('DOMContentLoaded', () => {
+  const bar = document.getElementById('loading-bar');
+  const pct = document.getElementById('loading-pct');
+  let p = 0;
+  const t = setInterval(() => {
+    p = Math.min(p + Math.random() * 8 + 2, 95);
+    bar.style.width = p + '%';
+    pct.textContent = Math.floor(p) + '%';
+  }, 60);
+
+  window.addEventListener('load', () => {
+    clearInterval(t);
+    bar.style.width = '100%';
+    pct.textContent = '100%';
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('hidden');
+      initSection(0);
+    }, 400);
+  });
+});
+
+// Resize handler
+window.addEventListener('resize', () => {
+  document.querySelectorAll('[id^="chart-"]').forEach(el => {
+    const inst = echarts.getInstanceByDom(el);
+    if (inst) inst.resize();
+  });
+});
+</script>
+
+<script>
+// ============================================================
+// SECTION 1: COVER
+// ============================================================
+function initCover() {
+  const tl = gsap.timeline({ delay: 0.15 });
+  tl.to('.cover-badge',       { opacity:1, y:0, duration:.75, ease:'power2.out' })
+    .to('.cover-main-title',  { opacity:1, y:0, duration:1.0, ease:'power2.out' }, '-=.4')
+    .to('.cover-tagline',     { opacity:1, duration:.7, ease:'power2.out' }, '-=.5')
+    .to('.cover-divider',     { opacity:1, duration:.6 }, '-=.4')
+    .to('.cover-stats',       { opacity:1, y:0, duration:.8, ease:'power2.out' }, '-=.3')
+    .to('.cover-cta',         { opacity:1, y:0, duration:.6, ease:'power2.out' }, '-=.4');
+
+  // Subtle ink blobs entrance
+  gsap.fromTo('.ink-blob',
+    { opacity:0, scale:0.7 },
+    { opacity:1, scale:1, duration:1.8, ease:'power1.out', stagger:0.4, delay:.2 }
+  );
+
+  setTimeout(() => {
+    countUp('cnt-bridges',  100,  1400);
+    countUp('cnt-dynasties', 10,  1100);
+    countUp('cnt-provinces', 28,  1200);
+    countUp('cnt-years',    2200, 1600);
+  }, 700);
+}
+</script>
+
+<script>
+// ============================================================
+// SECTION 2: REGIONAL
+// ============================================================
+function initRegional() {
+  // Ink palette for map
+  const INK_COLORS = ['#f8f5f0','#e8e2d8','#d0c8ba','#b0a898','#8a8070','#5a5248','#2d2a26','#1a1a1a','#0a0a0a'];
+  const ZHU_SHA = '#8b1a1a';
+
+  const PROVINCE = [
+    {name:"浙江省",value:14},{name:"福建省",value:12},{name:"江苏省",value:9},
+    {name:"北京市",value:5},{name:"云南省",value:5},{name:"四川省",value:6},
+    {name:"湖南省",value:2},{name:"广西壮族自治区",value:4},{name:"河北省",value:3},
+    {name:"山西省",value:3},{name:"西藏自治区",value:2},{name:"贵州省",value:2},
+    {name:"陕西省",value:3},{name:"甘肃省",value:2},{name:"安徽省",value:2},
+    {name:"江西省",value:2},{name:"上海市",value:2},{name:"天津市",value:2},
+    {name:"辽宁省",value:1},{name:"重庆市",value:2},{name:"广东省",value:3},
+    {name:"山东省",value:3},{name:"湖北省",value:2},{name:"河南省",value:5},
+    {name:"内蒙古自治区",value:1},{name:"吉林省",value:1},{name:"黑龙江省",value:1},
+    {name:"海南省",value:1}
+  ];
+  const PROVINCE_SHORT = PROVINCE.map(p => ({
+    ...p,
+    name: p.name.replace(/省|市|自治区|壮族|回族|维吾尔/g, '')
+  }));
+  const REGION = [
+    {name:"华东",value:38},{name:"华南",value:14},{name:"华北",value:14},
+    {name:"西南",value:17},{name:"华中",value:9},{name:"东北",value:3},
+    {name:"西北",value:5}
+  ];
+
+  // Map chart
+  const mapEl = document.getElementById("chart-map");
+  const mapChart = echarts.init(mapEl);
+  const mapOpt = () => ({
+    backgroundColor:"transparent",
+    tooltip:{trigger:"item",
+      formatter:p=>p.value>0?`<b>${p.name}</b><br>古桥数量：${p.value} 座`:`${p.name}：暂无记录`,
+      backgroundColor:"rgba(248,245,240,.95)",
+      borderColor:"#c8c0b4",
+      textStyle:{color:"#1a1a1a",fontSize:12,fontFamily:"'Noto Serif SC',serif"}},
+    visualMap:{min:0,max:14,left:"left",top:"bottom",text:["多","少"],calculable:true,
+      inRange:{color:['#f0ede8','#d8d0c4','#b8b0a0','#8a8078','#5a5248','#2d2926','#1a1818','#0a0a0a']},
+      textStyle:{color:"#5a5a5a",fontSize:10,fontFamily:"'Noto Serif SC',serif"}},
+    series:[{type:"map",map:"china",roam:false,data:PROVINCE,
+      label:{show:false},
+      emphasis:{label:{show:true,color:"#f8f5f0",fontSize:11},itemStyle:{areaColor:"#2d2926",shadowBlur:10,shadowColor:"rgba(0,0,0,.3)"}},
+      selectedMode:"single",select:{itemStyle:{areaColor:"#5a5248"}},
+      itemStyle:{areaColor:"#ede8e0",borderColor:"#c8c0b4",borderWidth:.8}}]
+  });
+  // Load bridge data for province click detail
+  let ALL_BRIDGES = [];
+  fetch('data/bridges_data_100.json')
+    .then(r=>r.json())
+    .then(d=>{ ALL_BRIDGES = d.bridges || []; })
+    .catch(()=>{});
+
+  fetch("https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json")
+    .then(r=>r.json())
+    .then(geo=>{ echarts.registerMap("china",geo); mapChart.setOption(mapOpt()); })
+    .catch(()=>{
+      // Fallback horizontal bar
+      mapChart.setOption({
+        backgroundColor:"transparent",
+        grid:{left:"12%",right:"6%",top:"5%",bottom:"5%"},
+        xAxis:{type:"value",axisLabel:{color:"#5a5a5a",fontSize:9},splitLine:{lineStyle:{color:"#e0d8cc"}}},
+        yAxis:{type:"category",data:PROVINCE_SHORT.slice(0,15).map(d=>d.name),axisLabel:{color:"#5a5a5a",fontSize:10}},
+        series:[{type:"bar",data:PROVINCE.slice(0,15).map(d=>d.value),barMaxWidth:18,
+          itemStyle:{color:p=>['#1a1a1a','#2d2d2d','#3d3d3d','#4d4d4d','#5a5a5a','#6a6a6a','#7a7a7a','#8a8a8a','#9a9a9a','#aaaaaa','#bababa','#cacaca','#dadada','#e8e8e8','#f0f0f0'][p.dataIndex]||'#1a1a1a'}}]
+      });
+    });
+
+  // Map click: show province bridge detail
+  mapChart.on('click', function(params) {
+    if (!params || !params.name) return;
+    const fullName = params.name;
+    // Strip province/city/autonomous region suffixes to get short name
+    const shortName = fullName
+      .replace(/壮族自治区$|回族自治区$|维吾尔族自治区$|自治区$/, '')
+      .replace(/省$|市$/, '');
+    const bridges = ALL_BRIDGES.filter(b => b.province === shortName);
+    document.getElementById('prov-title').textContent = fullName;
+    document.getElementById('prov-cnt').textContent =
+      bridges.length > 0 ? `共收录 ${bridges.length} 座古桥` : '暂无收录桥梁';
+    const list = document.getElementById('prov-bridge-list');
+    list.innerHTML = bridges.length === 0
+      ? '<div class="prov-empty">该省份暂无收录桥梁记录</div>'
+      : bridges.map(b => {
+          const yr = b.year > 0 ? b.year + ' 年' : '公元前 ' + Math.abs(b.year) + ' 年';
+          const srcHtml = b.source ? `<div class="pbi-source">📚 ${b.source}</div>` : '';
+          return `<div class="pbi">
+            <div class="pbi-name">${b.name}</div>
+            <div class="pbi-meta">${b.dynasty}・${yr}・${b.type}</div>
+            <div class="pbi-status">${b.status}</div>
+            ${srcHtml}
+          </div>`;
+        }).join('');
+    document.getElementById('prov-overlay').classList.add('open');
+  });
+
+  window.closeProvModal = function() {
+    document.getElementById('prov-overlay').classList.remove('open');
+  };
+
+  // Dual-ring pie (ink palette)
+  const INK_REGION_COLORS = ['#1a1a1a','#2d2d2d','#4a4a4a','#5a5a5a','#6a6a6a','#8a8a8a','#aaaaaa'];
+  const pieChart = echarts.init(document.getElementById("chart-region-pie"));
+  pieChart.setOption({
+    backgroundColor:"transparent",
+    tooltip:{trigger:"item",formatter:"{b}: {c}座 ({d}%)",
+      backgroundColor:"rgba(248,245,240,.95)",borderColor:"#c8c0b4",
+      textStyle:{color:"#1a1a1a",fontFamily:"'Noto Serif SC',serif"}},
+    legend:{bottom:0,textStyle:{color:"#5a5a5a",fontSize:11,fontFamily:"'Noto Serif SC',serif"},itemWidth:8,itemHeight:8,itemGap:5},
+    series:[
+      {type:"pie",radius:["22%","42%"],center:["50%","44%"],
+       data:REGION.map((d,i)=>({name:d.name,value:d.value,itemStyle:{color:INK_REGION_COLORS[i]}})),
+       label:{show:false},emphasis:{itemStyle:{shadowBlur:8}}},
+      {type:"pie",radius:["47%","63%"],center:["50%","44%"],
+       data:REGION.map((d,i)=>({name:d.name,value:d.value,itemStyle:{color:INK_REGION_COLORS[i],opacity:.72}})),
+       label:{show:true,fontSize:11,formatter:"{b}\n{c}座",color:"#5a5a5a",fontFamily:"'Noto Serif SC',serif"},
+       emphasis:{itemStyle:{shadowBlur:8}}}
+    ]
+  });
+
+  // Province bar (ink palette)
+  const barChart = echarts.init(document.getElementById("chart-province-bar"));
+  barChart.setOption({
+    backgroundColor:"transparent",
+    tooltip:{trigger:"axis",backgroundColor:"rgba(248,245,240,.95)",borderColor:"#c8c0b4",
+      textStyle:{color:"#1a1a1a",fontFamily:"'Noto Serif SC',serif"}},
+    grid:{left:"11%",right:"5%",top:"6%",bottom:"18%"},
+    xAxis:{type:"category",data:PROVINCE_SHORT.map(d=>d.name),
+      axisLabel:{color:"#5a5a5a",fontSize:10,rotate:45,fontFamily:"'Noto Serif SC',serif"},
+      axisLine:{lineStyle:{color:"#c8c0b4"}}},
+    yAxis:{type:"value",
+      axisLabel:{color:"#5a5a5a",fontSize:10},
+      splitLine:{lineStyle:{color:"#e0d8cc",type:"dashed"}}},
+    series:[{type:"bar",data:PROVINCE.map(d=>d.value),barMaxWidth:18,
+      itemStyle:{color:p=>{
+        const v=p.value;
+        if(v>=10)return '#0a0a0a';
+        if(v>=7)return '#1a1a1a';
+        if(v>=5)return '#2d2d2d';
+        if(v>=3)return '#4a4a4a';
+        return '#6a6a6a';
+      },borderRadius:[2,2,0,0]},
+      label:{show:true,position:"top",color:"#5a5a5a",fontSize:10,fontFamily:"'Noto Serif SC',serif",formatter:"{c}"}}]
+  });
+
+  gsap.fromTo("#regional .sec-title",{opacity:0,y:25},{opacity:1,y:0,duration:.8});
+  gsap.fromTo("#regional .sec-sub",{opacity:0,y:15},{opacity:1,y:0,duration:.7,delay:.15});
+}
+</script>
+
+<script>
+// ============================================================
+// SECTION 3: TIMELINE
+// ============================================================
+const TL_DATA = [
+  {name:'战国',yr:'前475—前221',cnt:1,tech:'早期石梁桥技术',
+   desc:'战国时期已有石梁桥建造记录，灵渠及相关水利工程的修建为后代大规模桥梁建设积累了宝贵经验，奠定了中国桥梁建设的早期技术基础。',
+   tags:['石材加工','水利工程','桥梁萌芽'],
+   world:'希腊古典时期，亚历山大东征，罗马开始修建军事道路网络'},
+  {name:'秦汉',yr:'前221—220',cnt:4,tech:'多孔石梁·驰道桥梁',
+   desc:'秦汉时期驰道贯通天下，桥梁建设随之大规模展开。渭河桥、灞河桥等著名桥梁已具备多孔石梁结构，汉代还有张衡《西京赋》中记载的多种桥型，技术体系初步形成。',
+   tags:['驰道桥梁','多孔石梁','木石混合'],
+   world:'罗马帝国修建万里道路网，其中多座石拱桥沿用至今'},
+  {name:'东晋',yr:'317—420',cnt:2,tech:'江南早期石梁桥',
+   desc:'东晋时期江南水系纵横，先民因地制宜以天然石材构筑简洁实用的石梁桥。光相桥（360年）始建于绍兴，是现存最古老的江南桥梁之一，见证了东晋至今绍兴水城的历史演变。',
+   tags:['江南早期石梁','天然石材利用','水乡桥梁起源'],
+   world:'西晋灭亡，东晋偏安江左，江南地区大规模开发，水利交通建设随之兴起'},
+  {name:'隋',yr:'581—618',cnt:5,tech:'敞肩拱桥技术',
+   desc:'隋代国祚虽短，却开创了中国桥梁史的辉煌时代。工匠李春设计赵州桥（605年），首创敞肩拱结构，跨径37.02米，比欧洲同类技术早约800年，被誉为「世界桥梁史七大奇迹」之一。',
+   tags:['敞肩拱桥','李春设计','超越欧洲800年'],
+   world:'拜占庭帝国建穹顶式建筑，欧洲尚未出现敞肩拱结构'},
+  {name:'唐',yr:'618—907',cnt:11,tech:'多孔连拱·运河桥梁',
+   desc:'唐代经济文化鼎盛，宝带桥53孔连续石拱横跨运河，枫桥因张继《枫桥夜泊》名传千古，「二十四桥明月夜」成为扬州的永恒符号。',
+   tags:['多孔连续石拱','运河文化载体','诗桥合一'],
+   world:'欧洲中世纪建罗曼式小石拱桥，规模远不及唐代运河大桥'},
+  {name:'宋',yr:'960—1279',cnt:29,tech:'筏形基础·浮梁结合·廊桥发展',
+   desc:'宋代是中国古代桥梁黄金时代。洛阳桥首创筏形基础与牡蛎固基；安平桥2255米成史上最长石梁桥；广济桥首创浮梁结合；绍兴八字桥是世界最早城市立交桥，技术创新层出不穷。',
+   tags:['筏形基础','浮梁结合','牡蛎固基','城市立交','廊桥发展'],
+   world:'欧洲建造伦敦桥（石拱，1176年），技术与宋代筏形基础相比差距明显'},
+  {name:'辽金',yr:'916—1234',cnt:3,tech:'石拱联拱·多孔技术',
+   desc:'辽金时期卢沟桥（金大定29年，1189年）建成，11孔联拱石桥横跨永定河，马可·波罗盛赞为「世界最美桥梁」。辽金工匠在北方平原地区形成独特的多孔联拱石桥体系。',
+   tags:['多孔联拱石桥','北方石桥体系','金代工艺'],
+   world:'马可·波罗（1271年）盛赞卢沟桥为世界最美桥梁'},
+  {name:'元',yr:'1271—1368',cnt:3,tech:'南北技术融合·运河桥梁',
+   desc:'元代蒙古族统治带来南北建筑技术广泛交流。后门桥（万宁桥，1285年）位于北京中轴线与大运河交汇处，是元大都城市规划的核心节点，见证郭守敬引白浮泉水入通惠河的水利壮举。',
+   tags:['南北技术融合','运河漕运','元大都规划'],
+   world:'马可·波罗返回欧洲，将中国桥梁技术的见闻带回西方'},
+  {name:'明',yr:'1368—1644',cnt:22,tech:'廊桥成熟·茶马古道·石梁巨构',
+   desc:'明代廊桥技术趋于成熟，侗族风雨桥形成独特体系。茶马古道沿线桥梁建设达到顶峰，江南水乡桥梁景观基本定型，唐东杰布一生建铁索桥58座。兰州镇远桥为黄河第一桥。',
+   tags:['廊桥成熟','茶马古道','海上丝路','江南水乡','石梁巨构'],
+   world:'欧洲文艺复兴，意大利建威尼斯里亚托桥（1591年），比安平桥短400余年'},
+  {name:'清',yr:'1644—1912',cnt:20,tech:'皇家园林·铁索桥·风雨廊桥',
+   desc:'清代皇家园林建设达顶峰，颐和园十七孔桥、玉带桥为精华。泸定桥1706年建成13根铁索横跨大渡河，双龙桥17孔横卧云南，三江岜团桥代表侗族风雨廊桥巅峰。',
+   tags:['皇家园林','铁索桥','西藏通道','乾隆时代','风雨廊桥'],
+   world:'欧洲工业革命开始用铸铁建桥（1779年铁桥）'},
+];
+
+function initTimeline() {
+  const barEl = document.getElementById('chart-dynasty-bar');
+  const barChart = echarts.getInstanceByDom(barEl) || echarts.init(barEl);
+  const cum = TL_DATA.reduce((a,d,i)=>{ a.push((a[i-1]||0)+d.cnt); return a; },[]);
+
+  // Ink grayscale palette for bars
+  const INK_BARS = ['#8a8a8a','#7a7a7a','#6a6a6a','#5a5a5a','#4a4a4a','#2d2d2d','#1a1a1a','#0f0f0f','#1a1a1a','#2d2d2d'];
+
+  barChart.setOption({
+    backgroundColor:'transparent',
+    title:{text:'各朝代建桥数量 & 累计趋势',
+      textStyle:{color:'#5a5a5a',fontSize:10,fontFamily:"'Noto Serif SC',serif"},left:'center',top:2},
+    tooltip:{trigger:'axis',
+      backgroundColor:'rgba(248,245,240,.95)',borderColor:'#c8c0b4',
+      textStyle:{color:'#1a1a1a',fontFamily:"'Noto Serif SC',serif"},
+      axisPointer:{type:'cross',crossStyle:{color:'#8a8a8a'}}},
+    legend:{top:18,right:8,data:['建桥数量','累计'],
+      textStyle:{color:'#5a5a5a',fontSize:8.5,fontFamily:"'Noto Serif SC',serif"}},
+    grid:{left:'8%',right:'10%',top:'20%',bottom:'12%'},
+    xAxis:{type:'category',data:TL_DATA.map(d=>d.name),
+      axisLabel:{color:'#5a5a5a',fontSize:10,fontFamily:"'Noto Serif SC',serif"},
+      axisLine:{lineStyle:{color:'#c8c0b4'}}},
+    yAxis:[
+      {type:'value',name:'座',nameTextStyle:{color:'#5a5a5a',fontSize:8},
+       axisLabel:{color:'#5a5a5a',fontSize:8},
+       splitLine:{lineStyle:{color:'#e0d8cc',type:'dashed'}}},
+      {type:'value',name:'累计',nameTextStyle:{color:'#2d2d2d',fontSize:8},
+       axisLabel:{color:'#2d2d2d',fontSize:8},splitLine:{show:false}}
+    ],
+    series:[
+      {name:'建桥数量',type:'bar',data:TL_DATA.map(d=>d.cnt),barMaxWidth:30,yAxisIndex:0,
+       itemStyle:{color:p=>INK_BARS[p.dataIndex]||'#2d2d2d',borderRadius:[3,3,0,0]},
+       label:{show:true,position:'top',color:'#5a5a5a',fontSize:8.5,
+         fontFamily:"'Noto Serif SC',serif",formatter:p=>p.value+'座'}},
+      {name:'累计',type:'line',yAxisIndex:1,data:cum,smooth:true,
+       symbol:'circle',symbolSize:5,
+       lineStyle:{color:'#8b1a1a',width:2},
+       itemStyle:{color:'#8b1a1a',borderColor:'#f8f5f0',borderWidth:2},
+       areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[
+         {offset:0,color:'rgba(139,26,26,.12)'},{offset:1,color:'rgba(139,26,26,0)'}])}}
+    ]
+  });
+
+  barChart.on('click', p => { selectDyn(p.dataIndex); highlightBtn(p.dataIndex); });
+  document.getElementById('dynasty-strip').addEventListener('click', e => {
+    const btn = e.target.closest('.dyn-btn');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.idx);
+    highlightBtn(idx);
+    selectDyn(idx);
+    barChart.dispatchAction({type:'highlight',seriesIndex:0,dataIndex:idx});
+    setTimeout(()=>barChart.dispatchAction({type:'downplay',seriesIndex:0,dataIndex:idx}),1200);
+  });
+
+  gsap.fromTo("#timeline .sec-title",{opacity:0,y:25},{opacity:1,y:0,duration:.8});
+}
+
+function highlightBtn(idx) {
+  document.querySelectorAll('.dyn-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+}
+
+function selectDyn(idx) {
+  const d = TL_DATA[idx];
+  document.getElementById('dyn-title').textContent = d.name+'（'+d.yr+'）';
+  document.getElementById('dyn-tech').textContent = d.tech;
+  document.getElementById('dyn-desc').textContent = d.desc;
+  document.getElementById('dyn-world').textContent = d.world;
+  document.getElementById('dyn-tags').innerHTML = d.tags.map(t=>`<span class="dyn-tag">${t}</span>`).join('');
+  gsap.fromTo('#dyn-card',{opacity:0,x:-15},{opacity:1,x:0,duration:.4,ease:'power2.out'});
+}
+</script>
+
+<script>
+// ============================================================
+// SECTION 4: TYPES
+// ============================================================
+var TYPE_DATA=[
+  {icon:'<span class="bridge-icon arch">拱</span>',name:"石拱桥",cnt:"66座",pct:"66%",
+   desc:"以石块砌筑拱圈，利用拱圈受压将荷载传至桥墩，在100座代表性古桥中占比最高（66%），广泛分布于全国各地。代表作有赵州桥、卢沟桥、宝带桥等。",
+   tech:["敞肩拱结构","多孔连续石拱","筏形基础配合拱桥"],
+   exs:["赵州桥（隋605年）单孔敞肩拱","卢沟桥（金1189年）11孔联拱","十七孔桥（清1750年）皇家园林"],
+   princ:"垂直荷载在拱轴方向分解为水平推力与竖向压力，由桥墩及基础安全平衡，拱圈主要承受压力，充分发挥石材抗压性能。"},
+  {icon:'<span class="bridge-icon beam">梁</span>',name:"石梁桥",cnt:"18座",pct:"18%",
+   desc:"采用天然石材或开凿石条作为主梁，简洁实用，以宋代福建闽南地区最为发达，代表作有安平桥、洛阳桥（筏基石梁）、虎渡桥等。",
+   tech:["巨石条梁切割运输","筏形基础固桥墩","船形桥墩减压分流"],
+   exs:["安平桥（宋1138年）2255米最长","虎渡桥（宋1237年）200吨巨石梁","龙脑桥（明1368年）神兽石雕"],
+   princ:"梁式结构以受弯为主，将荷载直接传至桥墩，石材抗压性强但抗弯性弱，因此石梁跨度受限，多采用多孔短跨布局。"},
+  {icon:'<span class="bridge-icon corridor">廊</span>',name:"廊桥",cnt:"7座",pct:"7%",
+   desc:"桥面覆盖屋顶廊屋的特殊桥梁，兼具交通与避雨休息功能，以木构为主，常见于西南少数民族聚居区，兼具文化祭祀功能。",
+   tech:["木拱廊桥榫卯结构","侗族风雨桥鼓楼式楼亭","全木无钉无铆技艺"],
+   exs:["芙蓉桥（清1764年）泰顺世界最美","三江岜团桥（清1850年）侗族风雨桥","婺源彩虹桥（宋1207年）最美廊桥"],
+   princ:"主结构多采木拱或木桁架，桥面板承荷载，屋面起防水保护作用，榫卯结构依靠木构件几何咬合传力，无需金属连接件。"},
+  {icon:'<span class="bridge-icon chain">索</span>',name:"铁索桥",cnt:"4座",pct:"4%",
+   desc:"以铁链或铁索为承荷主体，属悬索桥的早期形式，多见于西南山岳大山峡谷地带，是山地交通的重要突破。",
+   tech:["铁环相扣链节工艺","铁锻造锤焊技术","桥头堡锚固系统"],
+   exs:["泸定桥（清1706年）13根铁索大渡河","唐东杰布铁索桥（明1430年）藏区"],
+   princ:"铁索承受张力，两端桥头堡（锚碇）承受拉力，桥面板悬挂于铁索上，充分利用铁材抗拉性能，可跨越大跨度峡谷。"},
+  {icon:'<span class="bridge-icon float">浮</span>',name:"浮桥/木桥",cnt:"5座",pct:"5%",
+   desc:"浮桥以船只或浮筏联排构成浮动式桥面，多用于江面宽阔而桥墩难以修建的地带；木桥以木材为主结构，在东北地区及特殊环境下使用。",
+   tech:["船只并列锁定技法","铁船铁链锚固系统","水位自适应可拆设计"],
+   exs:["兰州镇远桥（明1372年）黄河第一桥","赤水浮桥（明1520年）可拆卸浮桥","阿勒楚喀桥（清1680年）东北木桥"],
+   princ:"浮桥利用水的浮力提供支撑，船只或浮筏承载桥面荷载，整体浮于水面，适应水位变化能力强。木桥依靠木材韧性承受荷载。"}
+];
+
+function initTypes(){
+  var el=document.getElementById("ty-radar");
+  if(!el)return;
+  var rc=echarts.getInstanceByDom(el)||echarts.init(el,null,{renderer:"canvas"});
+  rc.setOption({
+    backgroundColor:"transparent",
+    title:{text:"类型特征对比",left:"center",top:4,
+      textStyle:{color:"#5a5a5a",fontSize:11,fontFamily:"'Noto Serif SC',serif"}},
+    radar:{indicator:[
+      {name:"历史性",max:100},{name:"工艺难度",max:100},
+      {name:"普及度",max:100},{name:"观赏性",max:100},{name:"实用性",max:100}
+    ],
+    axisName:{color:"#5a5a5a",fontSize:11,fontFamily:"'Noto Serif SC',serif"},
+    splitLine:{lineStyle:{color:"#d0c8c0"}},
+    splitArea:{areaStyle:{color:["rgba(10,10,10,.02)","rgba(10,10,10,.04)"]}},
+    axisLine:{lineStyle:{color:"#c8c0b4"}}},
+    series:[{type:"radar",data:[
+      {value:[90,85,95,70,80],name:"石拱桥",
+        lineStyle:{color:"#1a1a1a"},areaStyle:{color:"rgba(10,10,10,.12)"},itemStyle:{color:"#1a1a1a"}},
+      {value:[75,40,80,50,85],name:"石梁桥",
+        lineStyle:{color:"#4a4a4a"},areaStyle:{color:"rgba(74,74,74,.12)"},itemStyle:{color:"#4a4a4a"}},
+      {value:[70,70,30,95,60],name:"廊桥",
+        lineStyle:{color:"#6a6a6a"},areaStyle:{color:"rgba(106,106,106,.12)"},itemStyle:{color:"#6a6a6a"}},
+      {value:[85,80,20,65,55],name:"铁索桥",
+        lineStyle:{color:"#8b1a1a"},areaStyle:{color:"rgba(139,26,26,.12)"},itemStyle:{color:"#8b1a1a"}},
+      {value:[65,30,10,45,70],name:"浮桥",
+        lineStyle:{color:"#8a8a8a"},areaStyle:{color:"rgba(138,138,138,.12)"},itemStyle:{color:"#8a8a8a"}}
+    ]}]
+  });
+
+  var cards=document.getElementById("ty-cards");
+  if(cards){
+    cards.addEventListener("click",function(e){
+      var c=e.target.closest(".ty-card");
+      if(c)openTyModal(parseInt(c.dataset.t,10));
+    });
+  }
+}
+
+function openTyModal(idx){
+  var d=TYPE_DATA[idx];
+  if(!d)return;
+  document.getElementById("tm-icon").innerHTML=d.icon;
+  document.getElementById("tm-name").textContent=d.name;
+  document.getElementById("tm-cnt").textContent=d.cnt+" · "+d.pct;
+  document.getElementById("tm-desc").textContent=d.desc;
+  document.getElementById("tm-tags").innerHTML=d.tech.map(function(t){return "<span class='tm-tag'>"+t+"</span>";}).join("");
+  document.getElementById("tm-exs").innerHTML=d.exs.map(function(e){return "<div class='tm-ex-item'>"+e+"</div>";}).join("");
+  document.getElementById("tm-princ").textContent=d.princ;
+  document.getElementById("ty-overlay").classList.add("open");
+}
+
+function closeTyModal(){
+  document.getElementById("ty-overlay").classList.remove("open");
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  // Pre-init type cards on load since section 4 may not trigger the observer immediately
+  if(typeof initTypes==='function') {
+    setTimeout(initTypes, 100);
+  }
+});
+</script>
+
+<script>
+// ============================================================
+// SECTION 5: CULTURE
+// ============================================================
+function initCulture() {
+  var wcWords = [
+    { text: '敞肩拱',   size: 1.55, color: '#0a0a0a',  rot: -8,  x: 5,   y: 4,  cardId: 0 },
+    { text: '筏形基础', size: 0.95, color: '#4a4a4a',  rot:  5,  x: 55,  y: 3,  cardId: 3 },
+    { text: '榫卯',     size: 1.85, color: '#1a1a1a',  rot: -12, x: 20,  y: 14, cardId: 5 },
+    { text: '铁索',     size: 1.45, color: '#2d2d2d',  rot:  8,  x: 68,  y: 10, cardId: 6 },
+    { text: '廊桥',     size: 1.25, color: '#4a4a4a',  rot: -5,  x: 40,  y: 22, cardId: 5 },
+    { text: '石梁',     size: 1.05, color: '#5a5a5a',  rot:  3,  x: 80,  y: 18, cardId: 4 },
+    { text: '浮桥',     size: 0.95, color: '#6a6a6a',  rot: -10, x: 10,  y: 36, cardId: 4 },
+    { text: '李春',     size: 1.35, color: '#1a1a1a',  rot:  6,  x: 60,  y: 28, cardId: 0 },
+    { text: '赵州桥',   size: 1.95, color: '#0a0a0a',  rot: -4,  x: 28,  y: 4,  cardId: 0 },
+    { text: '卢沟桥',   size: 1.65, color: '#2d2d2d',  rot:  10, x: 72,  y: 36, cardId: 2 },
+    { text: '洛阳桥',   size: 1.45, color: '#3d3d3d',  rot: -7,  x: 3,   y: 54, cardId: 3 },
+    { text: '因地制宜', size: 0.88, color: '#5a5a5a',  rot:  4,  x: 45,  y: 45, cardId: -1 },
+    { text: '匠心',     size: 1.75, color: '#8b1a1a',  rot: -14, x: 82,  y: 46, cardId: -1 },
+    { text: '千年',     size: 1.45, color: '#1a1a1a',  rot:  9,  x: 25,  y: 56, cardId: -1 },
+    { text: '宋代',     size: 1.05, color: '#4a4a4a',  rot: -6,  x: 63,  y: 55, cardId: 3 },
+    { text: '清代',     size: 0.95, color: '#5a5a5a',  rot:  12, x: 15,  y: 72, cardId: 6 },
+    { text: '隋代',     size: 0.95, color: '#6a6a6a',  rot: -3,  x: 50,  y: 62, cardId: 0 },
+    { text: '唐代',     size: 1.05, color: '#2d2d2d',  rot:  7,  x: 78,  y: 62, cardId: 1 },
+    { text: '文人',     size: 0.88, color: '#5a5a5a',  rot: -11, x: 38,  y: 72, cardId: 1 },
+    { text: '诗词',     size: 1.25, color: '#8b1a1a',  rot:  5,  x: 5,   y: 82, cardId: 1 },
+    { text: '枫桥夜泊', size: 1.55, color: '#0a0a0a',  rot: -8,  x: 60,  y: 74, cardId: 1 },
+    { text: '牡蛎固基', size: 1.05, color: '#4a4a4a',  rot:  6,  x: 25,  y: 82, cardId: 3 },
+    { text: '燕京八景', size: 0.88, color: '#5a5a5a',  rot: -4,  x: 50,  y: 84, cardId: 2 },
+    { text: '茶马古道', size: 1.15, color: '#2d2d2d',  rot:  10, x: 78,  y: 78, cardId: 6 },
+    { text: '侗族',     size: 0.95, color: '#4a4a4a',  rot: -9,  x: 70,  y: 86, cardId: 5 },
+    { text: '苗族',     size: 0.78, color: '#6a6a6a',  rot:  3,  x: 40,  y: 90, cardId: 7 },
+    { text: '纳西族',   size: 0.72, color: '#5a5a5a',  rot: -7,  x: 10,  y: 92, cardId: 7 },
+    { text: '世界遗产', size: 1.25, color: '#8b1a1a',  rot:  8,  x: 56,  y: 90, cardId: 7 },
+    { text: '丝绸之路', size: 1.15, color: '#1a1a1a',  rot: -5,  x: 82,  y: 90, cardId: 7 },
+    { text: '海上丝路', size: 0.95, color: '#4a4a4a',  rot:  6,  x: 28,  y: 94, cardId: 3 }
+  ];
+
+  var container = document.getElementById('s5-wordcloud');
+  if (container) {
+    container.innerHTML = '';
+    wcWords.forEach(function(w) {
+      var span = document.createElement('span');
+      span.textContent = w.text;
+      span.style.fontSize = w.size + 'rem';
+      span.style.color = w.color;
+      span.style.left = w.x + '%';
+      span.style.top = w.y + '%';
+      span.style.transform = 'rotate(' + w.rot + 'deg)';
+      span.style.fontWeight = w.size >= 1.5 ? '700' : (w.size >= 1.1 ? '600' : '400');
+      span.style.opacity = '0.85';
+      span.style.fontFamily = "'Noto Serif SC', serif";
+      if (w.cardId >= 0) {
+        span.style.cursor = 'pointer';
+        span.title = '点击查看相关故事';
+        span.addEventListener('click', function() { s5ScrollToCard(w.cardId); });
+      }
+      container.appendChild(span);
+    });
+  }
+
+  function s5ScrollToCard(cardIndex) {
+    var card = document.getElementById('s5-card-' + cardIndex);
+    var scroll = document.getElementById('s5-stories-scroll');
+    if (!card || !scroll) return;
+    var cards = scroll.querySelectorAll('.s5-card');
+    cards.forEach(function(c) { c.classList.remove('s5-highlighted'); });
+    var cardTop = card.offsetTop - scroll.offsetTop;
+    scroll.scrollTo({ top: cardTop - 16, behavior: 'smooth' });
+    card.classList.add('s5-highlighted');
+    setTimeout(function() { card.classList.remove('s5-highlighted'); }, 2200);
+  }
+
+  // Sankey chart (ink palette)
+  var sankeyDom = document.getElementById('chart-sankey');
+  if (sankeyDom && typeof echarts !== 'undefined') {
+    var sankeyChart = echarts.init(sankeyDom, null, { renderer: 'canvas' });
+    sankeyChart.setOption({
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'item',triggerOn: 'mousemove',
+        formatter: function(params) {
+          if (params.dataType === 'edge') {
+            return params.data.source + ' → ' + params.data.target + '：' + params.data.value + ' 座';
+          }
+          return params.name;
+        },
+        backgroundColor: 'rgba(248,245,240,.95)',
+        borderColor: '#c8c0b4',borderWidth:1,
+        textStyle:{color:'#1a1a1a',fontFamily:"'Noto Serif SC',serif",fontSize:12}
+      },
+      series:[{
+        type:'sankey',left:'2%',right:'10%',top:'6%',bottom:'6%',
+        nodeWidth:12,nodeGap:9,
+        emphasis:{focus:'adjacency'},
+        data:[
+          {name:'石材', itemStyle:{color:'#2d2d2d'}},
+          {name:'木材', itemStyle:{color:'#5a5a5a'}},
+          {name:'铁链', itemStyle:{color:'#1a1a1a'}},
+          {name:'船只', itemStyle:{color:'#4a4a4a'}},
+          {name:'石拱桥',itemStyle:{color:'#0a0a0a'}},
+          {name:'石梁桥',itemStyle:{color:'#3d3d3d'}},
+          {name:'廊桥',  itemStyle:{color:'#6a6a6a'}},
+          {name:'铁索桥',itemStyle:{color:'#1a1a1a'}},
+          {name:'浮桥',  itemStyle:{color:'#8a8a8a'}},
+          {name:'木桥',  itemStyle:{color:'#aaaaaa'}}
+        ],
+        links:[
+          {source:'石材',target:'石拱桥',value:66},
+          {source:'石材',target:'石梁桥',value:18},
+          {source:'木材',target:'廊桥',  value:7},
+          {source:'木材',target:'木桥',  value:1},
+          {source:'铁链',target:'铁索桥',value:4},
+          {source:'船只',target:'浮桥',  value:4}
+        ],
+        lineStyle:{color:'gradient',opacity:0.35,curveness:0.52},
+        label:{color:'#2d2d2d',fontFamily:"'Noto Serif SC',serif",fontSize:11},
+        itemStyle:{borderWidth:0}
+      }]
+    });
+    window.addEventListener('resize', function() { sankeyChart.resize(); });
+  }
+
+  // GSAP entrance animations
+  var allCards = document.querySelectorAll('#s5-stories-scroll .s5-card');
+  if (typeof gsap !== 'undefined') {
+    gsap.fromTo(allCards,
+      {opacity:0,y:22},
+      {opacity:1,y:0,duration:.55,ease:'power2.out',stagger:.09,
+       onComplete:function(){ allCards.forEach(function(c){ c.classList.add('s5-visible'); }); }}
+    );
+    var wcSpans = document.querySelectorAll('#s5-wordcloud span');
+    gsap.fromTo(wcSpans,
+      {opacity:0,scale:0.6},
+      {opacity:0.85,scale:1,duration:.4,ease:'back.out(1.4)',stagger:.025,delay:.2}
+    );
+    var leftPanels = document.querySelectorAll('#culture .s5-wc-wrap,#culture .s5-sankey-wrap');
+    gsap.fromTo(leftPanels,
+      {opacity:0,x:-22},
+      {opacity:1,x:0,duration:.6,ease:'power2.out',stagger:.15}
+    );
+  } else {
+    allCards.forEach(function(c){
+      c.style.opacity='1'; c.style.transform='translateY(0)'; c.classList.add('s5-visible');
+    });
+  }
+}
+</script>
+
+<script>
+// ============================================================
+// SECTION 6: SUMMARY
+// ============================================================
+(function () {
+
+  function s6CountUp(id, target, duration) {
+    if (typeof countUp === 'function') { countUp(id, target, duration); return; }
+    var el = document.getElementById(id);
+    if (!el) return;
+    var v = 0; var step = target / (duration / 16);
+    var timer = setInterval(function () {
+      v = Math.min(v + step, target);
+      el.textContent = Math.floor(v);
+      if (v >= target) clearInterval(timer);
+    }, 16);
+  }
+
+  // Ink particle system (ink drops floating up)
+  var s6Canvas, s6Ctx, s6Particles = [], s6AnimId;
+  var S6_PARTICLE_COUNT = 60;
+
+  function s6CreateParticle(forceRandom) {
+    var canvas = s6Canvas;
+    var y = forceRandom ? Math.random() * canvas.height : canvas.height + Math.random() * 30;
+    return {
+      x: Math.random() * canvas.width,
+      y: y,
+      vy: 0.25 + Math.random() * 0.55,
+      vx: (Math.random() - 0.5) * 0.2,
+      opacity: 0.15 + Math.random() * 0.3,
+      radius: 0.8 + Math.random() * 1.8,
+      // Ink palette: very subtle light marks on dark bg
+      color: Math.random() > 0.85 ? 'rgba(139,26,26,0.6)' : 'rgba(248,245,240,0.5)',
+      twinkle: Math.random() * Math.PI * 2
+    };
+  }
+
+  function s6ResizeCanvas() {
+    if (!s6Canvas) return;
+    var section = document.getElementById('summary');
+    s6Canvas.width = section.offsetWidth;
+    s6Canvas.height = section.offsetHeight;
+  }
+
+  function s6InitParticles() {
+    s6Canvas = document.getElementById('summary-canvas');
+    if (!s6Canvas) return;
+    s6Ctx = s6Canvas.getContext('2d');
+    s6ResizeCanvas();
+    s6Particles = [];
+    for (var i = 0; i < S6_PARTICLE_COUNT; i++) s6Particles.push(s6CreateParticle(true));
+    window.addEventListener('resize', s6ResizeCanvas);
+  }
+
+  function s6AnimateParticles() {
+    if (!s6Canvas || !s6Ctx) return;
+    s6Ctx.clearRect(0, 0, s6Canvas.width, s6Canvas.height);
+    for (var i = 0; i < s6Particles.length; i++) {
+      var p = s6Particles[i];
+      p.y -= p.vy; p.x += p.vx; p.twinkle += 0.04;
+      var osc = 0.1 * Math.sin(p.twinkle);
+      var op = Math.max(0, Math.min(1, p.opacity + osc));
+      s6Ctx.save();
+      s6Ctx.globalAlpha = op;
+      s6Ctx.beginPath();
+      s6Ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      s6Ctx.fillStyle = p.color;
+      s6Ctx.fill();
+      s6Ctx.restore();
+      if (p.y < -10 || p.x < -20 || p.x > s6Canvas.width + 20)
+        s6Particles[i] = s6CreateParticle(false);
+    }
+    s6AnimId = requestAnimationFrame(s6AnimateParticles);
+  }
+
+  function s6AnimateCards() {
+    var cards = document.querySelectorAll('#s6-cards-grid .s6-card');
+    if (!cards.length) return;
+    if (typeof gsap !== 'undefined') {
+      gsap.to(cards, { opacity:1, y:0, duration:.6, stagger:.1, ease:'power2.out' });
+    } else {
+      cards.forEach(function(card, idx) {
+        setTimeout(function() {
+          card.style.transition = 'opacity .6s ease,transform .6s ease';
+          card.style.opacity = '1'; card.style.transform = 'translateY(0)';
+        }, idx * 100);
+      });
+    }
+  }
+
+  function s6SetupObserver() {
+    var section = document.getElementById('summary');
+    if (!section) return;
+    var triggered = false;
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting && !triggered) {
+          triggered = true;
+          s6AnimateCards();
+          setTimeout(function() {
+            s6CountUp('s6-cnt-bridges',  100,  1800);
+            s6CountUp('s6-cnt-dynasties', 10,  1400);
+            s6CountUp('s6-cnt-types',      5,  1200);
+            s6CountUp('s6-cnt-provinces', 28,  1600);
+            s6CountUp('s6-cnt-years',   2200,  2000);
+          }, 300);
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.15 });
+    observer.observe(section);
+  }
+
+  window.initSummary = function() {
+    s6InitParticles();
+    s6AnimateParticles();
+    s6SetupObserver();
+  };
+
+  // Generate poster (ink wash style)
+  window.generatePoster = function() {
+    var W = 800, H = 450;
+    var offscreen = document.createElement('canvas');
+    offscreen.width = W; offscreen.height = H;
+    var ctx = offscreen.getContext('2d');
+
+    // Rice paper background
+    ctx.fillStyle = '#f8f5f0';
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle texture (noise dots)
+    for(var i=0;i<2000;i++){
+      ctx.save();
+      ctx.globalAlpha = Math.random()*0.025;
+      ctx.fillStyle='#1a1a1a';
+      ctx.beginPath();
+      ctx.arc(Math.random()*W,Math.random()*H,Math.random()*1.2,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Ink wash blobs (background atmosphere)
+    var blobs = [
+      {x:0.1*W,y:0.2*H,r:130,a:0.04},{x:0.9*W,y:0.8*H,r:150,a:0.04},
+      {x:0.5*W,y:0.9*H,r:80,a:0.03}
+    ];
+    blobs.forEach(function(b){
+      var grd = ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+      grd.addColorStop(0,'rgba(10,10,10,'+b.a+')');
+      grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd;
+      ctx.fillRect(0,0,W,H);
+    });
+
+    // Top/bottom border lines
+    ctx.save();
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.globalAlpha=0.5;
+    ctx.beginPath();ctx.moveTo(48,36);ctx.lineTo(W-48,36);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(48,H-36);ctx.lineTo(W-48,H-36);ctx.stroke();
+    ctx.restore();
+
+    // Seal stamp (top-right)
+    ctx.save();
+    ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.globalAlpha=0.7;
+    ctx.strokeRect(W-90,20,62,28);
+    ctx.font='600 13px "Noto Serif SC",serif';
+    ctx.fillStyle='#8b1a1a';ctx.textAlign='center';ctx.globalAlpha=0.8;
+    ctx.fillText('文化遗产',W-59,38);
+    ctx.restore();
+
+    // Bridge silhouette (single arch, ink line style)
+    ctx.save();
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.2;ctx.globalAlpha=0.18;
+    var bx=120,by=380,bw=560;
+    ctx.beginPath();
+    ctx.moveTo(bx,by);
+    ctx.bezierCurveTo(bx+bw*0.25,by-80,bx+bw*0.75,by-80,bx+bw,by);
+    ctx.stroke();
+    ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+bw,by);ctx.stroke();
+    // Water ripple
+    ctx.beginPath();
+    ctx.ellipse(bx+bw/2,by+12,bw/2+20,8,0,0,Math.PI*2);
+    ctx.globalAlpha=0.08;ctx.stroke();
+    ctx.restore();
+
+    // Title area
+    ctx.save();
+    ctx.font='400 13px "Noto Serif SC",serif';
+    ctx.fillStyle='#5a5a5a';ctx.globalAlpha=0.8;ctx.textAlign='center';
+    ctx.fillText('· 千年桥史 ·',W/2,68);
+    ctx.restore();
+
+    ctx.save();
+    ctx.font='bold 50px "Ma Shan Zheng","Noto Serif SC",serif';
+    ctx.fillStyle='#0a0a0a';ctx.textAlign='center';
+    ctx.fillText('中国古代桥梁',W/2,138);
+    ctx.restore();
+
+    ctx.save();
+    ctx.font='400 20px "Noto Serif SC",serif';
+    ctx.fillStyle='#2d2d2d';ctx.textAlign='center';
+    ctx.fillText('千年匠心  数字刻碑',W/2,175);
+    ctx.restore();
+
+    // Divider
+    ctx.save();
+    ctx.strokeStyle='#c8c0b4';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(200,196);ctx.lineTo(W-200,196);ctx.stroke();
+    ctx.restore();
+
+    // 5 Stats
+    var stats=[
+      {num:'100座',label:'古桥'},{num:'10个',label:'朝代'},{num:'5种',label:'类型'},
+      {num:'28个',label:'省份'},{num:'2200+',label:'年历史'}
+    ];
+    var slotW=W/5;
+    stats.forEach(function(s,i){
+      var cx=slotW*i+slotW/2;
+      ctx.save();
+      ctx.font='bold 24px "Noto Serif SC",serif';
+      ctx.fillStyle='#1a1a1a';ctx.textAlign='center';
+      ctx.fillText(s.num,cx,258);
+      ctx.font='400 12px "Noto Serif SC",serif';
+      ctx.fillStyle='#5a5a5a';
+      ctx.fillText(s.label,cx,278);
+      ctx.restore();
+    });
+
+    // Closing quote
+    ctx.save();
+    ctx.font='italic 400 12px "Noto Serif SC",serif';
+    ctx.fillStyle='rgba(90,90,90,0.8)';ctx.textAlign='center';
+    ctx.fillText('「以桥为证，文明延续；匠心所至，千年不朽。」',W/2,328);
+    ctx.restore();
+
+    // Source note
+    ctx.save();
+    ctx.font='400 10px "Noto Serif SC",serif';
+    ctx.fillStyle='rgba(138,138,138,0.6)';ctx.textAlign='center';
+    ctx.fillText('数据来源：综合文献整理',W/2,410);
+    ctx.restore();
+
+    var dataUrl = offscreen.toDataURL('image/png');
+    var img=document.getElementById('s6-poster-img');
+    var link=document.getElementById('s6-poster-download');
+    if(img) img.src=dataUrl;
+    if(link) link.href=dataUrl;
+    var modal=document.getElementById('s6-poster-modal');
+    if(modal) modal.classList.add('s6-open');
+  };
+
+  window.s6ClosePosterModal = function() {
+    var modal=document.getElementById('s6-poster-modal');
+    if(modal) modal.classList.remove('s6-open');
+  };
+
+  document.addEventListener('click', function(e) {
+    var modal=document.getElementById('s6-poster-modal');
+    if(modal && e.target===modal) modal.classList.remove('s6-open');
+  });
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', window.initSummary);
+  } else {
+    window.initSummary();
+  }
+
+}());
+</script>
+
+</body>
+</html>
