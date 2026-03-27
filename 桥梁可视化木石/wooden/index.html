@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侗族木拱廊桥 · 结构信息可视化</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'SimSun', 'STSong', 'FangSong', serif;
+            background: #f7f3eb;
+            height: 100vh;
+            overflow: hidden;
+            color: #3d3530;
+        }
+
+        /* 水墨背景 */
+        .ink-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+            background:
+                radial-gradient(ellipse at 10% 20%, rgba(180, 170, 160, 0.15) 0%, transparent 40%),
+                radial-gradient(ellipse at 90% 80%, rgba(160, 150, 140, 0.12) 0%, transparent 35%);
+        }
+
+        /* 标题区 */
+        .header {
+            position: relative; z-index: 10;
+            padding: 12px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(139, 90, 43, 0.15);
+            height: 70px;
+        }
+
+        .title-group {
+            margin-left: 50px;
+        }
+
+        .title-group h1 {
+            font-size: 1.8em;
+            letter-spacing: 0.2em;
+            color: #2c2620;
+            font-family: 'SimSun', serif;
+            background: linear-gradient(180deg, #3d3530 0%, #5a4a3a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-group .subtitle {
+            font-size: 0.7em;
+            color: #8b7355;
+            letter-spacing: 0.3em;
+            font-family: 'FangSong', serif;
+            margin-top: 4px;
+        }
+
+        .stats-badge { display: flex; gap: 12px; }
+        .stat-item {
+            text-align: center;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(139, 90, 43, 0.2);
+            border-radius: 4px;
+        }
+        .stat-number { font-size: 1.5em; color: #8b5a2b; font-family: 'FangSong', serif; }
+        .stat-label { font-size: 0.65em; color: #8b7355; margin-top: 2px; letter-spacing: 0.1em; }
+
+        /* 主容器 */
+        .viz-container {
+            position: relative;
+            height: calc(100vh - 70px - 50px);
+            display: flex;
+            padding: 15px 30px;
+            gap: 25px;
+        }
+
+        /* 侧边栏 */
+        .side-panel {
+            width: 280px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(139, 90, 43, 0.15);
+            border-radius: 4px;
+            padding: 25px;
+            flex: 1;
+        }
+
+        .panel-title {
+            font-size: 1.4em;
+            color: #5a4a3a;
+            letter-spacing: 0.25em;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(139, 90, 43, 0.2);
+            font-family: 'SimSun', serif;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .element-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .element-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .element-item:hover {
+            background: rgba(139, 90, 43, 0.1);
+            border-color: rgba(139, 90, 43, 0.25);
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .element-item.active {
+            background: rgba(139, 90, 43, 0.15);
+            border-color: rgba(139, 90, 43, 0.4);
+            box-shadow: 0 4px 12px rgba(139, 90, 43, 0.1);
+        }
+
+        .element-icon {
+            width: 26px; height: 26px;
+            background: rgba(139, 90, 43, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            color: #8b5a2b;
+            font-family: 'FangSong', serif;
+            border: 1px solid rgba(139, 90, 43, 0.2);
+        }
+
+        .element-name { font-size: 0.9em; color: #4a4035; letter-spacing: 0.05em; }
+
+        /* 中央区域 */
+        .viz-main {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding-left: 40px;
+        }
+
+        .bridge-container {
+            position: relative;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(139, 90, 43, 0.2);
+            border-radius: 4px;
+        }
+
+        .bridge-image {
+            max-height: calc(100vh - 200px);
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            filter: sepia(8%) contrast(102%);
+            display: block;
+        }
+
+        /* 热点标记 */
+        .hotspot {
+            position: absolute;
+            width: 28px; height: 28px;
+            cursor: pointer;
+            z-index: 20;
+            transform: translate(-50%, -50%);
+        }
+
+        .hotspot-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            border: 1px solid rgba(139, 90, 43, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: ink-pulse 2.5s ease-out infinite;
+        }
+
+        .hotspot-ring:nth-child(2) { animation-delay: 0.8s; }
+
+        @keyframes ink-pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+
+        .hotspot-core {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 10px; height: 10px;
+            background: #8b2323;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px rgba(139, 35, 35, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .hotspot:hover .hotspot-core {
+            transform: translate(-50%, -50%) scale(1.3);
+            background: #a52a2a;
+        }
+
+        .hotspot.active .hotspot-core {
+            background: #5c1818;
+            box-shadow: 0 0 12px rgba(92, 24, 24, 0.6);
+        }
+
+        .hotspot-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            border: 1px solid rgba(139, 35, 35, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: ink-pulse 2.5s ease-out infinite;
+        }
+
+        /* 精确热点位置 - 基于实际图片结构 */
+        /* 屋顶 - 最顶层 */
+        .hotspot-wuding { top: 3%; left: 50%; }
+
+        /* 雕花望柱 - 飞檐下方立柱顶端 */
+        .hotspot-wangzhu { top: 35%; left: 18%; }
+        .hotspot-wangzhu-2 { top: 35%; left: 82%; }
+
+        /* 榫卯节点 - 主拱顶部和两侧拱架交接 */
+        .hotspot-sunmao-2 { top: 38%; left: 50%; }
+        .hotspot-sunmao { top: 42%; left: 26%; }
+        .hotspot-sunmao-3 { top: 42%; left: 74%; }
+
+        /* 承重横梁 - 水平横梁 */
+        .hotspot-hengliang { top: 48%; left: 50%; }
+
+        /* 交叉斜撑 - X形结构 */
+        .hotspot-xiecheng { top: 58%; left: 28%; }
+        .hotspot-xiecheng-2 { top: 58%; left: 72%; }
+
+        /* 木质立柱 - 主立柱 */
+        .hotspot-lizhu { top: 58%; left: 18%; }
+        .hotspot-lizhu-2 { top: 58%; left: 82%; }
+
+        /* 木护栏 - 两侧栏杆 */
+        .hotspot-hulan { top: 68%; left: 12%; }
+        .hotspot-hulan-2 { top: 68%; left: 88%; }
+
+        /* 木桩基础 - 底部支撑 */
+        .hotspot-jichu { top: 90%; left: 18%; }
+        .hotspot-jichu-2 { top: 90%; left: 82%; }
+
+        .hotspot-label {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #4a4035;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(255, 250, 240, 0.95);
+            padding: 3px 8px;
+            border-radius: 2px;
+            letter-spacing: 0.05em;
+            font-family: 'SimSun', serif;
+            border: 1px solid rgba(139, 90, 43, 0.2);
+        }
+
+        .hotspot:hover .hotspot-label { opacity: 1; }
+
+        /* 信息浮层 */
+        .info-float {
+            position: absolute;
+            width: 420px;
+            background: rgba(255, 253, 248, 0.98);
+            border: 1px solid rgba(139, 90, 43, 0.25);
+            border-radius: 4px;
+            padding: 28px;
+            z-index: 30;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+        }
+
+        .info-float::before {
+            content: '';
+            position: absolute;
+            top: 8px; left: 8px; right: 8px; bottom: 8px;
+            border: 1px solid rgba(139, 90, 43, 0.1);
+            pointer-events: none;
+        }
+
+        .info-float.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(139, 90, 43, 0.2);
+        }
+
+        .info-title {
+            font-size: 1.5em;
+            color: #4a4035;
+            letter-spacing: 0.15em;
+            font-weight: bold;
+            font-family: 'SimSun', serif;
+        }
+
+        .info-close {
+            width: 28px; height: 28px;
+            background: rgba(139, 90, 43, 0.08);
+            border: 1px solid rgba(139, 90, 43, 0.2);
+            border-radius: 2px;
+            color: #8b7355;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .info-close:hover {
+            background: rgba(139, 90, 43, 0.15);
+            color: #5a4a3a;
+        }
+
+        .info-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(139, 90, 43, 0.15);
+            filter: sepia(10%);
+        }
+
+        .info-content {
+            font-size: 1.05em;
+            color: #5a5248;
+            line-height: 1.9;
+            text-align: justify;
+            font-family: 'FangSong', 'SimSun', serif;
+        }
+
+        .info-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(139, 90, 43, 0.1);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8em;
+            color: #8b7355;
+        }
+
+        .meta-dot {
+            width: 6px; height: 6px;
+            background: #8b5a2b;
+            border-radius: 50%;
+        }
+
+        /* 底部栏 */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(247, 243, 235, 0.95);
+            border-top: 1px solid rgba(139, 90, 43, 0.15);
+            padding: 12px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+            height: 50px;
+        }
+
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-text {
+            font-size: 0.85em;
+            color: #8b7355;
+            letter-spacing: 0.1em;
+            font-family: 'SimSun', serif;
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 3px;
+            background: rgba(139, 90, 43, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5a2b, #a0522d);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .hint-text {
+            font-size: 0.85em;
+            color: #8b7355;
+            letter-spacing: 0.1em;
+            font-family: 'FangSong', serif;
+        }
+
+        /* 印章 */
+        .seal {
+            position: fixed;
+            bottom: 60px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(193, 68, 14, 0.4);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(193, 68, 14, 0.5);
+            font-size: 0.75em;
+            letter-spacing: 0.15em;
+            writing-mode: vertical-rl;
+            font-family: 'SimSun', serif;
+            pointer-events: none;
+            z-index: 5;
+            transform: rotate(-5deg);
+        }
+
+        /* 返回首页按钮 */
+        .home-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(255,253,248,0.98) 0%, rgba(247,243,235,0.98) 100%);
+            border: 2px solid rgba(139, 90, 43, 0.4);
+            color: #5a4a3a;
+            cursor: pointer;
+            border-radius: 50%;
+            font-family: 'SimSun', serif;
+            font-size: 1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .home-btn::before {
+            content: '';
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            border: 1px dashed rgba(139, 90, 43, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .home-btn::after {
+            content: '首';
+            transition: all 0.3s ease;
+        }
+
+        .home-btn:hover {
+            background: linear-gradient(135deg, #8b5a2b 0%, #a0522d 100%);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(139, 90, 43, 0.3);
+            border-color: #8b5a2b;
+        }
+
+        .home-btn:hover::after {
+            content: '返';
+        }
+
+        .home-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="ink-bg"></div>
+
+    <a href="../index.html" class="home-btn" title="返回首页"></a>
+
+    <header class="header">
+        <div class="title-group">
+            <h1>侗族木拱廊桥</h1>
+            <p class="subtitle">STRUCTURAL INFORMATION VISUALIZATION</p>
+        </div>
+        <div class="stats-badge">
+            <div class="stat-item">
+                <div class="stat-number">八</div>
+                <div class="stat-label">结构元素</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">十三</div>
+                <div class="stat-label">标注点位</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="viz-container">
+        <aside class="side-panel">
+            <div class="panel-section">
+                <div class="panel-title">结构元素</div>
+                <div class="element-list">
+                    <div class="element-item" data-id="wuding">
+                        <div class="element-icon">伍</div>
+                        <div class="element-name">廊桥屋顶</div>
+                    </div>
+                    <div class="element-item" data-id="sunmao">
+                        <div class="element-icon">壹</div>
+                        <div class="element-name">榫卯节点</div>
+                    </div>
+                    <div class="element-item" data-id="hengliang">
+                        <div class="element-icon">柒</div>
+                        <div class="element-name">承重横梁</div>
+                    </div>
+                    <div class="element-item" data-id="xiecheng">
+                        <div class="element-icon">叁</div>
+                        <div class="element-name">交叉斜撑</div>
+                    </div>
+                    <div class="element-item" data-id="wangzhu">
+                        <div class="element-icon">捌</div>
+                        <div class="element-name">雕花望柱</div>
+                    </div>
+                    <div class="element-item" data-id="lizhu">
+                        <div class="element-icon">贰</div>
+                        <div class="element-name">木质立柱</div>
+                    </div>
+                    <div class="element-item" data-id="hulan">
+                        <div class="element-icon">肆</div>
+                        <div class="element-name">木护栏</div>
+                    </div>
+                    <div class="element-item" data-id="jichu">
+                        <div class="element-icon">陆</div>
+                        <div class="element-name">木桩基础</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="viz-main">
+            <div class="bridge-container" id="bridgeContainer">
+                <img src="muqiao.png" alt="侗族木拱廊桥" class="bridge-image">
+
+                <!-- 屋顶 -->
+                <div class="hotspot hotspot-wuding" data-id="wuding">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">廊桥屋顶</span>
+                </div>
+
+                <!-- 榫卯节点 -->
+                <div class="hotspot hotspot-sunmao-2" data-id="sunmao">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">榫卯节点</span>
+                </div>
+                <div class="hotspot hotspot-sunmao" data-id="sunmao">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">榫卯节点</span>
+                </div>
+                <div class="hotspot hotspot-sunmao-3" data-id="sunmao">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">榫卯节点</span>
+                </div>
+
+                <!-- 承重横梁 -->
+                <div class="hotspot hotspot-hengliang" data-id="hengliang">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">承重横梁</span>
+                </div>
+
+                <!-- 交叉斜撑 -->
+                <div class="hotspot hotspot-xiecheng" data-id="xiecheng">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">交叉斜撑</span>
+                </div>
+                <div class="hotspot hotspot-xiecheng-2" data-id="xiecheng">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">交叉斜撑</span>
+                </div>
+
+                <!-- 雕花望柱 -->
+                <div class="hotspot hotspot-wangzhu" data-id="wangzhu">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">雕花望柱</span>
+                </div>
+                <div class="hotspot hotspot-wangzhu-2" data-id="wangzhu">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">雕花望柱</span>
+                </div>
+
+                <!-- 木质立柱 -->
+                <div class="hotspot hotspot-lizhu" data-id="lizhu">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">木质立柱</span>
+                </div>
+                <div class="hotspot hotspot-lizhu-2" data-id="lizhu">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">木质立柱</span>
+                </div>
+
+                <!-- 木护栏 -->
+                <div class="hotspot hotspot-hulan" data-id="hulan">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">木护栏</span>
+                </div>
+                <div class="hotspot hotspot-hulan-2" data-id="hulan">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">木护栏</span>
+                </div>
+
+                <!-- 木桩基础 -->
+                <div class="hotspot hotspot-jichu" data-id="jichu">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">木桩基础</span>
+                </div>
+                <div class="hotspot hotspot-jichu-2" data-id="jichu">
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-ring"></div>
+                    <div class="hotspot-core"></div>
+                    <span class="hotspot-label">木桩基础</span>
+                </div>
+
+                <!-- 信息浮层 -->
+                <div class="info-float" id="infoFloat">
+                    <div class="info-header">
+                        <h3 class="info-title" id="infoTitle"></h3>
+                        <button class="info-close" onclick="closeInfo()">×</button>
+                    </div>
+                    <img class="info-image" id="infoImage" src="" alt="">
+                    <p class="info-content" id="infoContent"></p>
+                    <div class="info-meta">
+                        <div class="meta-item">
+                            <div class="meta-dot"></div>
+                            <span>传统木结构</span>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-dot"></div>
+                            <span>侗族工艺</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="seal">廊桥<br>结构</div>
+
+    <div class="bottom-bar">
+        <div class="progress-indicator">
+            <span class="progress-text">探索进度</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="progress-text" id="progressText">零 / 捌</span>
+        </div>
+        <div class="hint-text">点击标记点或左侧面板查看详情</div>
+    </div>
+
+    <script>
+        const elementsData = {
+            sunmao: {
+                title: '榫卯节点',
+                image: 'sunmao.jpg',
+                content: '核心连接工艺，无需钉子胶水，通过木材凹凸咬合实现构件固定。常见于梁柱交接、拱架拼接处，是中国古代木作工艺的精髓。'
+            },
+            lizhu: {
+                title: '木质立柱',
+                image: 'lizhu.jpg',
+                content: '廊屋内部的垂直支撑构件，左右对称排列。与横梁组成梁柱体系，支撑廊屋重量并传递至下部结构，形成稳定承重系统。'
+            },
+            xiecheng: {
+                title: '交叉斜撑',
+                image: 'jiaochaxiecheng.jpg',
+                content: '又称"剪刀撑"，呈X形或八字形布置。连接立柱与拱架，增强桥体稳定性，抵御风力、地震等外力冲击。'
+            },
+            hulan: {
+                title: '木护栏',
+                image: 'muhulan.jpg',
+                content: '桥面两侧连续的木质栏杆，由木杆木板拼接而成。既保障行人安全，又具装饰效果，部分做镂空雕花处理。'
+            },
+            wuding: {
+                title: '廊桥屋顶',
+                image: 'langwuqiaoding.jpg',
+                content: '中式歇山顶设计，木廊桥标志性元素。飞檐翘角增强排水功能，覆盖木瓦树皮，为行人遮风挡雨。'
+            },
+            jichu: {
+                title: '木桩基础',
+                image: 'muzhuangjichu.jpg',
+                content: '打入河床的木质桩基，采用耐腐蚀木材。位于桥体最底部，支撑整个桥体，增强桥基稳定性。'
+            },
+            hengliang: {
+                title: '承重横梁',
+                image: 'chengzhonghengliang.jpg',
+                content: '水平贯穿桥体的主受力木梁，连接立柱。承接桥面荷载并传递至立柱，决定桥梁承载能力和跨度。'
+            },
+            wangzhu: {
+                title: '雕花望柱',
+                image: 'diaohualizhu.jpg',
+                content: '栏杆端部立柱，带传统精美雕花。顶部常刻瑞兽、莲花、云纹等图案，兼具防护与装饰功能。'
+            }
+        };
+
+        let visitedElements = new Set();
+        const chineseNumbers = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌'];
+
+        const infoFloat = document.getElementById('infoFloat');
+        const infoTitle = document.getElementById('infoTitle');
+        const infoImage = document.getElementById('infoImage');
+        const infoContent = document.getElementById('infoContent');
+        const hotspots = document.querySelectorAll('.hotspot');
+        const elementItems = document.querySelectorAll('.element-item');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+
+        function showInfo(elementId, target) {
+            const data = elementsData[elementId];
+            if (!data) return;
+
+            visitedElements.add(elementId);
+            updateProgress();
+
+            infoTitle.textContent = data.title;
+            infoImage.src = data.image;
+            infoImage.alt = data.title;
+            infoContent.textContent = data.content;
+
+            hotspots.forEach(h => h.classList.remove('active'));
+            elementItems.forEach(item => item.classList.remove('active'));
+            document.querySelectorAll(`[data-id="${elementId}"]`).forEach(el => el.classList.add('active'));
+
+            const container = document.getElementById('bridgeContainer');
+            const containerRect = container.getBoundingClientRect();
+            let left, top;
+
+            if (target.classList.contains('element-item')) {
+                left = Math.min(containerRect.width + 20, window.innerWidth - 460);
+                top = 40;
+            } else {
+                const rect = target.getBoundingClientRect();
+                const relLeft = ((rect.left - containerRect.left) / containerRect.width) * 100;
+                left = relLeft < 50 ? rect.left - containerRect.left + 35 : rect.left - containerRect.left - 435;
+                top = ((rect.top - containerRect.top) / containerRect.height) * 100;
+                top = Math.max(10, Math.min(top, 45));
+            }
+
+            infoFloat.style.left = left + 'px';
+            infoFloat.style.top = top + 'px';
+            infoFloat.classList.add('show');
+        }
+
+        function closeInfo() {
+            infoFloat.classList.remove('show');
+            hotspots.forEach(h => h.classList.remove('active'));
+            elementItems.forEach(item => item.classList.remove('active'));
+        }
+
+        function updateProgress() {
+            const count = visitedElements.size;
+            progressFill.style.width = (count / 8 * 100) + '%';
+            progressText.textContent = `${chineseNumbers[count]} / 捌`;
+        }
+
+        hotspots.forEach(h => h.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showInfo(h.getAttribute('data-id'), h);
+        }));
+
+        elementItems.forEach(item => item.addEventListener('click', () => {
+            showInfo(item.getAttribute('data-id'), item);
+        }));
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.info-float') && !e.target.closest('.hotspot') && !e.target.closest('.element-item')) {
+                closeInfo();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeInfo();
+        });
+
+        document.querySelector('.bridge-image').addEventListener('dragstart', (e) => e.preventDefault());
+    </script>
+</body>
+</html>

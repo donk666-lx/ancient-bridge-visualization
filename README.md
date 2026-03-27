@@ -17,19 +17,60 @@
 | Python | ≥ 3.8 |
 | edge-tts | `pip install edge-tts` |
 
-### 安装与启动
+---
+
+### 方式一：统一端口快速启动（推荐）
+
+所有页面通过 **8080 端口**统一访问，无需分别启动多个服务。
 
 ```bash
-# 1. 安装依赖
+# 1. 安装统一服务依赖
+cd "统一端口测试"
+npm install
+
+# 2. 启动统一端口服务
+npm start
+```
+
+服务启动后访问：
+- 首页：http://localhost:8080/
+- 展览：http://localhost:8080/exhibition
+- 图鉴：http://localhost:8080/atlas
+- 数据报告：http://localhost:8080/report
+- 木石之韵：http://localhost:8080/woodstone
+
+**如需使用 AI 智能对话功能，需额外启动后端服务：**
+
+```bash
+# 3. 启动 AI 后端服务（端口 3005）
+cd atlas/backend
+npm install  # 首次运行需安装依赖
+npm start
+```
+
+> **验证后端是否启动成功**：访问 http://localhost:8080/api/health，如返回 `{"status":"ok"}` 则表示 AI 功能可用。
+
+---
+
+### 方式二：完整功能启动（含 AI 对话）
+
+如果需要使用 **AI 小导游** 的语音对话功能，需同时启动 AI 后端服务。
+
+```bash
+# 1. 安装所有依赖
 cd exhibition && npm install
 cd ../atlas && npm install
+cd ../ && npm install
 
 # 2. 构建前端项目
 cd exhibition && npm run build
 cd ../atlas && npm run build
 
-# 3. 启动统一服务
-cd .. && npm start
+# 3. 启动 AI 后端服务（端口 3005）
+cd ../atlas/backend && npm start
+
+# 4. 启动统一服务（端口 8080）
+cd ../../ && npm start
 ```
 
 ### 服务地址
@@ -40,8 +81,9 @@ cd .. && npm start
 | 首页 | http://localhost:8080/ | 水墨入场动画，总导航 |
 | 桥韵·展览 | http://localhost:8080/exhibition | 三维滚动叙事 |
 | 桥韵·图鉴 | http://localhost:8080/atlas | 数据可视化 + AI 对话 |
-| AI 后端 | http://localhost:8080/api/health | 后端健康检查 |
+| 木石之韵 | http://localhost:8080/woodstone | 传统营造技艺可视化 |
 | 数据报告 | http://localhost:8080/report | 100座古桥宏观可视化 |
+| AI 后端 | http://localhost:8080/api/health | 后端健康检查 |
 
 ---
 
@@ -49,12 +91,15 @@ cd .. && npm start
 
 **桥韵·智汇**是一件以中国古代桥梁为核心主题的**交互式信息可视化设计**作品。作品以**100座中国古代桥梁**为数据基础，构建了一个从微观叙事到宏观洞察的完整数据可视化体系。
 
-### 核心创新点
+### 核心亮点
 
-1. **六维数据模型**：地域分布、历史时间、结构类型、文化价值、荣誉纪录、世界纪录
-2. **渐进式数据探索**：从单桥6维数据到100座古桥全景概览
-3. **AI智能交互**：基于GLM-4.5的自然语言数据查询与语音导览
-4. **沉浸式数据叙事**：数据可视化与文化叙事的深度融合
+| 特性 | 说明 |
+|------|------|
+| **六维数据模型** | 地域、历史、结构、文化、荣誉、世界纪录 |
+| **渐进式探索** | 从单桥细节到百桥全景的层层递进 |
+| **AI 智能导览** | GLM-4.5 大模型 + 语音合成，可对话的小导游 |
+| **统一入口** | 单一端口（8080）访问所有子应用 |
+| **水墨美学** | 程序化生成的水墨风格视觉 |
 
 ### 应用场景
 
@@ -80,13 +125,19 @@ cd .. && npm start
     │       ├── Three.js 3D 赵州桥模型
     │       └── GSAP ScrollTrigger 驱动动画
     │
-    └─→ 第二幕：桥韵·图鉴（/atlas）
+    ├─→ 第二幕：桥韵·图鉴（/atlas）
     │       ├── React 18 + TypeScript SPA
     │       ├── 多维度桥梁数据可视化
     │       ├── AI 小导游（可拖拽，支持语音/文字）
     │       └── Node.js 后端（GLM-4.5 + Edge TTS）
     │
-    └─→ 第三幕：中国古代桥梁数据报告（/report）
+    ├─→ 第三幕：木石之韵（/woodstone）
+    │       ├── 中国传统桥梁营造技艺可视化
+    │       ├── 石质桥梁营造流程
+    │       ├── 木质桥梁营造流程
+    │       └── AI 小导游（共用后端服务）
+    │
+    └─→ 第四幕：数据报告（/report）
             ├── 100座古桥六维数据可视化
             ├── ECharts 地图/桑基图/雷达图
             └── GSAP 沉浸式滚动 + 水墨美学
@@ -117,6 +168,47 @@ cd .. && npm start
 | Python 3.8+ | Edge TTS 语音合成服务 |
 | ZhipuAI GLM-4.5-air | 大语言模型对话 |
 | Edge TTS | 语音合成 |
+| http-proxy-middleware | API 代理 |
+
+---
+
+## 统一端口架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    统一入口 (Port 8080)                      │
+│                     server.js                               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌──────────────┐    ┌──────────────────┐    ┌──────────────┐
+│ 静态页面服务  │    │   API 代理        │    │  React SPA   │
+│              │    │                  │    │              │
+│ /exhibition  │    │  /api/*          │    │  /atlas      │
+│ /report      │    │  ──────────────► │    │              │
+│ /woodstone   │    │  localhost:3005  │    │  (Fallback)  │
+│ /            │    │                  │    │              │
+└──────────────┘    └──────────────────┘    └──────────────┘
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │   AI 后端服务     │
+                    │   (Port 3005)    │
+                    │                  │
+                    │  GLM-4.5 对话    │
+                    │  Edge TTS 语音   │
+                    │  桥梁知识库      │
+                    └──────────────────┘
+```
+
+### 架构优势
+
+- **单一入口**：所有页面通过 `http://localhost:8080` 访问
+- **共享后端**：多个前端页面共用同一个 AI 后端服务
+- **路径隔离**：各子应用通过独立路由访问，互不干扰
+- **开发友好**：支持独立开发和统一部署两种模式
 
 ---
 
@@ -133,6 +225,8 @@ cd .. && npm start
 │ ai-assistant-   │←────│  (:3005)        │←────│  + Edge TTS    │
 │ embed.js        │     │                 │     │                 │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
+         │
+         └──── 应用于 /atlas 和 /woodstone 页面
 ```
 
 **特性**：
@@ -140,6 +234,7 @@ cd .. && npm start
 - 全页面自由拖拽定位
 - 自然语言问答 + 语音播报
 - 知识库增强（bridge_knowledge.md）
+- 多页面共享（图鉴页 + 木石之韵页）
 
 ### 2. 程序化水墨生成
 
@@ -172,34 +267,40 @@ gsap.timeline({
 ```
 统一端口测试/
 ├── index.html                 # 首页：水墨开场动画
-├── server.js                  # 统一端口服务配置
+├── server.js                  # 统一端口服务器（Port 8080）
 ├── package.json               # 统一服务依赖
-├── README.md
+├── README.md                  # 项目说明文档
 │
-├── exhibition/                # 桥韵·展览（Vite + Three.js）
+├── exhibition/                # 第一幕：桥韵·展览（Vite + Three.js）
 │   ├── index.html
 │   ├── script.js              # GSAP + Lenis + Three.js
 │   ├── modelZhaozhou.glb      # 赵州桥 3D 模型
-│   ├── dist/                  # 构建输出目录
-│   └── ...
+│   └── dist/                  # 构建输出
 │
-├── atlas/                     # 桥韵·图鉴（React + TS）
-│   ├── src/
-│   │   ├── main.tsx
-│   │   ├── App.tsx
-│   │   └── components/        # 各 Section 组件
-│   ├── backend/
-│   │   └── server.js          # Express API (:3005)
+├── atlas/                     # 第二幕：桥韵·图鉴（React + TS）
+│   ├── src/                   # React 源码
+│   ├── backend/               # AI 后端服务（Port 3005）
+│   │   ├── server.js          # Express API 服务器
+│   │   └── edge_tts_service.py # Edge TTS 语音服务
 │   ├── knowledge/
-│   │   └── bridge_knowledge.md # AI 知识库
+│   │   └── bridge_knowledge.md # AI 知识库文档
 │   ├── ai-assistant-embed.js  # AI 小导游嵌入脚本
-│   ├── dist/                  # 构建输出目录
-│   └── ...
+│   └── dist/                  # 构建输出
 │
-└── 第四页/                    # 数据报告（原生 JS + ECharts）
-    ├── index.html
-    └── data/
-        └── bridges_data_100.json  # 100座桥梁数据
+├── 桥梁可视化木石/             # 第三幕：木石之韵页面
+│   ├── index.html
+│   ├── ai-assistant-embed.js  # AI 小导游（共用后端）
+│   ├── shilong/               # 石质桥梁子页面
+│   └── wooden/                # 木质桥梁子页面
+│
+├── 第四页/                     # 第四幕：数据报告页面
+│   ├── index.html
+│   └── data/
+│       └── bridges_data_100.json  # 100座古桥数据
+│
+└── frontend/                   # 构建输出目录（由统一服务托管）
+    ├── exhibition/             # exhibition 构建产物
+    └── atlas/dist/             # atlas 构建产物
 ```
 
 ---
@@ -226,7 +327,90 @@ gsap.timeline({
 
 ---
 
-## 开源协议
+## 开发指南
+
+### 独立开发模式
+
+如果只需要开发某个子页面，可以单独启动开发服务器：
+
+```bash
+# 开发展览页面
+cd exhibition
+npm install
+npm run dev       # 启动在 http://localhost:5173
+
+# 开发图鉴页面
+cd atlas
+npm install
+npm run dev       # 启动在 http://localhost:5173
+```
+
+### 统一部署模式
+
+开发完成后，需要构建并放到统一端口下：
+
+```bash
+# 构建 exhibition
+cd exhibition
+npm run build     # 输出到 frontend/exhibition
+
+# 构建 atlas
+cd atlas
+npm run build     # 输出到 frontend/atlas/dist
+```
+
+构建完成后，统一服务会自动加载新的构建文件。
+
+---
+
+## API 接口
+
+统一端口服务提供以下 API 代理：
+
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/health` | GET | 后端健康检查 |
+| `/api/chat` | POST | AI 对话接口（需要 backend 服务） |
+| `/api/tts` | POST | 语音合成接口（需要 backend 服务） |
+
+**AI 对话示例：**
+```bash
+curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"介绍一下赵州桥"}'
+```
+
+---
+
+## 常见问题
+
+### Q: 8080 端口被占用？
+```bash
+# Windows: 查找并终止占用进程
+netstat -ano | findstr :8080
+taskkill //F //PID <PID>
+```
+
+### Q: AI 功能无法使用？
+确保已：
+1. 安装 Python 和 edge-tts：`pip install edge-tts`
+2. 设置智谱 AI API Key（在 atlas/backend/server.js 中配置）
+3. 启动后端服务：`cd atlas/backend && npm start`
+
+### Q: 页面样式加载异常？
+检查浏览器控制台是否有 CORS 错误，或尝试清除浏览器缓存后刷新。
+
+---
+
+## 更新日志
+
+### v1.0.0 (2025-03)
+- 统一端口架构实现
+- 支持 5 个子应用统一访问
+- AI 小导游多页面共享
+- 水墨风格首页动画
+
+---
 
 本项目采用 **MIT License** 开源协议。
 

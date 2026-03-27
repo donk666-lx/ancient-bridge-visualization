@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国古桥 · 木石之韵</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --paper-bg: #f5f0e6;
+            --paper-dark: #e8e0d0;
+            --ink-black: #1a1a1a;
+            --ink-gray: #4a4a4a;
+            --ink-light: #7a7a7a;
+            --wood-brown: #8b5a2b;
+            --wood-light: #a67c52;
+            --stone-gray: #5a5a5a;
+            --stone-dark: #3a3a3a;
+            --accent-red: #8b2323;
+            --accent-gold: #c9a227;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: "STKaiti", "KaiTi", "SimSun", serif;
+            background-color: var(--paper-bg);
+            overflow: hidden;
+            color: var(--ink-black);
+        }
+
+        /* 水墨背景 */
+        .ink-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background:
+                /* 纸张纹理 */
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(139,119,101,0.03) 2px,
+                    rgba(139,119,101,0.03) 4px
+                ),
+                /* 水墨晕染 */
+                radial-gradient(ellipse at 15% 20%, rgba(60,60,60,0.08) 0%, transparent 40%),
+                radial-gradient(ellipse at 85% 15%, rgba(80,80,80,0.06) 0%, transparent 35%),
+                radial-gradient(ellipse at 75% 85%, rgba(60,60,60,0.1) 0%, transparent 45%),
+                radial-gradient(ellipse at 25% 80%, rgba(90,90,90,0.05) 0%, transparent 30%),
+                /* 远山淡影 */
+                radial-gradient(ellipse at 50% 100%, rgba(100,100,100,0.08) 0%, transparent 60%);
+        }
+
+        /* 水墨笔触装饰 */
+        .ink-stroke {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.15;
+        }
+
+        .ink-stroke-1 {
+            top: 5%;
+            right: 5%;
+            width: 300px;
+            height: 150px;
+            background: radial-gradient(ellipse at center, var(--ink-gray) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(40px);
+            transform: rotate(-30deg);
+        }
+
+        .ink-stroke-2 {
+            bottom: 10%;
+            left: 3%;
+            width: 200px;
+            height: 100px;
+            background: radial-gradient(ellipse at center, var(--ink-light) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(30px);
+            transform: rotate(20deg);
+        }
+
+        /* 四角边框 */
+        .corner {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(139,119,101,0.3);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .corner-tl { top: 30px; left: 30px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 30px; right: 30px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 30px; left: 30px; border-right: none; border-top: none; }
+        .corner-br { bottom: 30px; right: 30px; border-left: none; border-top: none; }
+
+        /* 主容器 */
+        .container {
+            position: relative;
+            z-index: 5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 标题区 */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .main-title {
+            font-size: 4rem;
+            letter-spacing: 0.5em;
+            color: var(--ink-black);
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-title::before,
+        .main-title::after {
+            content: '';
+            display: inline-block;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--ink-gray), transparent);
+            vertical-align: middle;
+            margin: 0 30px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--ink-light);
+            letter-spacing: 0.3em;
+            font-family: "FangSong", "STFangsong", serif;
+        }
+
+        .divider {
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--wood-brown), transparent);
+            margin: 25px auto;
+        }
+
+        /* 导航区 */
+        .nav-container {
+            display: flex;
+            gap: 80px;
+            align-items: center;
+        }
+
+        /* 导航卡片 */
+        .nav-card {
+            position: relative;
+            width: 320px;
+            height: 400px;
+            background: rgba(255,255,255,0.4);
+            border: 1px solid rgba(139,119,101,0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            overflow: hidden;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 30px;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px dashed rgba(139,119,101,0.2);
+            pointer-events: none;
+            border-radius: 2px;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        /* 石质桥梁卡片 */
+        .nav-card.stone {
+            border-color: rgba(90,90,90,0.3);
+        }
+
+        .nav-card.stone:hover {
+            background: rgba(240,240,240,0.6);
+            border-color: var(--stone-gray);
+        }
+
+        /* 木质桥梁卡片 */
+        .nav-card.wood {
+            border-color: rgba(139,90,43,0.3);
+        }
+
+        .nav-card.wood:hover {
+            background: rgba(250,245,235,0.6);
+            border-color: var(--wood-brown);
+        }
+
+        /* 图标区 */
+        .card-icon {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .card-icon::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .nav-card.stone .card-icon {
+            color: var(--stone-gray);
+        }
+
+        .nav-card.wood .card-icon {
+            color: var(--wood-brown);
+        }
+
+        .icon-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        /* 卡片标题 */
+        .card-title {
+            font-size: 2rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 15px;
+            color: var(--ink-black);
+        }
+
+        .nav-card.stone .card-title {
+            color: var(--stone-dark);
+        }
+
+        .nav-card.wood .card-title {
+            color: var(--wood-brown);
+        }
+
+        /* 卡片英文 */
+        .card-en {
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: var(--ink-light);
+            margin-bottom: 30px;
+            font-family: "Times New Roman", serif;
+            text-transform: uppercase;
+        }
+
+        /* 描述文字 */
+        .card-desc {
+            font-size: 1rem;
+            line-height: 2;
+            color: var(--ink-gray);
+            text-align: center;
+            font-family: "FangSong", "STFangsong", serif;
+        }
+
+        /* 装饰线 */
+        .card-line {
+            width: 40px;
+            height: 2px;
+            margin: 20px 0;
+            transition: all 0.5s ease;
+        }
+
+        .nav-card.stone .card-line {
+            background: var(--stone-gray);
+        }
+
+        .nav-card.wood .card-line {
+            background: var(--wood-brown);
+        }
+
+        .nav-card:hover .card-line {
+            width: 80px;
+        }
+
+        /* 悬停箭头 */
+        .card-arrow {
+            position: absolute;
+            bottom: 40px;
+            font-size: 1.5rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-card.stone .card-arrow {
+            color: var(--stone-gray);
+        }
+
+        .nav-card.wood .card-arrow {
+            color: var(--wood-brown);
+        }
+
+        .nav-card:hover .card-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* 中间装饰 */
+        .center-or {
+            width: 60px;
+            height: 60px;
+            border: 1px solid rgba(139,119,101,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--ink-light);
+            letter-spacing: 0.2em;
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* 底部印章 */
+        .seal {
+            position: fixed;
+            bottom: 60px;
+            right: 60px;
+            width: 70px;
+            height: 70px;
+            border: 2px solid rgba(139,35,35,0.4);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(139,35,35,0.5);
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            writing-mode: vertical-rl;
+            transform: rotate(-5deg);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* 底部信息 */
+        .footer {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            color: var(--ink-light);
+            letter-spacing: 0.15em;
+            font-family: "FangSong", "STFangsong", serif;
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .nav-card {
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .nav-card.wood {
+            animation-delay: 0.5s;
+        }
+
+        .center-or {
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        /* 返回首页按钮 */
+        .back-home {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(139,119,101,0.3);
+            border-radius: 4px;
+            color: var(--ink-gray);
+            text-decoration: none;
+            font-family: "FangSong", "STFangsong", serif;
+            font-size: 1rem;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .back-home:hover {
+            background: rgba(255,255,255,0.9);
+            border-color: var(--wood-brown);
+            color: var(--wood-brown);
+            transform: translateX(-4px);
+        }
+
+        .back-home::before {
+            content: '←';
+            font-size: 1.2rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .nav-card {
+                width: 280px;
+                height: 320px;
+            }
+
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .main-title::before,
+            .main-title::after {
+                width: 30px;
+                margin: 0 15px;
+            }
+
+            .center-or {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-home">返回首页</a>
+    <div class="ink-bg"></div>
+    <div class="ink-stroke ink-stroke-1"></div>
+    <div class="ink-stroke ink-stroke-2"></div>
+
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="main-title">木石之韵</h1>
+            <div class="divider"></div>
+            <p class="subtitle">中国传统桥梁营造技艺可视化</p>
+        </header>
+
+        <nav class="nav-container">
+            <a href="shilong/index.html" class="nav-card stone">
+                <div class="card-icon">
+                    <span class="icon-text">石</span>
+                </div>
+                <h2 class="card-title">石质桥梁</h2>
+                <p class="card-en">Stone Architecture</p>
+                <div class="card-line"></div>
+                <p class="card-desc">
+                    以石为骨，拱券相承<br>
+                    长虹卧波，古韵悠长
+                </p>
+                <span class="card-arrow">→</span>
+            </a>
+
+            <div class="center-or">或</div>
+
+            <a href="wooden/index.html" class="nav-card wood">
+                <div class="card-icon">
+                    <span class="icon-text">木</span>
+                </div>
+                <h2 class="card-title">木质桥梁</h2>
+                <p class="card-en">Wood Architecture</p>
+                <div class="card-line"></div>
+                <p class="card-desc">
+                    榫卯相扣，廊桥卧波<br>
+                    侗寨风雨，百年传承
+                </p>
+                <span class="card-arrow">→</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="seal">古桥<br>营造</div>
+
+    <footer class="footer">
+        点击卡片进入相应展示 · 探索中国传统桥梁之美
+    </footer>
+
+    <!-- AI 小导游 -->
+    <script src="ai-assistant-embed.js"></script>
+</body>
+</html>
