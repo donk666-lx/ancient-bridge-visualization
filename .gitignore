@@ -51,6 +51,7 @@ atlas/bun.lock
 atlas/gitignore.txt
 atlas/dist/
 atlas/node_modules/
+atlas/backend/node_modules/
 
 # Frontend build files
 frontend/atlas/

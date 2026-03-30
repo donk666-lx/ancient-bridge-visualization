@@ -48,7 +48,7 @@ npm install  # 首次运行需安装依赖
 npm start
 ```
 
-> **验证后端是否启动成功**：访问 http://localhost:8080/api/health，如返回 `{"status":"ok"}` 则表示 AI 功能可用。
+> **验证后端是否启动成功**：访问 http://localhost:3005/health，如返回 `{"status":"ok"}` 则表示 AI 功能可用。
 
 ---
 
@@ -82,8 +82,10 @@ cd ../../ && npm start
 | 桥韵·展览 | http://localhost:8080/exhibition | 三维滚动叙事 |
 | 桥韵·图鉴 | http://localhost:8080/atlas | 数据可视化 + AI 对话 |
 | 木石之韵 | http://localhost:8080/woodstone | 传统营造技艺可视化 |
+| ├─ 石质桥梁 | http://localhost:8080/woodstone/shilong/ | 石桥营造流程 |
+| └─ 木质桥梁 | http://localhost:8080/woodstone/wooden/ | 木桥营造流程 |
 | 数据报告 | http://localhost:8080/report | 100座古桥宏观可视化 |
-| AI 后端 | http://localhost:8080/api/health | 后端健康检查 |
+| AI 后端 | http://localhost:3005/health | 后端健康检查（直接访问）|
 
 ---
 
@@ -133,12 +135,19 @@ cd ../../ && npm start
     │
     ├─→ 第三幕：木石之韵（/woodstone）
     │       ├── 中国传统桥梁营造技艺可视化
-    │       ├── 石质桥梁营造流程
-    │       ├── 木质桥梁营造流程
+    │       ├── 石质桥梁营造流程（/woodstone/shilong/）
+    │       ├── 木质桥梁营造流程（/woodstone/wooden/）
     │       └── AI 小导游（共用后端服务）
     │
     └─→ 第四幕：数据报告（/report）
             ├── 100座古桥六维数据可视化
+            ├── 六大篇章模块化架构
+            │   ├── S1 封面：水墨动效 + 四大统计数字
+            │   ├── S2 地域分布：中国地图热力图 + 双环饼图
+            │   ├── S3 历史时间：7朝代选择条 + 世界对比
+            │   ├── S4 结构类型：雷达图对比5种桥型
+            │   ├── S5 文化价值：词云 + 桑基图 + 8则历史故事
+            │   └── S6 彩蛋总结：6张纪录卡 + Canvas海报生成器
             ├── ECharts 地图/桑基图/雷达图
             └── GSAP 沉浸式滚动 + 水墨美学
 ```
@@ -185,8 +194,8 @@ cd ../../ && npm start
         ▼                     ▼                     ▼
 ┌──────────────┐    ┌──────────────────┐    ┌──────────────┐
 │ 静态页面服务  │    │   API 代理        │    │  React SPA   │
-│              │    │                  │    │              │
-│ /exhibition  │    │  /api/*          │    │  /atlas      │
+│              │    │  (health 检查)    │    │              │
+│ /exhibition  │    │  /api/health     │    │  /atlas      │
 │ /report      │    │  ──────────────► │    │              │
 │ /woodstone   │    │  localhost:3005  │    │  (Fallback)  │
 │ /            │    │                  │    │              │
@@ -195,12 +204,17 @@ cd ../../ && npm start
                               ▼
                     ┌──────────────────┐
                     │   AI 后端服务     │
-                    │   (Port 3005)    │
-                    │                  │
-                    │  GLM-4.5 对话    │
-                    │  Edge TTS 语音   │
-                    │  桥梁知识库      │
-                    └──────────────────┘
+                    │   (Port 3005)    │◄──┐
+                    │                  │   │  /atlas 页面
+                    │  GLM-4.5 对话    │   │  直接访问
+                    │  Edge TTS 语音   │◄──┘  localhost:3005
+                    │  桥梁知识库      │   │
+                    └──────────────────┘   │
+                                           │
+                    ┌──────────────────┐   │
+                    │   木石之韵页面     │◄──┘
+                    │   /woodstone     │    通过 /api 代理访问
+                    └──────────────────┘    (api/v1/*)
 ```
 
 ### 架构优势
@@ -236,6 +250,8 @@ cd ../../ && npm start
 - 知识库增强（bridge_knowledge.md）
 - 多页面共享（图鉴页 + 木石之韵页）
 
+**注意**：图鉴页(/atlas)的AI助手默认直接访问后端服务(`localhost:3005`)，木石之韵页(/woodstone)通过统一服务的`/api`代理访问。如需使用统一端口代理，请修改 `atlas/ai-assistant-embed.js` 中的 `baseURL` 为空字符串。
+
 ### 2. 程序化水墨生成
 
 首页背景不依赖图片，全部由 Canvas 2D API 实时绘制：
@@ -260,6 +276,26 @@ gsap.timeline({
 );
 ```
 
+### 4. 六维数据可视化（数据报告）
+
+第四幕数据报告采用模块化架构，六大篇章通过滚动吸附方式呈现：
+
+| 篇章 | 核心可视化 | 交互特性 |
+|------|-----------|----------|
+| **S1 封面** | 四大统计数字（25座/7朝代/15省/1400+年）| 数字计数动画、幕布揭开 |
+| **S2 地域** | 中国地图热力图 + 双环饼图 | 省份点击高亮、图表联动 |
+| **S3 朝代** | 7朝代柱状图 + 世界对比 | 朝代切换、详情面板 |
+| **S4 类型** | 雷达图对比5种桥型 | 卡片点击模态框 |
+| **S5 文化** | 词云 + 桑基图 + 8则故事 | 关键词跳转对应故事 |
+| **S6 总结** | 6张纪录卡 + 粒子动画 | Canvas海报生成器 |
+
+**技术实现**：
+- 单文件架构（76KB）零构建部署
+- 6个section模块并行开发，通过组装脚本合并
+- 侧边导航点 + 进度条 + 滚动吸附
+- ECharts 5.4.3 实现地图/雷达/桑基图
+- Canvas API 实现粒子效果和海报生成
+
 ---
 
 ## 项目目录
@@ -273,34 +309,59 @@ gsap.timeline({
 │
 ├── exhibition/                # 第一幕：桥韵·展览（Vite + Three.js）
 │   ├── index.html
-│   ├── script.js              # GSAP + Lenis + Three.js
-│   ├── modelZhaozhou.glb      # 赵州桥 3D 模型
+│   ├── script.js              # GSAP + Lenis + Three.js 动画逻辑
+│   ├── styles.css             # 展览页面样式
+│   ├── shaders.js             # Three.js 着色器
+│   ├── modelZhaozhou.glb      # 赵州桥 3D 模型（32MB）
+│   ├── vite.config.js         # Vite 配置
+│   ├── package.json           # 展览模块依赖
+│   ├── shared/                # 共享组件
+│   │   └── zhaozhou-3d-scene.js  # 赵州桥 3D 场景初始化
 │   └── dist/                  # 构建输出
 │
 ├── atlas/                     # 第二幕：桥韵·图鉴（React + TS）
 │   ├── src/                   # React 源码
+│   │   ├── App.tsx            # 应用主组件
+│   │   ├── main.tsx           # 入口文件
+│   │   ├── pages/             # 页面组件
+│   │   ├── components/        # 可复用组件
+│   │   ├── assets/            # 图片资源
+│   │   └── hooks/             # 自定义 Hooks
 │   ├── backend/               # AI 后端服务（Port 3005）
 │   │   ├── server.js          # Express API 服务器
-│   │   └── edge_tts_service.py # Edge TTS 语音服务
+│   │   ├── edge_tts_service.py # Edge TTS 语音服务
+│   │   └── package.json       # 后端依赖
 │   ├── knowledge/
 │   │   └── bridge_knowledge.md # AI 知识库文档
 │   ├── ai-assistant-embed.js  # AI 小导游嵌入脚本
+│   ├── ai-assistant.html      # AI 助手独立页面
 │   └── dist/                  # 构建输出
 │
 ├── 桥梁可视化木石/             # 第三幕：木石之韵页面
 │   ├── index.html
 │   ├── ai-assistant-embed.js  # AI 小导游（共用后端）
 │   ├── shilong/               # 石质桥梁子页面
+│   │   ├── index.html
+│   │   └── images/            # 石质桥梁图片
 │   └── wooden/                # 木质桥梁子页面
+│       ├── index.html
+│       └── images/            # 木质桥梁图片
 │
 ├── 第四页/                     # 第四幕：数据报告页面
 │   ├── index.html
-│   └── data/
-│       └── bridges_data_100.json  # 100座古桥数据
+│   ├── README.md              # 页面说明
+│   ├── DATA_SOURCES.md        # 数据来源说明
+│   ├── page_structure.md      # 页面结构文档
+│   ├── data/
+│   │   ├── bridges_data.json      # 桥梁数据集
+│   │   └── bridges_data_100.json  # 100座古桥完整数据
+│   ├── lib/                   # 库文件
+│   └── sections/              # 页面区块
 │
 └── frontend/                   # 构建输出目录（由统一服务托管）
     ├── exhibition/             # exhibition 构建产物
-    └── atlas/dist/             # atlas 构建产物
+    ├── atlas/dist/             # atlas 构建产物
+    └── report/                 # 报告页面
 ```
 
 ---
@@ -337,12 +398,12 @@ gsap.timeline({
 # 开发展览页面
 cd exhibition
 npm install
-npm run dev       # 启动在 http://localhost:5173
+npm run dev       # 启动在 http://localhost:3003
 
 # 开发图鉴页面
 cd atlas
 npm install
-npm run dev       # 启动在 http://localhost:5173
+npm run dev       # 启动在 http://localhost:3004
 ```
 
 ### 统一部署模式
@@ -369,16 +430,20 @@ npm run build     # 输出到 frontend/atlas/dist
 
 | 接口 | 方法 | 说明 |
 |------|------|------|
-| `/api/health` | GET | 后端健康检查 |
-| `/api/chat` | POST | AI 对话接口（需要 backend 服务） |
-| `/api/tts` | POST | 语音合成接口（需要 backend 服务） |
+| `/health` | GET | 后端健康检查 |
+| `/api/v1/chat` | POST | AI 对话接口（需要 backend 服务） |
+| `/api/v1/chat/stream` | POST | 流式 AI 对话接口 |
+| `/api/v1/tts/edge` | POST | Edge TTS 语音合成接口 |
+| `/api/v1/tts/edge/stream` | POST | 流式语音合成接口 |
 
-**AI 对话示例：**
+**AI 对话示例（直接访问后端）：**
 ```bash
-curl -X POST http://localhost:8080/api/chat \
+curl -X POST http://localhost:3005/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"介绍一下赵州桥"}'
 ```
+
+**注意**：当前代理配置下，API 端点需要通过 `localhost:3005` 直接访问。统一服务的 `/api` 代理仅用于健康检查接口。
 
 ---
 
@@ -403,6 +468,11 @@ taskkill //F //PID <PID>
 ---
 
 ## 更新日志
+
+### v1.1.0 (2025-03)
+- 木石之韵页面新增石质/木质桥梁子页面（/woodstone/shilong/、/woodstone/wooden/）
+- 数据报告页面模块化重构，新增6大篇章（S1-S6）
+- 完善项目文档和目录结构说明
 
 ### v1.0.0 (2025-03)
 - 统一端口架构实现
