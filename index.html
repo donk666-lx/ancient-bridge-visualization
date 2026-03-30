@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IronHill Scroll Animation | TTTISE</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="./styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Fredoka+One&display=swap" rel="stylesheet">
@@ -26,23 +26,23 @@
 
     <!-- 开头部分 -->
     <section class="intro-section">
-        <p class="intro-title">桥韵—智汇</p>
+        <p class="intro-title">桥韵—智<span class="small-hui">汇</span></p>
     </section>
     <section class="spotlight-section">
         <div class="project-index">
             <h1>01/10</h1>
         </div>
         <div class="project-images">
-            <div class="project-img"><img src="/img1.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img2.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img3.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img4.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img5.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img6.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img7.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img8.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img9.jpg" alt="" loading="lazy"></div>
-            <div class="project-img"><img src="/img10.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img1.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img2.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img3.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img4.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img5.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img6.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img7.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img8.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img9.jpg" alt="" loading="lazy"></div>
+            <div class="project-img"><img src="./img10.jpg" alt="" loading="lazy"></div>
         </div>
         <div class="project-names">
             <p>通津桥</p>
@@ -60,7 +60,7 @@
     <!-- 原有项目内容 -->
     <section class="hero">
         <div class="hero-img">
-            <img src="/porsche-911-gt3-rs-7680x4320-25139.jpg" alt="" loading="lazy" />
+            <img src="./porsche-911-gt3-rs-7680x4320-25139.jpg" alt="" loading="lazy" />
         </div>
 
         <div class="hero-header">
@@ -80,7 +80,7 @@
     <!-- 第二个项目内容 -->
     <section class="hero jeskojets-hero">
         <div class="sky-container">
-            <img src="/sky.png" alt="" loading="lazy" />
+            <img src="./sky.png" alt="" loading="lazy" />
 
             <div class="sky-overlay">
                 <div class="sky-center-block">
@@ -113,7 +113,7 @@
         </div>
 
         <div class="window-container">
-            <img src="/windows.png" alt="" loading="lazy" />
+            <img src="./windows.png" alt="" loading="lazy" />
         </div>
 
         <div class="hero-header">
@@ -121,9 +121,6 @@
                 <h1>
                     静境通津
                 </h1>
-                <p>
-                    通津桥，江南水乡标志性石拱桥，横跨清流，连接两岸烟火。半月般的桥身与水面相映，红灯笼、白墙黛瓦环绕，承载着百年岁月，在时光里静静诉说着江南的温婉与从容。
-                </p>
             </div>
             <div class="col">
                 <p>桥映水乡</p>
@@ -178,15 +175,24 @@
             </div>
         </div>
         
-        <!-- 跳转按钮 -->
-        <button class="next-page-btn" onclick="window.location.href='next-page.html'">
-            <span>下一页</span>
+        <!-- 返回首页按钮 -->
+        <button class="next-page-btn" onclick="window.location.href='/'" style="left: 20px; right: auto;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+            <span>返回首页</span>
+        </button>
+
+        <!-- 跳转第三页按钮 -->
+        <button class="next-page-btn" onclick="window.location.href='/atlas'" style="right: 20px;">
+            <span>桥韵·图鉴</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 18l6-6-6-6"/>
             </svg>
         </button>
+
     </footer>
 
-    <script type="module" src="/script.js"></script>
+    <script type="module" src="./script.js"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@ import Lenis from "lenis"; // 现在它会指向上面定义的 jsdelivr 地址
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { vertexShader, fragmentShader } from "./shaders.js";
-import { initZhaozhou3DScene } from "../shared/zhaozhou-3d-scene.js";
+import { initZhaozhou3DScene } from "./shared/zhaozhou-3d-scene.js";
 
 gsap.registerPlugin(ScrollTrigger);
 

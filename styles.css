@@ -24,14 +24,14 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  background-image: url("/background.jpg");
+  background-image: url("background.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
 .intro-section .intro-title {
-  font-size: clamp(4rem, 12vw, 10rem);
+  font-size: clamp(3.6rem, 10.8vw, 9rem);
   font-family: 'Ma Shan Zheng', 'ZCOOL QingKe HuangYou', 'Noto Serif SC', serif;
   color: #000000;
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
@@ -43,8 +43,12 @@
   line-height: 1.5;
 }
 
+.intro-section .intro-title .small-hui {
+  font-size: calc(clamp(3.6rem, 10.8vw, 9rem) - 5px);
+}
+
 .spotlight-section {
-  background-image: url("/background.jpg");
+  background-image: url("background.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -113,7 +117,7 @@
 }
 
 .spotlight-section .project-names p.active-name {
-  color: #ff0000 !important;
+  color: #3d6a9a !important;
   font-family: 'Noto Serif SC', serif !important;
   font-weight: 600 !important;
 }
@@ -382,13 +386,8 @@ p {
     font-family: "KaiTi", "STKaiti", "SimSun", "Songti SC", serif;
     font-size: clamp(3.5rem, 7vw, 6.5rem);
     font-weight: 700;
-    color: transparent;
-    -webkit-text-stroke: 1.5px rgba(255, 248, 220, 0.88);
+    color: #000000;
     letter-spacing: 0.5em;
-    text-shadow:
-        0 0 40px rgba(255, 220, 130, 0.45),
-        0 0 80px rgba(255, 180, 60, 0.18);
-    filter: drop-shadow(0 4px 16px rgba(60, 30, 0, 0.4));
 }
 
 /* 装饰分割线 */
@@ -689,7 +688,7 @@ footer {
   width: 100%;
   height: 100vh;
   background:
-    url('/bc.jpg');
+    url('bc.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -827,11 +826,6 @@ footer::before {
 .tttise-zhaozhou-module + .tttise-zhaozhou-module {
     border-top: 1px solid rgba(224, 210, 188, 0.1);
     padding-top: 20px;
-}
-
-.tttise-zhaozhou-module:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 62px rgba(0, 0, 0, 0.35);
 }
 
 .tttise-zhaozhou-module:focus-visible {
@@ -1175,7 +1169,6 @@ footer::before {
   font-size: clamp(36px, 4.5vw, 66px);
   letter-spacing: 0.12em;
   color: #000000;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 12px 36px rgba(0, 0, 0, 0.5);
   writing-mode: vertical-rl;
   text-orientation: mixed;
 }
@@ -1368,54 +1361,81 @@ footer::before {
   }
 }
 
-/* 跳转按钮样式 */
+/* 跳转按钮样式 - 水墨风格 */
 .next-page-btn {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 2.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  background: rgba(255, 240, 180, 0.9);
-  color: #333;
-  border: none;
-  border-radius: 50px;
-  font-family: var(--font-hanzi);
-  font-size: 1rem;
-  font-weight: 500;
+  padding: 0.7rem 1.4rem;
+  background: rgba(248, 245, 240, 0.85);
+  color: #2d2d2d;
+  border: 1px solid rgba(45, 45, 45, 0.4);
+  border-radius: 2px;
+  font-family: 'Ma Shan Zheng', 'ZCOOL XiaoWei', var(--font-hanzi);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s ease;
   z-index: 9998;
-  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.next-page-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.next-page-btn:hover::before {
+  left: 100%;
 }
 
 .next-page-btn:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-  background: rgba(255, 240, 180, 1);
-}
-
-.next-page-btn:active {
-  transform: translateY(-1px) scale(0.98);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: rgba(45, 45, 45, 0.7);
+  background: rgba(248, 245, 240, 0.95);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  letter-spacing: 0.2em;
 }
 
 .next-page-btn svg {
+  width: 16px;
+  height: 16px;
   transition: transform 0.3s ease;
+  stroke-width: 1.5;
 }
 
 .next-page-btn:hover svg {
-  transform: translateX(3px);
+  transform: translateX(4px);
+}
+
+/* 左下角按钮 */
+.next-page-btn[style*="left: 20px"] {
+  left: 2rem;
+  right: auto;
+}
+
+.next-page-btn[style*="left: 20px"]:hover svg {
+  transform: translateX(-4px);
 }
 
 @media (max-width: 768px) {
   .next-page-btn {
     bottom: 1.5rem;
-    right: 1.5rem;
-    padding: 0.8rem 1.2rem;
-    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+  .next-page-btn[style*="left: 20px"] {
+    left: 1.5rem;
   }
 }
 
@@ -1476,7 +1496,6 @@ footer::before {
   font-size: clamp(4rem, 8vw, 7rem);
   color: #000000;
   margin-bottom: 0.5rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
   letter-spacing: 0.1em;
 }
 
